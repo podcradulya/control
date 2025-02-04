@@ -1,0 +1,45 @@
+.nav--hide{
+    position: fixed;
+    top: 0;
+    left: 0;      
+    background-color: var(--orig-blue-color);
+    height: 100vh;
+    width: 70px;
+    border-radius: 0 40px 40px 0;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s;
+}
+.nav--show{
+    position: fixed;
+    top: 0;
+    left: 0;      
+    background-color: var(--orig-blue-color);
+    height: 100vh;
+    width: 220px;
+    border-radius: 0 40px 40px 0;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all 0.3s;
+
+}
+.nav__body{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+    width: 100%;
+    gap: 15px;
+}
+.nav__arrow{
+    position: absolute;
+    top: 20px;
+    left: 10px;  
+    background-image: var(--image-arrow);
+    width: 30px;
+    height: 30px;
+}

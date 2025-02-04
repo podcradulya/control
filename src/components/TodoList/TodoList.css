@@ -1,0 +1,29 @@
+
+.tasks__list{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    height: 87vh;
+    padding: 5px;
+}
+.tasks__list::-webkit-scrollbar {
+    width: 10px;
+    background-color: inherit;
+}
+.tasks__list::-webkit-scrollbar-button {
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+    background:  var(--medium-text-color);
+}
+.tasks__list::-webkit-scrollbar-thumb {
+    background-color: var(--medium-text-color);
+    border-radius: 5px;
+}
+.tasks__list::-webkit-scrollbar-track {
+    width: 10px;
+    background-color: var(--light-text-color);
+    border-radius: 5px;
+
+}

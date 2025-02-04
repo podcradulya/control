@@ -1,0 +1,14 @@
+#root {
+  max-width: 1440px;
+  margin: auto;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+.container__app{
+  margin: auto;
+  /* display: flex;
+  align-items: start;
+  justify-content: space-between; */
+  margin: 0 0 0 50px;
+}
