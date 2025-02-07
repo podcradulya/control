@@ -1,0 +1,12 @@
+:root{
+    --text-color: #28799F;
+    --light-text-color: #CAE6F1;
+    --medium-text-color: #78B4D0;
+    --orig-blue-color: #90D5FE;
+    --white: #ffffff;
+    --medium-text-color-dark: #62bff5;
+    --light-text-color-light: #e3f3f9;
+
+    /* images */
+    --image-arrow: url("../images/icons/prev_arrow.svg")
+}

@@ -1,0 +1,26 @@
+.button{
+    background-color: var(--orig-blue-color);
+    padding: 10px;
+    border-radius: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.button:hover{
+    background-color: var(--medium-text-color-dark);
+}
+.button a{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-weight: 600;
+}
+.button img{
+    width: 33px;
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

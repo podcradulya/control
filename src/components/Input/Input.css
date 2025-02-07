@@ -1,0 +1,21 @@
+.input{
+    background-color: var(--light-text-color);
+    color: var(--medium-text-color);
+    padding: 10px 20px;
+    height: 45px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 400;
+    border-radius: 20px;
+    transition: all 0.3s;
+}
+.input::placeholder {
+    color: var(--medium-text-color);
+  }
+.input:hover{
+    background-color: var(--light-text-color-light);
+    cursor: pointer;
+
+}

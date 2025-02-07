@@ -1,0 +1,9 @@
+  .container__calendar{
+    margin: auto;
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+  }
+  .container__col1{
+    width: 100%;
+  }
