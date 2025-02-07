@@ -3,6 +3,7 @@ import {AxiosResponse} from 'axios';
 // import jwt_decode from "jwt-decode";
 import {TaskResponse} from "../models/response/TaskResponse";
 import {StatusResponse} from "../models/response/StatusResponse";
+import { PriorityResponse } from "../models/response/PriorityResponse";
 
 
 
@@ -17,6 +18,9 @@ export default class TaskService {
 
     static fetchStatus(): Promise<AxiosResponse<StatusResponse[]>>{
         return $api.get<StatusResponse[]>('/status')
+    }
+    static fetchPriority(): Promise<AxiosResponse<PriorityResponse[]>>{
+        return $api.get<PriorityResponse[]>('/priority')
     }
 
 }

@@ -35,7 +35,7 @@ const Calendar:React.FC<CalendarProps> = ({firstWeekDay = 2, locale = 'default',
   const {state, functions} = useCalendar({firstWeekDay, locale, selectedDate})
 
 
-  const eventDates = new Set(events.map((event) =>`${event.datetimeon.toLocaleDateString("ru-RU", {year: 'numeric'})}.${event.datetimeon.getMonth()}.${event.datetimeon.getDate()}` ));
+  const eventDates = new Set(events.map((e) =>`${new Date(e.datetimeon).toLocaleDateString("ru-RU", {year: 'numeric'})}.${new Date(e.datetimeon).getMonth()}.${new Date(e.datetimeon).getDate()}` ));
 
   return <div className='calendar'>
     <div className="calendar_header">

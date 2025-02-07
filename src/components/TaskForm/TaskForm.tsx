@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Context } from "../../main";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LOGIN_ROUTER, CALENDAR_ROUTER } from "../../utils/consts";
@@ -9,6 +9,8 @@ import Input from "../Input/Input";
 import Select from '../../components/Select/Select.tsx'
 import TaskService from "../../service/taskService.ts";
 import { StatusResponse } from "../../models/response/StatusResponse.ts";
+import Button from "../Button/Button.tsx";
+import { PriorityResponse } from "../../models/response/PriorityResponse.ts";
 
 const TaskForm: React.FC = () => {
   const [numberOfTezis, setNumberOfTezis] = React.useState<string>("");
@@ -16,26 +18,44 @@ const TaskForm: React.FC = () => {
   const [datetimeon, setDatetimeon] = React.useState<string>("");
   const [user_authorID, setUser_authorID] = React.useState<string>("");
   const [user_executorID, setUser_executorID] = React.useState<string>("");
-  const [priorityID, setPriorityID] = React.useState<string[]>([]);
+  const [priorityID, setPriorityID] = React.useState<PriorityResponse[]>([]);
     
 
   const { store } = useContext(Context);
 
-    async function getStatus() {
+    // async function getStatus() {
+    //       try{
+    //         const response = await TaskService.fetchStatus()
+    //         const data = response.data
+    //         console.log(data)
+    //         setStatusID(data)
+    //       }catch(error){
+    //         let errorMessage = "Failed to do something exceptional";
+    //           if (error instanceof Error) {
+    //               errorMessage = error.message;
+    //               }
+    //           console.log(errorMessage);
+    //       }
+    //     }
+        useEffect(() => {
           try{
-            const response = await TaskService.fetchStatus()
-            const data = response
+           TaskService.fetchStatus().then(response => {
+            const data = response.data
             console.log(data)
-            setStatusID(data)
+            setStatusID(data)})
+            TaskService.fetchPriority().then(response => {
+              const datap = response.data
+              console.log(datap)
+              setPriorityID(datap)})
           }catch(error){
             let errorMessage = "Failed to do something exceptional";
-              if (error instanceof Error) {
-                  errorMessage = error.message;
-                  }
-              console.log(errorMessage);
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                }
+            console.log(errorMessage);
           }
-        }
 
+        },[])
   return (
     <>
           <div className="sell__number sell">
@@ -64,7 +84,15 @@ const TaskForm: React.FC = () => {
           </div>
           <div className="sell__number sell">
             <p>Приоритетность</p>
-            <Select
+            <input  className="select" list="datalist"/>
+            <datalist id="datalist">
+              {
+               Object.entries(priorityID).map(([key, value]) => (
+                  <option key={key}>{value.name}</option>
+                ))
+            }
+            </datalist> 
+            {/* <Select
               placeholder="Выберите приоритетность"
               name="priorityID"
               onChange={(e) => setPriorityID(e.target.value)}
@@ -74,23 +102,25 @@ const TaskForm: React.FC = () => {
                 "Срочно",
                 "Не важно",
               ]}
-            ></Select>
+            ></Select> */}
           </div>
           <div className="sell__number sell">
             <p>Статус</p>
-            <Select
+            <input  className="select" list="datalist"/>
+            <datalist id="datalist">
+              {
+               Object.entries(statusID).map(([key, value]) => (
+                  <option key={key}>{value.name}</option>
+                ))
+            }
+            </datalist> 
+            {/* <Select
             placeholder="Выберите статус"
             name="statusID"
             onChange={(e) => setStatusID(e.target.value)}
             value={statusID}
-              list_option={[
-                "Новая",
-                "В работе",
-                "Выполнено в срок",
-                "Просрочено",
-                "Выполнено с просрочкой",
-              ]}
-            ></Select>
+              list_option={statusID}
+            ></Select> */}
           </div>
           <div className="sell__number sell">
             <p>Исполнитель</p>
@@ -104,9 +134,7 @@ const TaskForm: React.FC = () => {
           </div>
           <Input name="user_authorID" type="hidden"></Input>
           <Input name="dateTimeCreated" type="hidden"></Input>
-        <button
-          style={{ border: "2px solid red", width: "100px", height: "100px" }}
-        >dd</button>
+        <Button text="Создать"></Button>
     </>
   );
 };

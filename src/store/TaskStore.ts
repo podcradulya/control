@@ -1,10 +1,13 @@
 import {TaskResponse} from "../models/response/TaskResponse";
 import {makeAutoObservable} from "mobx";
 import TaskService from "../service/taskService";
+import { StatusResponse } from "../models/response/StatusResponse";
+import { PriorityResponse } from "../models/response/PriorityResponse";
 
 export default class TaskStore {
     task = {} as TaskResponse;
-    status = "В работе";
+    status = {} as StatusResponse;
+    priority = {} as PriorityResponse;
     page = 1;
     totalCount = 0;
     limit = 3;
@@ -14,8 +17,12 @@ export default class TaskStore {
         makeAutoObservable(this)
     }
 
-    setStatus(status: string) {
+    setStatus(status: StatusResponse) {
         this.status = status
+    }
+
+    setPriority(priority: PriorityResponse) {
+        this.priority = priority
     }
 
     setTask(task: TaskResponse) {
