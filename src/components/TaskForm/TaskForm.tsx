@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../../main";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LOGIN_ROUTER, CALENDAR_ROUTER } from "../../utils/consts";
@@ -6,47 +6,63 @@ import AuthService from "../../service/AuthService";
 import { observer } from "mobx-react-lite";
 import "./TaskForm.css";
 import Input from "../Input/Input";
-import Select from '../../components/Select/Select.tsx'
 import TaskService from "../../service/taskService.ts";
 import { StatusResponse } from "../../models/response/StatusResponse.ts";
 import Button from "../Button/Button.tsx";
 import { PriorityResponse } from "../../models/response/PriorityResponse.ts";
+import UserService from "../../service/UserService.ts";
+import { IUser } from "../../models/IUser.ts";
+import StatusList from "../../components/Selects/StatusList/StatusList.tsx"
+import PriorityList from "../Selects/PriorityList/PriorityList.tsx";
+import UsersList from "../Selects/UsersList/UsersList.tsx";
 
 const TaskForm: React.FC = () => {
+  const { taskStore } = useContext(Context);
+  const { userStore } = useContext(Context);
+
   const [numberOfTezis, setNumberOfTezis] = React.useState<string>("");
-  const [statusID, setStatusID] = React.useState<StatusResponse[]>([])
   const [datetimeon, setDatetimeon] = React.useState<string>("");
-  const [user_authorID, setUser_authorID] = React.useState<string>("");
-  const [user_executorID, setUser_executorID] = React.useState<string>("");
-  const [priorityID, setPriorityID] = React.useState<PriorityResponse[]>([]);
+  const [user_authorID, setUser_authorID] = React.useState<IUser[]>([]);
+  const [user_executorID, setUser_executorID] =  React.useState<IUser[]>([]);
+  const [priorityID, setPriorityID] = React.useState<string[]>([])
     
+  const addTask = () => {
+        const formData = new FormData()
+    //     const date = new Date();
+    //     const pad = (num: number) => String(num).padStart(2, '0');
 
-  const { store } = useContext(Context);
+    // const year = date.getFullYear();
+    // const month = pad(date.getMonth() + 1); // Месяцы начинаются с 0
+    // const day = pad(date.getDate());
+    // const hours = pad(date.getHours());
+    // const minutes = pad(date.getMinutes());
+    // const seconds = pad(date.getSeconds());
+    // const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+    
+    // // Получаем смещение часового пояса в минутах и преобразуем его в часы и минуты
+    // const timezoneOffset = -date.getTimezoneOffset();
+    // const timezoneHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+    // const timezoneMinutes = pad(Math.abs(timezoneOffset) % 60);
+    // const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
+    //     const now = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}${timezoneSign}${timezoneHours}${timezoneMinutes}`
+        formData.append('number_tesiz', numberOfTezis)
+        formData.append('datetimeon', `${datetimeon}`)
+        formData.append('status_id', `${taskStore.selectedStatus.id}`)
+        formData.append('priority_id', `${taskStore.selectedPriority.id}`)
+        formData.append('user_executor_id', `${userStore.selectedUser.id}`)
+        formData.append('user_author_id', `${userStore.selectedUser.id}`)
+        console.log(formData);
+        
+        TaskService.createTask(formData).then(data => alert(data))
+  }
 
-    // async function getStatus() {
-    //       try{
-    //         const response = await TaskService.fetchStatus()
-    //         const data = response.data
-    //         console.log(data)
-    //         setStatusID(data)
-    //       }catch(error){
-    //         let errorMessage = "Failed to do something exceptional";
-    //           if (error instanceof Error) {
-    //               errorMessage = error.message;
-    //               }
-    //           console.log(errorMessage);
-    //       }
-    //     }
         useEffect(() => {
           try{
-           TaskService.fetchStatus().then(response => {
-            const data = response.data
-            console.log(data)
-            setStatusID(data)})
-            TaskService.fetchPriority().then(response => {
-              const datap = response.data
-              console.log(datap)
-              setPriorityID(datap)})
+           TaskService.fetchStatus().then(response => taskStore.setStatus(response.data))
+           TaskService.fetchPriority().then(response => taskStore.setPriority(response.data))
+           UserService.fetchUsers().then(response => userStore.setUsers(response.data))
+          
+           
           }catch(error){
             let errorMessage = "Failed to do something exceptional";
             if (error instanceof Error) {
@@ -56,8 +72,10 @@ const TaskForm: React.FC = () => {
           }
 
         },[])
+
   return (
     <>
+    <div className="popup_content">
           <div className="sell__number sell">
             <p>Номер в Тезисе</p>
             <Input
@@ -69,72 +87,34 @@ const TaskForm: React.FC = () => {
           </div>
           <div className="sell_dateon sell">
             <p className="sell_dateon__header">Срок исполнения</p>
-            <div className="sell__date sell">
-              <p>Дата</p>
-              <Input placeholder="Введите дату..."></Input>
-            </div>
+
             <div className="sell__time sell">
-              <p>Время</p>
+              <p>Дата</p>
               <input
                 type="datetime-local"
                 id="meeting-time"
                 name="meeting-time"
-              />
+                onChange={(e) => setDatetimeon(e.target.value)}
+                value={datetimeon}/>
             </div>
           </div>
           <div className="sell__number sell">
             <p>Приоритетность</p>
-            <input  className="select" list="datalist"/>
-            <datalist id="datalist">
-              {
-               Object.entries(priorityID).map(([key, value]) => (
-                  <option key={key}>{value.name}</option>
-                ))
-            }
-            </datalist> 
-            {/* <Select
-              placeholder="Выберите приоритетность"
-              name="priorityID"
-              onChange={(e) => setPriorityID(e.target.value)}
-              value={priorityID}
-              list_option={[
-                "Важно",
-                "Срочно",
-                "Не важно",
-              ]}
-            ></Select> */}
+            <PriorityList></PriorityList>
           </div>
           <div className="sell__number sell">
             <p>Статус</p>
-            <input  className="select" list="datalist"/>
-            <datalist id="datalist">
-              {
-               Object.entries(statusID).map(([key, value]) => (
-                  <option key={key}>{value.name}</option>
-                ))
-            }
-            </datalist> 
-            {/* <Select
-            placeholder="Выберите статус"
-            name="statusID"
-            onChange={(e) => setStatusID(e.target.value)}
-            value={statusID}
-              list_option={statusID}
-            ></Select> */}
+            <StatusList></StatusList>
+
           </div>
           <div className="sell__number sell">
             <p>Исполнитель</p>
-            <Select
-            placeholder="Выберите исполнителя"
-            name="user_executorID"
-            onChange={(e) => setUser_executorID(e.target.value)}
-            value={user_executorID}
-              list_option={["Зам Дира1", "Зам Дира2", "Зам Дира3"]}
-            ></Select>
+            <UsersList></UsersList>
           </div>
           <Input name="user_authorID" type="hidden"></Input>
           <Input name="dateTimeCreated" type="hidden"></Input>
-        <Button text="Создать"></Button>
+          <Button text="Создать" onClick = {addTask}></Button>
+        </div>
     </>
   );
 };

@@ -10,8 +10,10 @@ import { TaskResponse } from "../models/response/TaskResponse";
 
 export default class Store {
     user = {} as IUser;
-    isAuth = true;
+    isAuth = false;
     isLoading = false;
+    users =  <IUser[]>[];
+    selectedUser = {} as IUser;
 
     constructor() {
         makeAutoObservable(this);
@@ -25,13 +27,20 @@ export default class Store {
         this.user = user;
     }
 
+    setUsers(users: IUser[]) {
+        this.users = users
+    }
+
     setLoading(bool: boolean) {
         this.isLoading = bool;
     }
+  setSelectedUser(users: IUser) {
+        this.selectedUser = users
+    }
 
-    async login(firstName: string, lastName: string, fatherName: string, password: string) {
+    async login(login: string, password: string) {
         try {
-            const {data} = await AuthService.login(firstName, lastName, fatherName, password);
+            const {data} = await AuthService.login(login, password);
             console.log(jwtDecode(data.token))
             localStorage.setItem('token', data.token);
             this.setAuth(true);

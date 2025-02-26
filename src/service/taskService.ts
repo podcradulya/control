@@ -8,8 +8,13 @@ import { PriorityResponse } from "../models/response/PriorityResponse";
 
 
 export default class TaskService {
-    static async createTask(numberTesiz: string, statusID: string, datetimeon: string, user_executorID: string, priorityID: string): Promise<AxiosResponse<TaskResponse>> {
-        return $api.post<TaskResponse>('/task', {numberTesiz, statusID, datetimeon, user_executorID, priorityID})
+    static async createTask(task: FormData): Promise<AxiosResponse<TaskResponse>> {
+        const {data} = await $api.post('/task', task, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+    })
+        return data
     }
 
     static fetchTask(): Promise<AxiosResponse<TaskResponse[]>>{

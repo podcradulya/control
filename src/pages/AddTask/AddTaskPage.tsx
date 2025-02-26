@@ -19,7 +19,6 @@ const AddTaskPage: React.FC = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const closePopup = () => setIsPopupOpen(false);   
   const BtnClick = () => setIsPopupOpen(true);
-  const {taskStore} = useContext(Context)
   
   const [tasks, setTasks] = useState<TaskResponse[]>([])
   
@@ -27,7 +26,6 @@ const AddTaskPage: React.FC = () => {
     try{
      TaskService.fetchTask().then(response => {
       const data = response.data
-      console.log(data)
       setTasks(data)
   })}
     catch(error){

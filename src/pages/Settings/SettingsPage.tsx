@@ -8,7 +8,7 @@ import list_todo from "../../todo_list.ts"
 import Button from "../../components/Button/Button.tsx"
 import close_icon from "../../assets/images/icons/close.svg"
 import Input from '../../components/Input/Input.tsx'
-import Select from '../../components/Select/Select.tsx'
+import Select from '../../components/Selects/StatusList/StatusList.tsx'
 
 
 

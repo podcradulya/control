@@ -1,0 +1,12 @@
+body{
+    background-color: var(--orig-blue-color);
+}
+.logo{
+    width: 50px;
+    height: auto;
+}
+.logo_box p{
+    color: white;
+    font-size: 22px;
+    font-weight: 500;
+}

@@ -29,7 +29,7 @@ const Nav = () =>{
                  <div className="nav__body">
                     <NavLink to="./calendar"><Button iconURL={calendar} text='Календарь'/></NavLink>
                     <NavLink to="./addtask"><Button iconURL={add_calendar} text='Новая задача'/></NavLink>
-                    <Button iconURL={report} text='Мастер отчетов'/>
+                    <NavLink to="./report"><Button iconURL={report} text='Мастер отчетов'/></NavLink>
                     <Button iconURL={static_icon} text='Статистика'/>
                     <NavLink to="./settings"><Button iconURL={settings} text='Настройки'/></NavLink>
                     <NavLink to="./login"><Button iconURL={help_icon} text='Помощь'/></NavLink>
@@ -44,7 +44,7 @@ const Nav = () =>{
                  <div className="nav__body">
                     <NavLink to="./calendar"><Button iconURL={calendar}/></NavLink>
                     <NavLink to="./addtask"><Button iconURL={add_calendar}/></NavLink>
-                    <Button iconURL={report}/>
+                    <NavLink to="./report"><Button iconURL={report}/></NavLink>
                     <Button iconURL={static_icon}/>
                     <NavLink to="./settings"><Button iconURL={settings}/></NavLink>
                     <NavLink to="./login"><Button iconURL={help_icon}/></NavLink>

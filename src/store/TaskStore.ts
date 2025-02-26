@@ -6,8 +6,10 @@ import { PriorityResponse } from "../models/response/PriorityResponse";
 
 export default class TaskStore {
     task = {} as TaskResponse;
-    status = {} as StatusResponse;
-    priority = {} as PriorityResponse;
+    status = <StatusResponse[]>[];
+    priority = <PriorityResponse[]>[];
+    selectedStatus = {} as StatusResponse;
+    selectedPriority = {} as PriorityResponse;
     page = 1;
     totalCount = 0;
     limit = 3;
@@ -17,11 +19,11 @@ export default class TaskStore {
         makeAutoObservable(this)
     }
 
-    setStatus(status: StatusResponse) {
+    setStatus(status: StatusResponse[]) {
         this.status = status
     }
 
-    setPriority(priority: PriorityResponse) {
+    setPriority(priority: PriorityResponse[]) {
         this.priority = priority
     }
 
@@ -29,72 +31,25 @@ export default class TaskStore {
         this.task = task
     }
 
-    async login() {
-        try {
-            const {data} = await TaskService.fetchTask();
-            console.log(data)
-            // this.setTask(data);
-        } catch (error) {
-            let errorMessage = "Failed to do something exceptional";
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                }
+
+    setSelectedStatus(status: StatusResponse) {
+        this.setPage(1)
+        this.selectedStatus = status
     }
-}
-    // async get totalCount() {
-    //     return this.totalCount
-    // }
-    // async get page() {
-    //     return this._page
-    // }
-    // async get limit() {
-    //     return this._limit
-    // }
-
-    // setBrands(brands) {
-    //     this._brands = brands
-    // }
-    // setDevices(devices) {
-    //     this._devices = devices
-    // }
-
-    // setSelectedType(type) {
-    //     this.setPage(1)
-    //     this._selectedType = type
-    // }
-    // setSelectedBrand(brand) {
-    //     this.setPage(1)
-    //     this._selectedBrand = brand
-    // }
-    // setPage(page) {
-    //     this._page = page
-    // }
-    // setTotalCount(count) {
-    //     this._totalCount = count
-    // }
-
-    // get types() {
-    //     return this._types
-    // }
-    // get brands() {
-    //     return this._brands
-    // }
-    // get devices() {
-    //     return this._devices
-    // }
-    // get selectedType() {
-    //     return this._selectedType
-    // }
-    // get selectedBrand() {
-    //     return this._selectedBrand
-    // }
-    // get totalCount() {
-    //     return this._totalCount
-    // }
-    // get page() {
-    //     return this._page
-    // }
-    // get limit() {
-    //     return this._limit
-    // }
+    setSelectedPriority(priority: PriorityResponse) {
+        this.setPage(1)
+        this.selectedPriority = priority
+    }
+    setPage(page:number) {
+        this.page = page
+    }
+    setTotalCount(count:number) {
+        this.totalCount = count
+    }
+    get getStatus() {
+        return this.status
+    }
+    get getPriority() {
+        return this.priority
+    }
 }
