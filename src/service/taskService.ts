@@ -1,6 +1,5 @@
 import $api from "../http/index";
 import {AxiosResponse} from 'axios';
-// import jwt_decode from "jwt-decode";
 import {TaskResponse} from "../models/response/TaskResponse";
 import {StatusResponse} from "../models/response/StatusResponse";
 import { PriorityResponse } from "../models/response/PriorityResponse";
@@ -26,6 +25,12 @@ export default class TaskService {
     }
     static fetchPriority(): Promise<AxiosResponse<PriorityResponse[]>>{
         return $api.get<PriorityResponse[]>('/priority')
+    }
+    static updateTask(): Promise<AxiosResponse<PriorityResponse[]>>{
+        return $api.put<PriorityResponse[]>('/')
+    }
+    static deleteTask(): Promise<AxiosResponse<PriorityResponse[]>>{
+        return $api.delete<PriorityResponse[]>('/')
     }
 
 }

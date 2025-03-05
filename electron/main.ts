@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import axios from "axios"
-
+import * as schedule from 'node-schedule'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -82,4 +82,28 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+function sendNotification(title: string, body: string) {
+  const notification = new Notification({ title, body });
+  notification.show();
+}
+
+function scheduleNotification(date: Date) {
+  const notificationTime = new Date(date.getTime() - 2 * 60 * 60 * 1000); 
+
+  schedule.scheduleJob(notificationTime, () => {
+      sendNotification('Напоминание!', 'Срок исполнения задачи подходит к концу через 2 часа!');
+  });
+}
+
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+  if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+  }
+});
+
+app.whenReady().then(() => {
+  createWindow()
+  const targetDate = new Date('2025-03-04T02:17:00+03:00'); // Московское время (UTC+3)
+    scheduleNotification(targetDate);
+})

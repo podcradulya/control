@@ -21,11 +21,11 @@ const Nav = () =>{
           }
     }
     return (
-        <>
+        <div style={{fontFamily: 'Nunito'}}>
                 { selectedDirection === "show" && 
                  (<div className="nav--show">
                     <div className="nav__arrow"
-                        onClick={()=>onClickArrow(selectedDirection)}></div>
+                        onClick={()=>onClickArrow(selectedDirection)}>x</div>
                  <div className="nav__body">
                     <NavLink to="./calendar"><Button iconURL={calendar} text='Календарь'/></NavLink>
                     <NavLink to="./addtask"><Button iconURL={add_calendar} text='Новая задача'/></NavLink>
@@ -40,7 +40,7 @@ const Nav = () =>{
                 { selectedDirection === "hide" && 
                  (<div className="nav--hide">
                     <div className="nav__arrow"
-                        onClick={()=>onClickArrow(selectedDirection)}></div>
+                        onClick={()=>onClickArrow(selectedDirection)}>❮</div>
                  <div className="nav__body">
                     <NavLink to="./calendar"><Button iconURL={calendar}/></NavLink>
                     <NavLink to="./addtask"><Button iconURL={add_calendar}/></NavLink>
@@ -51,7 +51,7 @@ const Nav = () =>{
                     </div>
                     </div>)
             }        
-        </>
+        </div>
     )
 }
 

@@ -1,13 +1,19 @@
+.task__container{
+    background: var(--light-text-color);
+    color: var(--text-color);
+    width: 100%;
+    border-radius: 10px;
+    padding: 10px 27px;
+    gap: 10px;
+    height: min-content;
+}
 .task__item{
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: var(--light-text-color);
-    color: var(--text-color);
     height: 80px;
     width: 100%;
-    border-radius: 10px;
-    padding: 20px 27px;
     gap: 10px;
     font-size: 0.85rem;
 }
@@ -56,4 +62,9 @@
 .status__indicator_new{
     background-color: #F92B9C;
 
+}
+.task__menu{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
 }

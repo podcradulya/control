@@ -53,7 +53,7 @@ const TaskForm: React.FC = () => {
         formData.append('user_author_id', `${userStore.selectedUser.id}`)
         console.log(formData);
         
-        TaskService.createTask(formData).then(data => alert(data))
+        TaskService.createTask(formData).then(data => setNumberOfTezis(""))
   }
 
         useEffect(() => {

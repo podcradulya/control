@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import "./TodoItem.css"
 import { TaskResponse } from '../../../models/response/TaskResponse.ts'
 import TaskService from "../../../service/taskService.ts"
@@ -7,6 +7,7 @@ import { taskStore, userStore } from "../../../main.tsx"
 import { PriorityResponse } from "../../../models/response/PriorityResponse.ts"
 import { StatusResponse } from "../../../models/response/StatusResponse.ts"
 import { IUser } from "../../../models/IUser.ts"
+import Button from "../../Button/Button.tsx"
 
 interface EventsProps{
     todo: TaskResponse
@@ -15,6 +16,42 @@ interface EventsProps{
 
 
 const TodoItem: React.FC<EventsProps> = ({todo}) => {
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
+  const [showMenu, setShowMenu] = useState<boolean>(false);
+
+  const handleEdit = async (task: TaskResponse) => {
+    const number_tesiz = prompt('Введите новое название задачи:', task.number_tesiz);
+    // const description = prompt('Введите новое описание задачи:', task.description);
+    // if (title !== null && description !== null) {
+    //     await fetch(`/api/tasks/${task.id}`, {
+    //         method: 'PUT',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({ title, description, completed: task.completed }),
+    //     });
+    //     fetchTasks(); // Обновляем список задач
+    // }
+};
+
+// Обработка удаления задачи
+const handleDelete = async (taskId: number) => {  
+    await fetch(`http://localhost:3300/api/task/${taskId}`, {
+        method: 'DELETE',
+    });
+    TaskService.fetchTask()
+};
+
+  const openMenu = (task: TaskResponse) => {
+    setSelectedTask(task);
+    setShowMenu(true);
+  };
+  
+  const closeMenu = () => {
+    setShowMenu(false);
+    setSelectedTask(null);
+  };
+
     const date_task = new Date(todo.datetimeon).toLocaleDateString('ru-RU', {
         year: 'numeric',
         month: '2-digit',
@@ -60,6 +97,8 @@ const TodoItem: React.FC<EventsProps> = ({todo}) => {
               
 
     return(
+    
+    <div className="task__container">
     <div className="task__item">
             <div className="task_date">
                 <p>{date_task}</p>
@@ -79,7 +118,17 @@ const TodoItem: React.FC<EventsProps> = ({todo}) => {
                 </div>
             <div>{priority}</div>
             <div>{executor}</div>
-            <button></button>
+            <Button text="▼" onClick={() => openMenu(todo)}/>
+            
+        </div>
+        {showMenu && selectedTask && (
+                <div className="task__menu">
+                    <h3>Выберите действие для задачи: {selectedTask.number_tesiz}</h3>
+                    <Button text="Редактировать" onClick={() => handleEdit(selectedTask)}/>
+                    <Button text="Удалить" onClick={() => handleDelete(selectedTask.id)}/>
+                    <Button text="Закрыть" onClick={closeMenu}/>
+                </div>
+            )}
         </div>
 )}
 

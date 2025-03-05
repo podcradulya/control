@@ -1,5 +1,6 @@
+
 .container{
-    /* position: relative; */
+    color: var(--text-color);
 }
 .popup{
     position: fixed;
