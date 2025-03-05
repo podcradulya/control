@@ -10,7 +10,7 @@ import { TaskResponse } from "../models/response/TaskResponse";
 
 export default class Store {
     user = {} as IUser;
-    isAuth = false;
+    isAuth = true;
     isLoading = false;
     users =  <IUser[]>[];
     selectedUser = {} as IUser;
