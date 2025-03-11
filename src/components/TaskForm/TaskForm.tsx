@@ -28,29 +28,12 @@ const TaskForm: React.FC = () => {
     
   const addTask = () => {
         const formData = new FormData()
-    //     const date = new Date();
-    //     const pad = (num: number) => String(num).padStart(2, '0');
-
-    // const year = date.getFullYear();
-    // const month = pad(date.getMonth() + 1); // Месяцы начинаются с 0
-    // const day = pad(date.getDate());
-    // const hours = pad(date.getHours());
-    // const minutes = pad(date.getMinutes());
-    // const seconds = pad(date.getSeconds());
-    // const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-    
-    // // Получаем смещение часового пояса в минутах и преобразуем его в часы и минуты
-    // const timezoneOffset = -date.getTimezoneOffset();
-    // const timezoneHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
-    // const timezoneMinutes = pad(Math.abs(timezoneOffset) % 60);
-    // const timezoneSign = timezoneOffset >= 0 ? '+' : '-';
-    //     const now = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}${timezoneSign}${timezoneHours}${timezoneMinutes}`
         formData.append('number_tesiz', numberOfTezis)
         formData.append('datetimeon', `${datetimeon}`)
         formData.append('status_id', `${taskStore.selectedStatus.id}`)
         formData.append('priority_id', `${taskStore.selectedPriority.id}`)
         formData.append('user_executor_id', `${userStore.selectedUser.id}`)
-        formData.append('user_author_id', `${userStore.selectedUser.id}`)
+        formData.append('user_author_id', `${userStore.user.id}`)
         console.log(formData);
         
         TaskService.createTask(formData).then(data => setNumberOfTezis(""))

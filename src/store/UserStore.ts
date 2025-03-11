@@ -10,7 +10,7 @@ import { TaskResponse } from "../models/response/TaskResponse";
 
 export default class Store {
     user = {} as IUser;
-    isAuth = true;
+    isAuth = false;
     isLoading = false;
     users =  <IUser[]>[];
     selectedUser = {} as IUser;
@@ -34,23 +34,22 @@ export default class Store {
     setLoading(bool: boolean) {
         this.isLoading = bool;
     }
-  setSelectedUser(users: IUser) {
+    setSelectedUser(users: IUser) {
         this.selectedUser = users
     }
 
     async login(login: string, password: string) {
         try {
             const {data} = await AuthService.login(login, password);
-            console.log(jwtDecode(data.token))
             localStorage.setItem('token', data.token);
             this.setAuth(true);
-            this.setUser(data.user);
+            this.setUser(jwtDecode(data.token));
         } catch (error) {
             let errorMessage = "Failed to do something exceptional";
             if (error instanceof Error) {
                 errorMessage = error.message;
                 }
-            alert(errorMessage);
+            
         }
     } 
 

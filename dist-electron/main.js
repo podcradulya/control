@@ -1,8415 +1,20744 @@
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 import { app, BrowserWindow, ipcMain, Notification } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
-import require$$0 from "events";
-import require$$1 from "fs";
-var luxon$1 = {};
-Object.defineProperty(luxon$1, "__esModule", { value: true });
-class LuxonError extends Error {
-}
-class InvalidDateTimeError extends LuxonError {
-  constructor(reason) {
-    super(`Invalid DateTime: ${reason.toMessage()}`);
-  }
-}
-class InvalidIntervalError extends LuxonError {
-  constructor(reason) {
-    super(`Invalid Interval: ${reason.toMessage()}`);
-  }
-}
-class InvalidDurationError extends LuxonError {
-  constructor(reason) {
-    super(`Invalid Duration: ${reason.toMessage()}`);
-  }
-}
-class ConflictingSpecificationError extends LuxonError {
-}
-class InvalidUnitError extends LuxonError {
-  constructor(unit) {
-    super(`Invalid unit ${unit}`);
-  }
-}
-class InvalidArgumentError extends LuxonError {
-}
-class ZoneIsAbstractError extends LuxonError {
-  constructor() {
-    super("Zone is an abstract class");
-  }
-}
-const n = "numeric", s = "short", l = "long";
-const DATE_SHORT = {
-  year: n,
-  month: n,
-  day: n
-};
-const DATE_MED = {
-  year: n,
-  month: s,
-  day: n
-};
-const DATE_MED_WITH_WEEKDAY = {
-  year: n,
-  month: s,
-  day: n,
-  weekday: s
-};
-const DATE_FULL = {
-  year: n,
-  month: l,
-  day: n
-};
-const DATE_HUGE = {
-  year: n,
-  month: l,
-  day: n,
-  weekday: l
-};
-const TIME_SIMPLE = {
-  hour: n,
-  minute: n
-};
-const TIME_WITH_SECONDS = {
-  hour: n,
-  minute: n,
-  second: n
-};
-const TIME_WITH_SHORT_OFFSET = {
-  hour: n,
-  minute: n,
-  second: n,
-  timeZoneName: s
-};
-const TIME_WITH_LONG_OFFSET = {
-  hour: n,
-  minute: n,
-  second: n,
-  timeZoneName: l
-};
-const TIME_24_SIMPLE = {
-  hour: n,
-  minute: n,
-  hourCycle: "h23"
-};
-const TIME_24_WITH_SECONDS = {
-  hour: n,
-  minute: n,
-  second: n,
-  hourCycle: "h23"
-};
-const TIME_24_WITH_SHORT_OFFSET = {
-  hour: n,
-  minute: n,
-  second: n,
-  hourCycle: "h23",
-  timeZoneName: s
-};
-const TIME_24_WITH_LONG_OFFSET = {
-  hour: n,
-  minute: n,
-  second: n,
-  hourCycle: "h23",
-  timeZoneName: l
-};
-const DATETIME_SHORT = {
-  year: n,
-  month: n,
-  day: n,
-  hour: n,
-  minute: n
-};
-const DATETIME_SHORT_WITH_SECONDS = {
-  year: n,
-  month: n,
-  day: n,
-  hour: n,
-  minute: n,
-  second: n
-};
-const DATETIME_MED = {
-  year: n,
-  month: s,
-  day: n,
-  hour: n,
-  minute: n
-};
-const DATETIME_MED_WITH_SECONDS = {
-  year: n,
-  month: s,
-  day: n,
-  hour: n,
-  minute: n,
-  second: n
-};
-const DATETIME_MED_WITH_WEEKDAY = {
-  year: n,
-  month: s,
-  day: n,
-  weekday: s,
-  hour: n,
-  minute: n
-};
-const DATETIME_FULL = {
-  year: n,
-  month: l,
-  day: n,
-  hour: n,
-  minute: n,
-  timeZoneName: s
-};
-const DATETIME_FULL_WITH_SECONDS = {
-  year: n,
-  month: l,
-  day: n,
-  hour: n,
-  minute: n,
-  second: n,
-  timeZoneName: s
-};
-const DATETIME_HUGE = {
-  year: n,
-  month: l,
-  day: n,
-  weekday: l,
-  hour: n,
-  minute: n,
-  timeZoneName: l
-};
-const DATETIME_HUGE_WITH_SECONDS = {
-  year: n,
-  month: l,
-  day: n,
-  weekday: l,
-  hour: n,
-  minute: n,
-  second: n,
-  timeZoneName: l
-};
-class Zone {
-  /**
-   * The type of zone
-   * @abstract
-   * @type {string}
-   */
-  get type() {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * The name of this zone.
-   * @abstract
-   * @type {string}
-   */
-  get name() {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * The IANA name of this zone.
-   * Defaults to `name` if not overwritten by a subclass.
-   * @abstract
-   * @type {string}
-   */
-  get ianaName() {
-    return this.name;
-  }
-  /**
-   * Returns whether the offset is known to be fixed for the whole year.
-   * @abstract
-   * @type {boolean}
-   */
-  get isUniversal() {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * Returns the offset's common name (such as EST) at the specified timestamp
-   * @abstract
-   * @param {number} ts - Epoch milliseconds for which to get the name
-   * @param {Object} opts - Options to affect the format
-   * @param {string} opts.format - What style of offset to return. Accepts 'long' or 'short'.
-   * @param {string} opts.locale - What locale to return the offset name in.
-   * @return {string}
-   */
-  offsetName(ts, opts) {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * Returns the offset's value as a string
-   * @abstract
-   * @param {number} ts - Epoch milliseconds for which to get the offset
-   * @param {string} format - What style of offset to return.
-   *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
-   * @return {string}
-   */
-  formatOffset(ts, format) {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * Return the offset in minutes for this zone at the specified timestamp.
-   * @abstract
-   * @param {number} ts - Epoch milliseconds for which to compute the offset
-   * @return {number}
-   */
-  offset(ts) {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * Return whether this Zone is equal to another zone
-   * @abstract
-   * @param {Zone} otherZone - the zone to compare
-   * @return {boolean}
-   */
-  equals(otherZone) {
-    throw new ZoneIsAbstractError();
-  }
-  /**
-   * Return whether this Zone is valid.
-   * @abstract
-   * @type {boolean}
-   */
-  get isValid() {
-    throw new ZoneIsAbstractError();
-  }
-}
-let singleton$1 = null;
-class SystemZone extends Zone {
-  /**
-   * Get a singleton instance of the local zone
-   * @return {SystemZone}
-   */
-  static get instance() {
-    if (singleton$1 === null) {
-      singleton$1 = new SystemZone();
-    }
-    return singleton$1;
-  }
-  /** @override **/
-  get type() {
-    return "system";
-  }
-  /** @override **/
-  get name() {
-    return new Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }
-  /** @override **/
-  get isUniversal() {
-    return false;
-  }
-  /** @override **/
-  offsetName(ts, {
-    format,
-    locale
-  }) {
-    return parseZoneInfo(ts, format, locale);
-  }
-  /** @override **/
-  formatOffset(ts, format) {
-    return formatOffset(this.offset(ts), format);
-  }
-  /** @override **/
-  offset(ts) {
-    return -new Date(ts).getTimezoneOffset();
-  }
-  /** @override **/
-  equals(otherZone) {
-    return otherZone.type === "system";
-  }
-  /** @override **/
-  get isValid() {
-    return true;
-  }
-}
-let dtfCache = {};
-function makeDTF(zone) {
-  if (!dtfCache[zone]) {
-    dtfCache[zone] = new Intl.DateTimeFormat("en-US", {
-      hour12: false,
-      timeZone: zone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      era: "short"
-    });
-  }
-  return dtfCache[zone];
-}
-const typeToPos = {
-  year: 0,
-  month: 1,
-  day: 2,
-  era: 3,
-  hour: 4,
-  minute: 5,
-  second: 6
-};
-function hackyOffset(dtf, date2) {
-  const formatted = dtf.format(date2).replace(/\u200E/g, ""), parsed = /(\d+)\/(\d+)\/(\d+) (AD|BC),? (\d+):(\d+):(\d+)/.exec(formatted), [, fMonth, fDay, fYear, fadOrBc, fHour, fMinute, fSecond] = parsed;
-  return [fYear, fMonth, fDay, fadOrBc, fHour, fMinute, fSecond];
-}
-function partsOffset(dtf, date2) {
-  const formatted = dtf.formatToParts(date2);
-  const filled = [];
-  for (let i = 0; i < formatted.length; i++) {
-    const {
-      type,
-      value
-    } = formatted[i];
-    const pos = typeToPos[type];
-    if (type === "era") {
-      filled[pos] = value;
-    } else if (!isUndefined(pos)) {
-      filled[pos] = parseInt(value, 10);
-    }
-  }
-  return filled;
-}
-let ianaZoneCache = {};
-class IANAZone extends Zone {
-  /**
-   * @param {string} name - Zone name
-   * @return {IANAZone}
-   */
-  static create(name) {
-    if (!ianaZoneCache[name]) {
-      ianaZoneCache[name] = new IANAZone(name);
-    }
-    return ianaZoneCache[name];
-  }
-  /**
-   * Reset local caches. Should only be necessary in testing scenarios.
-   * @return {void}
-   */
-  static resetCache() {
-    ianaZoneCache = {};
-    dtfCache = {};
-  }
-  /**
-   * Returns whether the provided string is a valid specifier. This only checks the string's format, not that the specifier identifies a known zone; see isValidZone for that.
-   * @param {string} s - The string to check validity on
-   * @example IANAZone.isValidSpecifier("America/New_York") //=> true
-   * @example IANAZone.isValidSpecifier("Sport~~blorp") //=> false
-   * @deprecated For backward compatibility, this forwards to isValidZone, better use `isValidZone()` directly instead.
-   * @return {boolean}
-   */
-  static isValidSpecifier(s2) {
-    return this.isValidZone(s2);
-  }
-  /**
-   * Returns whether the provided string identifies a real zone
-   * @param {string} zone - The string to check
-   * @example IANAZone.isValidZone("America/New_York") //=> true
-   * @example IANAZone.isValidZone("Fantasia/Castle") //=> false
-   * @example IANAZone.isValidZone("Sport~~blorp") //=> false
-   * @return {boolean}
-   */
-  static isValidZone(zone) {
-    if (!zone) {
-      return false;
-    }
-    try {
-      new Intl.DateTimeFormat("en-US", {
-        timeZone: zone
-      }).format();
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  constructor(name) {
-    super();
-    this.zoneName = name;
-    this.valid = IANAZone.isValidZone(name);
-  }
-  /**
-   * The type of zone. `iana` for all instances of `IANAZone`.
-   * @override
-   * @type {string}
-   */
-  get type() {
-    return "iana";
-  }
-  /**
-   * The name of this zone (i.e. the IANA zone name).
-   * @override
-   * @type {string}
-   */
-  get name() {
-    return this.zoneName;
-  }
-  /**
-   * Returns whether the offset is known to be fixed for the whole year:
-   * Always returns false for all IANA zones.
-   * @override
-   * @type {boolean}
-   */
-  get isUniversal() {
-    return false;
-  }
-  /**
-   * Returns the offset's common name (such as EST) at the specified timestamp
-   * @override
-   * @param {number} ts - Epoch milliseconds for which to get the name
-   * @param {Object} opts - Options to affect the format
-   * @param {string} opts.format - What style of offset to return. Accepts 'long' or 'short'.
-   * @param {string} opts.locale - What locale to return the offset name in.
-   * @return {string}
-   */
-  offsetName(ts, {
-    format,
-    locale
-  }) {
-    return parseZoneInfo(ts, format, locale, this.name);
-  }
-  /**
-   * Returns the offset's value as a string
-   * @override
-   * @param {number} ts - Epoch milliseconds for which to get the offset
-   * @param {string} format - What style of offset to return.
-   *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
-   * @return {string}
-   */
-  formatOffset(ts, format) {
-    return formatOffset(this.offset(ts), format);
-  }
-  /**
-   * Return the offset in minutes for this zone at the specified timestamp.
-   * @override
-   * @param {number} ts - Epoch milliseconds for which to compute the offset
-   * @return {number}
-   */
-  offset(ts) {
-    const date2 = new Date(ts);
-    if (isNaN(date2)) return NaN;
-    const dtf = makeDTF(this.name);
-    let [year, month, day, adOrBc, hour, minute, second] = dtf.formatToParts ? partsOffset(dtf, date2) : hackyOffset(dtf, date2);
-    if (adOrBc === "BC") {
-      year = -Math.abs(year) + 1;
-    }
-    const adjustedHour = hour === 24 ? 0 : hour;
-    const asUTC = objToLocalTS({
-      year,
-      month,
-      day,
-      hour: adjustedHour,
-      minute,
-      second,
-      millisecond: 0
-    });
-    let asTS = +date2;
-    const over = asTS % 1e3;
-    asTS -= over >= 0 ? over : 1e3 + over;
-    return (asUTC - asTS) / (60 * 1e3);
-  }
-  /**
-   * Return whether this Zone is equal to another zone
-   * @override
-   * @param {Zone} otherZone - the zone to compare
-   * @return {boolean}
-   */
-  equals(otherZone) {
-    return otherZone.type === "iana" && otherZone.name === this.name;
-  }
-  /**
-   * Return whether this Zone is valid.
-   * @override
-   * @type {boolean}
-   */
-  get isValid() {
-    return this.valid;
-  }
-}
-let intlLFCache = {};
-function getCachedLF(locString, opts = {}) {
-  const key = JSON.stringify([locString, opts]);
-  let dtf = intlLFCache[key];
-  if (!dtf) {
-    dtf = new Intl.ListFormat(locString, opts);
-    intlLFCache[key] = dtf;
-  }
-  return dtf;
-}
-let intlDTCache = {};
-function getCachedDTF(locString, opts = {}) {
-  const key = JSON.stringify([locString, opts]);
-  let dtf = intlDTCache[key];
-  if (!dtf) {
-    dtf = new Intl.DateTimeFormat(locString, opts);
-    intlDTCache[key] = dtf;
-  }
-  return dtf;
-}
-let intlNumCache = {};
-function getCachedINF(locString, opts = {}) {
-  const key = JSON.stringify([locString, opts]);
-  let inf = intlNumCache[key];
-  if (!inf) {
-    inf = new Intl.NumberFormat(locString, opts);
-    intlNumCache[key] = inf;
-  }
-  return inf;
-}
-let intlRelCache = {};
-function getCachedRTF(locString, opts = {}) {
-  const {
-    base,
-    ...cacheKeyOpts
-  } = opts;
-  const key = JSON.stringify([locString, cacheKeyOpts]);
-  let inf = intlRelCache[key];
-  if (!inf) {
-    inf = new Intl.RelativeTimeFormat(locString, opts);
-    intlRelCache[key] = inf;
-  }
-  return inf;
-}
-let sysLocaleCache = null;
-function systemLocale() {
-  if (sysLocaleCache) {
-    return sysLocaleCache;
-  } else {
-    sysLocaleCache = new Intl.DateTimeFormat().resolvedOptions().locale;
-    return sysLocaleCache;
-  }
-}
-let weekInfoCache = {};
-function getCachedWeekInfo(locString) {
-  let data = weekInfoCache[locString];
-  if (!data) {
-    const locale = new Intl.Locale(locString);
-    data = "getWeekInfo" in locale ? locale.getWeekInfo() : locale.weekInfo;
-    weekInfoCache[locString] = data;
-  }
-  return data;
-}
-function parseLocaleString(localeStr) {
-  const xIndex = localeStr.indexOf("-x-");
-  if (xIndex !== -1) {
-    localeStr = localeStr.substring(0, xIndex);
-  }
-  const uIndex = localeStr.indexOf("-u-");
-  if (uIndex === -1) {
-    return [localeStr];
-  } else {
-    let options;
-    let selectedStr;
-    try {
-      options = getCachedDTF(localeStr).resolvedOptions();
-      selectedStr = localeStr;
-    } catch (e) {
-      const smaller = localeStr.substring(0, uIndex);
-      options = getCachedDTF(smaller).resolvedOptions();
-      selectedStr = smaller;
-    }
-    const {
-      numberingSystem,
-      calendar
-    } = options;
-    return [selectedStr, numberingSystem, calendar];
-  }
-}
-function intlConfigString(localeStr, numberingSystem, outputCalendar) {
-  if (outputCalendar || numberingSystem) {
-    if (!localeStr.includes("-u-")) {
-      localeStr += "-u";
-    }
-    if (outputCalendar) {
-      localeStr += `-ca-${outputCalendar}`;
-    }
-    if (numberingSystem) {
-      localeStr += `-nu-${numberingSystem}`;
-    }
-    return localeStr;
-  } else {
-    return localeStr;
-  }
-}
-function mapMonths(f) {
-  const ms = [];
-  for (let i = 1; i <= 12; i++) {
-    const dt = DateTime.utc(2009, i, 1);
-    ms.push(f(dt));
-  }
-  return ms;
-}
-function mapWeekdays(f) {
-  const ms = [];
-  for (let i = 1; i <= 7; i++) {
-    const dt = DateTime.utc(2016, 11, 13 + i);
-    ms.push(f(dt));
-  }
-  return ms;
-}
-function listStuff(loc, length, englishFn, intlFn) {
-  const mode = loc.listingMode();
-  if (mode === "error") {
-    return null;
-  } else if (mode === "en") {
-    return englishFn(length);
-  } else {
-    return intlFn(length);
-  }
-}
-function supportsFastNumbers(loc) {
-  if (loc.numberingSystem && loc.numberingSystem !== "latn") {
-    return false;
-  } else {
-    return loc.numberingSystem === "latn" || !loc.locale || loc.locale.startsWith("en") || new Intl.DateTimeFormat(loc.intl).resolvedOptions().numberingSystem === "latn";
-  }
-}
-class PolyNumberFormatter {
-  constructor(intl, forceSimple, opts) {
-    this.padTo = opts.padTo || 0;
-    this.floor = opts.floor || false;
-    const {
-      padTo,
-      floor,
-      ...otherOpts
-    } = opts;
-    if (!forceSimple || Object.keys(otherOpts).length > 0) {
-      const intlOpts = {
-        useGrouping: false,
-        ...opts
-      };
-      if (opts.padTo > 0) intlOpts.minimumIntegerDigits = opts.padTo;
-      this.inf = getCachedINF(intl, intlOpts);
-    }
-  }
-  format(i) {
-    if (this.inf) {
-      const fixed = this.floor ? Math.floor(i) : i;
-      return this.inf.format(fixed);
-    } else {
-      const fixed = this.floor ? Math.floor(i) : roundTo(i, 3);
-      return padStart(fixed, this.padTo);
-    }
-  }
-}
-class PolyDateFormatter {
-  constructor(dt, intl, opts) {
-    this.opts = opts;
-    this.originalZone = void 0;
-    let z = void 0;
-    if (this.opts.timeZone) {
-      this.dt = dt;
-    } else if (dt.zone.type === "fixed") {
-      const gmtOffset = -1 * (dt.offset / 60);
-      const offsetZ = gmtOffset >= 0 ? `Etc/GMT+${gmtOffset}` : `Etc/GMT${gmtOffset}`;
-      if (dt.offset !== 0 && IANAZone.create(offsetZ).valid) {
-        z = offsetZ;
-        this.dt = dt;
-      } else {
-        z = "UTC";
-        this.dt = dt.offset === 0 ? dt : dt.setZone("UTC").plus({
-          minutes: dt.offset
-        });
-        this.originalZone = dt.zone;
-      }
-    } else if (dt.zone.type === "system") {
-      this.dt = dt;
-    } else if (dt.zone.type === "iana") {
-      this.dt = dt;
-      z = dt.zone.name;
-    } else {
-      z = "UTC";
-      this.dt = dt.setZone("UTC").plus({
-        minutes: dt.offset
-      });
-      this.originalZone = dt.zone;
-    }
-    const intlOpts = {
-      ...this.opts
-    };
-    intlOpts.timeZone = intlOpts.timeZone || z;
-    this.dtf = getCachedDTF(intl, intlOpts);
-  }
-  format() {
-    if (this.originalZone) {
-      return this.formatToParts().map(({
-        value
-      }) => value).join("");
-    }
-    return this.dtf.format(this.dt.toJSDate());
-  }
-  formatToParts() {
-    const parts = this.dtf.formatToParts(this.dt.toJSDate());
-    if (this.originalZone) {
-      return parts.map((part) => {
-        if (part.type === "timeZoneName") {
-          const offsetName = this.originalZone.offsetName(this.dt.ts, {
-            locale: this.dt.locale,
-            format: this.opts.timeZoneName
-          });
-          return {
-            ...part,
-            value: offsetName
-          };
-        } else {
-          return part;
-        }
-      });
-    }
-    return parts;
-  }
-  resolvedOptions() {
-    return this.dtf.resolvedOptions();
-  }
-}
-class PolyRelFormatter {
-  constructor(intl, isEnglish, opts) {
-    this.opts = {
-      style: "long",
-      ...opts
-    };
-    if (!isEnglish && hasRelative()) {
-      this.rtf = getCachedRTF(intl, opts);
-    }
-  }
-  format(count, unit) {
-    if (this.rtf) {
-      return this.rtf.format(count, unit);
-    } else {
-      return formatRelativeTime(unit, count, this.opts.numeric, this.opts.style !== "long");
-    }
-  }
-  formatToParts(count, unit) {
-    if (this.rtf) {
-      return this.rtf.formatToParts(count, unit);
-    } else {
-      return [];
-    }
-  }
-}
-const fallbackWeekSettings = {
-  firstDay: 1,
-  minimalDays: 4,
-  weekend: [6, 7]
-};
-class Locale {
-  static fromOpts(opts) {
-    return Locale.create(opts.locale, opts.numberingSystem, opts.outputCalendar, opts.weekSettings, opts.defaultToEN);
-  }
-  static create(locale, numberingSystem, outputCalendar, weekSettings, defaultToEN = false) {
-    const specifiedLocale = locale || Settings.defaultLocale;
-    const localeR = specifiedLocale || (defaultToEN ? "en-US" : systemLocale());
-    const numberingSystemR = numberingSystem || Settings.defaultNumberingSystem;
-    const outputCalendarR = outputCalendar || Settings.defaultOutputCalendar;
-    const weekSettingsR = validateWeekSettings(weekSettings) || Settings.defaultWeekSettings;
-    return new Locale(localeR, numberingSystemR, outputCalendarR, weekSettingsR, specifiedLocale);
-  }
-  static resetCache() {
-    sysLocaleCache = null;
-    intlDTCache = {};
-    intlNumCache = {};
-    intlRelCache = {};
-  }
-  static fromObject({
-    locale,
-    numberingSystem,
-    outputCalendar,
-    weekSettings
-  } = {}) {
-    return Locale.create(locale, numberingSystem, outputCalendar, weekSettings);
-  }
-  constructor(locale, numbering, outputCalendar, weekSettings, specifiedLocale) {
-    const [parsedLocale, parsedNumberingSystem, parsedOutputCalendar] = parseLocaleString(locale);
-    this.locale = parsedLocale;
-    this.numberingSystem = numbering || parsedNumberingSystem || null;
-    this.outputCalendar = outputCalendar || parsedOutputCalendar || null;
-    this.weekSettings = weekSettings;
-    this.intl = intlConfigString(this.locale, this.numberingSystem, this.outputCalendar);
-    this.weekdaysCache = {
-      format: {},
-      standalone: {}
-    };
-    this.monthsCache = {
-      format: {},
-      standalone: {}
-    };
-    this.meridiemCache = null;
-    this.eraCache = {};
-    this.specifiedLocale = specifiedLocale;
-    this.fastNumbersCached = null;
-  }
-  get fastNumbers() {
-    if (this.fastNumbersCached == null) {
-      this.fastNumbersCached = supportsFastNumbers(this);
-    }
-    return this.fastNumbersCached;
-  }
-  listingMode() {
-    const isActuallyEn = this.isEnglish();
-    const hasNoWeirdness = (this.numberingSystem === null || this.numberingSystem === "latn") && (this.outputCalendar === null || this.outputCalendar === "gregory");
-    return isActuallyEn && hasNoWeirdness ? "en" : "intl";
-  }
-  clone(alts) {
-    if (!alts || Object.getOwnPropertyNames(alts).length === 0) {
-      return this;
-    } else {
-      return Locale.create(alts.locale || this.specifiedLocale, alts.numberingSystem || this.numberingSystem, alts.outputCalendar || this.outputCalendar, validateWeekSettings(alts.weekSettings) || this.weekSettings, alts.defaultToEN || false);
-    }
-  }
-  redefaultToEN(alts = {}) {
-    return this.clone({
-      ...alts,
-      defaultToEN: true
-    });
-  }
-  redefaultToSystem(alts = {}) {
-    return this.clone({
-      ...alts,
-      defaultToEN: false
-    });
-  }
-  months(length, format = false) {
-    return listStuff(this, length, months, () => {
-      const intl = format ? {
-        month: length,
-        day: "numeric"
-      } : {
-        month: length
-      }, formatStr = format ? "format" : "standalone";
-      if (!this.monthsCache[formatStr][length]) {
-        this.monthsCache[formatStr][length] = mapMonths((dt) => this.extract(dt, intl, "month"));
-      }
-      return this.monthsCache[formatStr][length];
-    });
-  }
-  weekdays(length, format = false) {
-    return listStuff(this, length, weekdays, () => {
-      const intl = format ? {
-        weekday: length,
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      } : {
-        weekday: length
-      }, formatStr = format ? "format" : "standalone";
-      if (!this.weekdaysCache[formatStr][length]) {
-        this.weekdaysCache[formatStr][length] = mapWeekdays((dt) => this.extract(dt, intl, "weekday"));
-      }
-      return this.weekdaysCache[formatStr][length];
-    });
-  }
-  meridiems() {
-    return listStuff(this, void 0, () => meridiems, () => {
-      if (!this.meridiemCache) {
-        const intl = {
-          hour: "numeric",
-          hourCycle: "h12"
-        };
-        this.meridiemCache = [DateTime.utc(2016, 11, 13, 9), DateTime.utc(2016, 11, 13, 19)].map((dt) => this.extract(dt, intl, "dayperiod"));
-      }
-      return this.meridiemCache;
-    });
-  }
-  eras(length) {
-    return listStuff(this, length, eras, () => {
-      const intl = {
-        era: length
-      };
-      if (!this.eraCache[length]) {
-        this.eraCache[length] = [DateTime.utc(-40, 1, 1), DateTime.utc(2017, 1, 1)].map((dt) => this.extract(dt, intl, "era"));
-      }
-      return this.eraCache[length];
-    });
-  }
-  extract(dt, intlOpts, field) {
-    const df = this.dtFormatter(dt, intlOpts), results = df.formatToParts(), matching = results.find((m) => m.type.toLowerCase() === field);
-    return matching ? matching.value : null;
-  }
-  numberFormatter(opts = {}) {
-    return new PolyNumberFormatter(this.intl, opts.forceSimple || this.fastNumbers, opts);
-  }
-  dtFormatter(dt, intlOpts = {}) {
-    return new PolyDateFormatter(dt, this.intl, intlOpts);
-  }
-  relFormatter(opts = {}) {
-    return new PolyRelFormatter(this.intl, this.isEnglish(), opts);
-  }
-  listFormatter(opts = {}) {
-    return getCachedLF(this.intl, opts);
-  }
-  isEnglish() {
-    return this.locale === "en" || this.locale.toLowerCase() === "en-us" || new Intl.DateTimeFormat(this.intl).resolvedOptions().locale.startsWith("en-us");
-  }
-  getWeekSettings() {
-    if (this.weekSettings) {
-      return this.weekSettings;
-    } else if (!hasLocaleWeekInfo()) {
-      return fallbackWeekSettings;
-    } else {
-      return getCachedWeekInfo(this.locale);
-    }
-  }
-  getStartOfWeek() {
-    return this.getWeekSettings().firstDay;
-  }
-  getMinDaysInFirstWeek() {
-    return this.getWeekSettings().minimalDays;
-  }
-  getWeekendDays() {
-    return this.getWeekSettings().weekend;
-  }
-  equals(other) {
-    return this.locale === other.locale && this.numberingSystem === other.numberingSystem && this.outputCalendar === other.outputCalendar;
-  }
-  toString() {
-    return `Locale(${this.locale}, ${this.numberingSystem}, ${this.outputCalendar})`;
-  }
-}
-let singleton = null;
-class FixedOffsetZone extends Zone {
-  /**
-   * Get a singleton instance of UTC
-   * @return {FixedOffsetZone}
-   */
-  static get utcInstance() {
-    if (singleton === null) {
-      singleton = new FixedOffsetZone(0);
-    }
-    return singleton;
-  }
-  /**
-   * Get an instance with a specified offset
-   * @param {number} offset - The offset in minutes
-   * @return {FixedOffsetZone}
-   */
-  static instance(offset2) {
-    return offset2 === 0 ? FixedOffsetZone.utcInstance : new FixedOffsetZone(offset2);
-  }
-  /**
-   * Get an instance of FixedOffsetZone from a UTC offset string, like "UTC+6"
-   * @param {string} s - The offset string to parse
-   * @example FixedOffsetZone.parseSpecifier("UTC+6")
-   * @example FixedOffsetZone.parseSpecifier("UTC+06")
-   * @example FixedOffsetZone.parseSpecifier("UTC-6:00")
-   * @return {FixedOffsetZone}
-   */
-  static parseSpecifier(s2) {
-    if (s2) {
-      const r = s2.match(/^utc(?:([+-]\d{1,2})(?::(\d{2}))?)?$/i);
-      if (r) {
-        return new FixedOffsetZone(signedOffset(r[1], r[2]));
-      }
-    }
-    return null;
-  }
-  constructor(offset2) {
-    super();
-    this.fixed = offset2;
-  }
-  /**
-   * The type of zone. `fixed` for all instances of `FixedOffsetZone`.
-   * @override
-   * @type {string}
-   */
-  get type() {
-    return "fixed";
-  }
-  /**
-   * The name of this zone.
-   * All fixed zones' names always start with "UTC" (plus optional offset)
-   * @override
-   * @type {string}
-   */
-  get name() {
-    return this.fixed === 0 ? "UTC" : `UTC${formatOffset(this.fixed, "narrow")}`;
-  }
-  /**
-   * The IANA name of this zone, i.e. `Etc/UTC` or `Etc/GMT+/-nn`
-   *
-   * @override
-   * @type {string}
-   */
-  get ianaName() {
-    if (this.fixed === 0) {
-      return "Etc/UTC";
-    } else {
-      return `Etc/GMT${formatOffset(-this.fixed, "narrow")}`;
-    }
-  }
-  /**
-   * Returns the offset's common name at the specified timestamp.
-   *
-   * For fixed offset zones this equals to the zone name.
-   * @override
-   */
-  offsetName() {
-    return this.name;
-  }
-  /**
-   * Returns the offset's value as a string
-   * @override
-   * @param {number} ts - Epoch milliseconds for which to get the offset
-   * @param {string} format - What style of offset to return.
-   *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
-   * @return {string}
-   */
-  formatOffset(ts, format) {
-    return formatOffset(this.fixed, format);
-  }
-  /**
-   * Returns whether the offset is known to be fixed for the whole year:
-   * Always returns true for all fixed offset zones.
-   * @override
-   * @type {boolean}
-   */
-  get isUniversal() {
-    return true;
-  }
-  /**
-   * Return the offset in minutes for this zone at the specified timestamp.
-   *
-   * For fixed offset zones, this is constant and does not depend on a timestamp.
-   * @override
-   * @return {number}
-   */
-  offset() {
-    return this.fixed;
-  }
-  /**
-   * Return whether this Zone is equal to another zone (i.e. also fixed and same offset)
-   * @override
-   * @param {Zone} otherZone - the zone to compare
-   * @return {boolean}
-   */
-  equals(otherZone) {
-    return otherZone.type === "fixed" && otherZone.fixed === this.fixed;
-  }
-  /**
-   * Return whether this Zone is valid:
-   * All fixed offset zones are valid.
-   * @override
-   * @type {boolean}
-   */
-  get isValid() {
-    return true;
-  }
-}
-class InvalidZone extends Zone {
-  constructor(zoneName) {
-    super();
-    this.zoneName = zoneName;
-  }
-  /** @override **/
-  get type() {
-    return "invalid";
-  }
-  /** @override **/
-  get name() {
-    return this.zoneName;
-  }
-  /** @override **/
-  get isUniversal() {
-    return false;
-  }
-  /** @override **/
-  offsetName() {
-    return null;
-  }
-  /** @override **/
-  formatOffset() {
-    return "";
-  }
-  /** @override **/
-  offset() {
-    return NaN;
-  }
-  /** @override **/
-  equals() {
-    return false;
-  }
-  /** @override **/
-  get isValid() {
-    return false;
-  }
-}
-function normalizeZone(input, defaultZone2) {
-  if (isUndefined(input) || input === null) {
-    return defaultZone2;
-  } else if (input instanceof Zone) {
-    return input;
-  } else if (isString(input)) {
-    const lowered = input.toLowerCase();
-    if (lowered === "default") return defaultZone2;
-    else if (lowered === "local" || lowered === "system") return SystemZone.instance;
-    else if (lowered === "utc" || lowered === "gmt") return FixedOffsetZone.utcInstance;
-    else return FixedOffsetZone.parseSpecifier(lowered) || IANAZone.create(input);
-  } else if (isNumber(input)) {
-    return FixedOffsetZone.instance(input);
-  } else if (typeof input === "object" && "offset" in input && typeof input.offset === "function") {
-    return input;
-  } else {
-    return new InvalidZone(input);
-  }
-}
-const numberingSystems = {
-  arab: "[٠-٩]",
-  arabext: "[۰-۹]",
-  bali: "[᭐-᭙]",
-  beng: "[০-৯]",
-  deva: "[०-९]",
-  fullwide: "[０-９]",
-  gujr: "[૦-૯]",
-  hanidec: "[〇|一|二|三|四|五|六|七|八|九]",
-  khmr: "[០-៩]",
-  knda: "[೦-೯]",
-  laoo: "[໐-໙]",
-  limb: "[᥆-᥏]",
-  mlym: "[൦-൯]",
-  mong: "[᠐-᠙]",
-  mymr: "[၀-၉]",
-  orya: "[୦-୯]",
-  tamldec: "[௦-௯]",
-  telu: "[౦-౯]",
-  thai: "[๐-๙]",
-  tibt: "[༠-༩]",
-  latn: "\\d"
-};
-const numberingSystemsUTF16 = {
-  arab: [1632, 1641],
-  arabext: [1776, 1785],
-  bali: [6992, 7001],
-  beng: [2534, 2543],
-  deva: [2406, 2415],
-  fullwide: [65296, 65303],
-  gujr: [2790, 2799],
-  khmr: [6112, 6121],
-  knda: [3302, 3311],
-  laoo: [3792, 3801],
-  limb: [6470, 6479],
-  mlym: [3430, 3439],
-  mong: [6160, 6169],
-  mymr: [4160, 4169],
-  orya: [2918, 2927],
-  tamldec: [3046, 3055],
-  telu: [3174, 3183],
-  thai: [3664, 3673],
-  tibt: [3872, 3881]
-};
-const hanidecChars = numberingSystems.hanidec.replace(/[\[|\]]/g, "").split("");
-function parseDigits(str) {
-  let value = parseInt(str, 10);
-  if (isNaN(value)) {
-    value = "";
-    for (let i = 0; i < str.length; i++) {
-      const code = str.charCodeAt(i);
-      if (str[i].search(numberingSystems.hanidec) !== -1) {
-        value += hanidecChars.indexOf(str[i]);
-      } else {
-        for (const key in numberingSystemsUTF16) {
-          const [min, max] = numberingSystemsUTF16[key];
-          if (code >= min && code <= max) {
-            value += code - min;
-          }
-        }
-      }
-    }
-    return parseInt(value, 10);
-  } else {
-    return value;
-  }
-}
-let digitRegexCache = {};
-function resetDigitRegexCache() {
-  digitRegexCache = {};
-}
-function digitRegex({
-  numberingSystem
-}, append = "") {
-  const ns = numberingSystem || "latn";
-  if (!digitRegexCache[ns]) {
-    digitRegexCache[ns] = {};
-  }
-  if (!digitRegexCache[ns][append]) {
-    digitRegexCache[ns][append] = new RegExp(`${numberingSystems[ns]}${append}`);
-  }
-  return digitRegexCache[ns][append];
-}
-let now = () => Date.now(), defaultZone = "system", defaultLocale = null, defaultNumberingSystem = null, defaultOutputCalendar = null, twoDigitCutoffYear = 60, throwOnInvalid, defaultWeekSettings = null;
-class Settings {
-  /**
-   * Get the callback for returning the current timestamp.
-   * @type {function}
-   */
-  static get now() {
-    return now;
-  }
-  /**
-   * Set the callback for returning the current timestamp.
-   * The function should return a number, which will be interpreted as an Epoch millisecond count
-   * @type {function}
-   * @example Settings.now = () => Date.now() + 3000 // pretend it is 3 seconds in the future
-   * @example Settings.now = () => 0 // always pretend it's Jan 1, 1970 at midnight in UTC time
-   */
-  static set now(n2) {
-    now = n2;
-  }
-  /**
-   * Set the default time zone to create DateTimes in. Does not affect existing instances.
-   * Use the value "system" to reset this value to the system's time zone.
-   * @type {string}
-   */
-  static set defaultZone(zone) {
-    defaultZone = zone;
-  }
-  /**
-   * Get the default time zone object currently used to create DateTimes. Does not affect existing instances.
-   * The default value is the system's time zone (the one set on the machine that runs this code).
-   * @type {Zone}
-   */
-  static get defaultZone() {
-    return normalizeZone(defaultZone, SystemZone.instance);
-  }
-  /**
-   * Get the default locale to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static get defaultLocale() {
-    return defaultLocale;
-  }
-  /**
-   * Set the default locale to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static set defaultLocale(locale) {
-    defaultLocale = locale;
-  }
-  /**
-   * Get the default numbering system to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static get defaultNumberingSystem() {
-    return defaultNumberingSystem;
-  }
-  /**
-   * Set the default numbering system to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static set defaultNumberingSystem(numberingSystem) {
-    defaultNumberingSystem = numberingSystem;
-  }
-  /**
-   * Get the default output calendar to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static get defaultOutputCalendar() {
-    return defaultOutputCalendar;
-  }
-  /**
-   * Set the default output calendar to create DateTimes with. Does not affect existing instances.
-   * @type {string}
-   */
-  static set defaultOutputCalendar(outputCalendar) {
-    defaultOutputCalendar = outputCalendar;
-  }
-  /**
-   * @typedef {Object} WeekSettings
-   * @property {number} firstDay
-   * @property {number} minimalDays
-   * @property {number[]} weekend
-   */
-  /**
-   * @return {WeekSettings|null}
-   */
-  static get defaultWeekSettings() {
-    return defaultWeekSettings;
-  }
-  /**
-   * Allows overriding the default locale week settings, i.e. the start of the week, the weekend and
-   * how many days are required in the first week of a year.
-   * Does not affect existing instances.
-   *
-   * @param {WeekSettings|null} weekSettings
-   */
-  static set defaultWeekSettings(weekSettings) {
-    defaultWeekSettings = validateWeekSettings(weekSettings);
-  }
-  /**
-   * Get the cutoff year for whether a 2-digit year string is interpreted in the current or previous century. Numbers higher than the cutoff will be considered to mean 19xx and numbers lower or equal to the cutoff will be considered 20xx.
-   * @type {number}
-   */
-  static get twoDigitCutoffYear() {
-    return twoDigitCutoffYear;
-  }
-  /**
-   * Set the cutoff year for whether a 2-digit year string is interpreted in the current or previous century. Numbers higher than the cutoff will be considered to mean 19xx and numbers lower or equal to the cutoff will be considered 20xx.
-   * @type {number}
-   * @example Settings.twoDigitCutoffYear = 0 // all 'yy' are interpreted as 20th century
-   * @example Settings.twoDigitCutoffYear = 99 // all 'yy' are interpreted as 21st century
-   * @example Settings.twoDigitCutoffYear = 50 // '49' -> 2049; '50' -> 1950
-   * @example Settings.twoDigitCutoffYear = 1950 // interpreted as 50
-   * @example Settings.twoDigitCutoffYear = 2050 // ALSO interpreted as 50
-   */
-  static set twoDigitCutoffYear(cutoffYear) {
-    twoDigitCutoffYear = cutoffYear % 100;
-  }
-  /**
-   * Get whether Luxon will throw when it encounters invalid DateTimes, Durations, or Intervals
-   * @type {boolean}
-   */
-  static get throwOnInvalid() {
-    return throwOnInvalid;
-  }
-  /**
-   * Set whether Luxon will throw when it encounters invalid DateTimes, Durations, or Intervals
-   * @type {boolean}
-   */
-  static set throwOnInvalid(t) {
-    throwOnInvalid = t;
-  }
-  /**
-   * Reset Luxon's global caches. Should only be necessary in testing scenarios.
-   * @return {void}
-   */
-  static resetCaches() {
-    Locale.resetCache();
-    IANAZone.resetCache();
-    DateTime.resetCache();
-    resetDigitRegexCache();
-  }
-}
-class Invalid {
-  constructor(reason, explanation) {
-    this.reason = reason;
-    this.explanation = explanation;
-  }
-  toMessage() {
-    if (this.explanation) {
-      return `${this.reason}: ${this.explanation}`;
-    } else {
-      return this.reason;
-    }
-  }
-}
-const nonLeapLadder = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334], leapLadder = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
-function unitOutOfRange(unit, value) {
-  return new Invalid("unit out of range", `you specified ${value} (of type ${typeof value}) as a ${unit}, which is invalid`);
-}
-function dayOfWeek(year, month, day) {
-  const d = new Date(Date.UTC(year, month - 1, day));
-  if (year < 100 && year >= 0) {
-    d.setUTCFullYear(d.getUTCFullYear() - 1900);
-  }
-  const js = d.getUTCDay();
-  return js === 0 ? 7 : js;
-}
-function computeOrdinal(year, month, day) {
-  return day + (isLeapYear(year) ? leapLadder : nonLeapLadder)[month - 1];
-}
-function uncomputeOrdinal(year, ordinal) {
-  const table = isLeapYear(year) ? leapLadder : nonLeapLadder, month0 = table.findIndex((i) => i < ordinal), day = ordinal - table[month0];
-  return {
-    month: month0 + 1,
-    day
+import path$1 from "node:path";
+import require$$1 from "util";
+import stream, { Readable } from "stream";
+import require$$1$1 from "path";
+import require$$3 from "http";
+import require$$4 from "https";
+import require$$0$1 from "url";
+import require$$6 from "fs";
+import require$$4$1 from "assert";
+import require$$1$2 from "tty";
+import require$$0$2 from "os";
+import zlib from "zlib";
+import { EventEmitter } from "events";
+function bind(fn, thisArg) {
+  return function wrap2() {
+    return fn.apply(thisArg, arguments);
   };
 }
-function isoWeekdayToLocal(isoWeekday, startOfWeek) {
-  return (isoWeekday - startOfWeek + 7) % 7 + 1;
-}
-function gregorianToWeek(gregObj, minDaysInFirstWeek = 4, startOfWeek = 1) {
-  const {
-    year,
-    month,
-    day
-  } = gregObj, ordinal = computeOrdinal(year, month, day), weekday = isoWeekdayToLocal(dayOfWeek(year, month, day), startOfWeek);
-  let weekNumber = Math.floor((ordinal - weekday + 14 - minDaysInFirstWeek) / 7), weekYear;
-  if (weekNumber < 1) {
-    weekYear = year - 1;
-    weekNumber = weeksInWeekYear(weekYear, minDaysInFirstWeek, startOfWeek);
-  } else if (weekNumber > weeksInWeekYear(year, minDaysInFirstWeek, startOfWeek)) {
-    weekYear = year + 1;
-    weekNumber = 1;
-  } else {
-    weekYear = year;
-  }
-  return {
-    weekYear,
-    weekNumber,
-    weekday,
-    ...timeObject(gregObj)
-  };
-}
-function weekToGregorian(weekData, minDaysInFirstWeek = 4, startOfWeek = 1) {
-  const {
-    weekYear,
-    weekNumber,
-    weekday
-  } = weekData, weekdayOfJan4 = isoWeekdayToLocal(dayOfWeek(weekYear, 1, minDaysInFirstWeek), startOfWeek), yearInDays = daysInYear(weekYear);
-  let ordinal = weekNumber * 7 + weekday - weekdayOfJan4 - 7 + minDaysInFirstWeek, year;
-  if (ordinal < 1) {
-    year = weekYear - 1;
-    ordinal += daysInYear(year);
-  } else if (ordinal > yearInDays) {
-    year = weekYear + 1;
-    ordinal -= daysInYear(weekYear);
-  } else {
-    year = weekYear;
-  }
-  const {
-    month,
-    day
-  } = uncomputeOrdinal(year, ordinal);
-  return {
-    year,
-    month,
-    day,
-    ...timeObject(weekData)
-  };
-}
-function gregorianToOrdinal(gregData) {
-  const {
-    year,
-    month,
-    day
-  } = gregData;
-  const ordinal = computeOrdinal(year, month, day);
-  return {
-    year,
-    ordinal,
-    ...timeObject(gregData)
-  };
-}
-function ordinalToGregorian(ordinalData) {
-  const {
-    year,
-    ordinal
-  } = ordinalData;
-  const {
-    month,
-    day
-  } = uncomputeOrdinal(year, ordinal);
-  return {
-    year,
-    month,
-    day,
-    ...timeObject(ordinalData)
-  };
-}
-function usesLocalWeekValues(obj, loc) {
-  const hasLocaleWeekData = !isUndefined(obj.localWeekday) || !isUndefined(obj.localWeekNumber) || !isUndefined(obj.localWeekYear);
-  if (hasLocaleWeekData) {
-    const hasIsoWeekData = !isUndefined(obj.weekday) || !isUndefined(obj.weekNumber) || !isUndefined(obj.weekYear);
-    if (hasIsoWeekData) {
-      throw new ConflictingSpecificationError("Cannot mix locale-based week fields with ISO-based week fields");
-    }
-    if (!isUndefined(obj.localWeekday)) obj.weekday = obj.localWeekday;
-    if (!isUndefined(obj.localWeekNumber)) obj.weekNumber = obj.localWeekNumber;
-    if (!isUndefined(obj.localWeekYear)) obj.weekYear = obj.localWeekYear;
-    delete obj.localWeekday;
-    delete obj.localWeekNumber;
-    delete obj.localWeekYear;
-    return {
-      minDaysInFirstWeek: loc.getMinDaysInFirstWeek(),
-      startOfWeek: loc.getStartOfWeek()
-    };
-  } else {
-    return {
-      minDaysInFirstWeek: 4,
-      startOfWeek: 1
-    };
-  }
-}
-function hasInvalidWeekData(obj, minDaysInFirstWeek = 4, startOfWeek = 1) {
-  const validYear = isInteger(obj.weekYear), validWeek = integerBetween(obj.weekNumber, 1, weeksInWeekYear(obj.weekYear, minDaysInFirstWeek, startOfWeek)), validWeekday = integerBetween(obj.weekday, 1, 7);
-  if (!validYear) {
-    return unitOutOfRange("weekYear", obj.weekYear);
-  } else if (!validWeek) {
-    return unitOutOfRange("week", obj.weekNumber);
-  } else if (!validWeekday) {
-    return unitOutOfRange("weekday", obj.weekday);
-  } else return false;
-}
-function hasInvalidOrdinalData(obj) {
-  const validYear = isInteger(obj.year), validOrdinal = integerBetween(obj.ordinal, 1, daysInYear(obj.year));
-  if (!validYear) {
-    return unitOutOfRange("year", obj.year);
-  } else if (!validOrdinal) {
-    return unitOutOfRange("ordinal", obj.ordinal);
-  } else return false;
-}
-function hasInvalidGregorianData(obj) {
-  const validYear = isInteger(obj.year), validMonth = integerBetween(obj.month, 1, 12), validDay = integerBetween(obj.day, 1, daysInMonth(obj.year, obj.month));
-  if (!validYear) {
-    return unitOutOfRange("year", obj.year);
-  } else if (!validMonth) {
-    return unitOutOfRange("month", obj.month);
-  } else if (!validDay) {
-    return unitOutOfRange("day", obj.day);
-  } else return false;
-}
-function hasInvalidTimeData(obj) {
-  const {
-    hour,
-    minute,
-    second,
-    millisecond
-  } = obj;
-  const validHour = integerBetween(hour, 0, 23) || hour === 24 && minute === 0 && second === 0 && millisecond === 0, validMinute = integerBetween(minute, 0, 59), validSecond = integerBetween(second, 0, 59), validMillisecond = integerBetween(millisecond, 0, 999);
-  if (!validHour) {
-    return unitOutOfRange("hour", hour);
-  } else if (!validMinute) {
-    return unitOutOfRange("minute", minute);
-  } else if (!validSecond) {
-    return unitOutOfRange("second", second);
-  } else if (!validMillisecond) {
-    return unitOutOfRange("millisecond", millisecond);
-  } else return false;
-}
-function isUndefined(o) {
-  return typeof o === "undefined";
-}
-function isNumber(o) {
-  return typeof o === "number";
-}
-function isInteger(o) {
-  return typeof o === "number" && o % 1 === 0;
-}
-function isString(o) {
-  return typeof o === "string";
-}
-function isDate(o) {
-  return Object.prototype.toString.call(o) === "[object Date]";
-}
-function hasRelative() {
-  try {
-    return typeof Intl !== "undefined" && !!Intl.RelativeTimeFormat;
-  } catch (e) {
-    return false;
-  }
-}
-function hasLocaleWeekInfo() {
-  try {
-    return typeof Intl !== "undefined" && !!Intl.Locale && ("weekInfo" in Intl.Locale.prototype || "getWeekInfo" in Intl.Locale.prototype);
-  } catch (e) {
-    return false;
-  }
-}
-function maybeArray(thing) {
-  return Array.isArray(thing) ? thing : [thing];
-}
-function bestBy(arr, by, compare) {
-  if (arr.length === 0) {
-    return void 0;
-  }
-  return arr.reduce((best, next2) => {
-    const pair = [by(next2), next2];
-    if (!best) {
-      return pair;
-    } else if (compare(best[0], pair[0]) === best[0]) {
-      return best;
-    } else {
-      return pair;
-    }
-  }, null)[1];
-}
-function pick(obj, keys) {
-  return keys.reduce((a, k) => {
-    a[k] = obj[k];
-    return a;
-  }, {});
-}
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-function validateWeekSettings(settings) {
-  if (settings == null) {
-    return null;
-  } else if (typeof settings !== "object") {
-    throw new InvalidArgumentError("Week settings must be an object");
-  } else {
-    if (!integerBetween(settings.firstDay, 1, 7) || !integerBetween(settings.minimalDays, 1, 7) || !Array.isArray(settings.weekend) || settings.weekend.some((v) => !integerBetween(v, 1, 7))) {
-      throw new InvalidArgumentError("Invalid week settings");
-    }
-    return {
-      firstDay: settings.firstDay,
-      minimalDays: settings.minimalDays,
-      weekend: Array.from(settings.weekend)
-    };
-  }
-}
-function integerBetween(thing, bottom, top) {
-  return isInteger(thing) && thing >= bottom && thing <= top;
-}
-function floorMod(x, n2) {
-  return x - n2 * Math.floor(x / n2);
-}
-function padStart(input, n2 = 2) {
-  const isNeg = input < 0;
-  let padded;
-  if (isNeg) {
-    padded = "-" + ("" + -input).padStart(n2, "0");
-  } else {
-    padded = ("" + input).padStart(n2, "0");
-  }
-  return padded;
-}
-function parseInteger(string) {
-  if (isUndefined(string) || string === null || string === "") {
-    return void 0;
-  } else {
-    return parseInt(string, 10);
-  }
-}
-function parseFloating(string) {
-  if (isUndefined(string) || string === null || string === "") {
-    return void 0;
-  } else {
-    return parseFloat(string);
-  }
-}
-function parseMillis(fraction) {
-  if (isUndefined(fraction) || fraction === null || fraction === "") {
-    return void 0;
-  } else {
-    const f = parseFloat("0." + fraction) * 1e3;
-    return Math.floor(f);
-  }
-}
-function roundTo(number, digits, towardZero = false) {
-  const factor = 10 ** digits, rounder = towardZero ? Math.trunc : Math.round;
-  return rounder(number * factor) / factor;
-}
-function isLeapYear(year) {
-  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-}
-function daysInYear(year) {
-  return isLeapYear(year) ? 366 : 365;
-}
-function daysInMonth(year, month) {
-  const modMonth = floorMod(month - 1, 12) + 1, modYear = year + (month - modMonth) / 12;
-  if (modMonth === 2) {
-    return isLeapYear(modYear) ? 29 : 28;
-  } else {
-    return [31, null, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][modMonth - 1];
-  }
-}
-function objToLocalTS(obj) {
-  let d = Date.UTC(obj.year, obj.month - 1, obj.day, obj.hour, obj.minute, obj.second, obj.millisecond);
-  if (obj.year < 100 && obj.year >= 0) {
-    d = new Date(d);
-    d.setUTCFullYear(obj.year, obj.month - 1, obj.day);
-  }
-  return +d;
-}
-function firstWeekOffset(year, minDaysInFirstWeek, startOfWeek) {
-  const fwdlw = isoWeekdayToLocal(dayOfWeek(year, 1, minDaysInFirstWeek), startOfWeek);
-  return -fwdlw + minDaysInFirstWeek - 1;
-}
-function weeksInWeekYear(weekYear, minDaysInFirstWeek = 4, startOfWeek = 1) {
-  const weekOffset = firstWeekOffset(weekYear, minDaysInFirstWeek, startOfWeek);
-  const weekOffsetNext = firstWeekOffset(weekYear + 1, minDaysInFirstWeek, startOfWeek);
-  return (daysInYear(weekYear) - weekOffset + weekOffsetNext) / 7;
-}
-function untruncateYear(year) {
-  if (year > 99) {
-    return year;
-  } else return year > Settings.twoDigitCutoffYear ? 1900 + year : 2e3 + year;
-}
-function parseZoneInfo(ts, offsetFormat, locale, timeZone = null) {
-  const date2 = new Date(ts), intlOpts = {
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  };
-  if (timeZone) {
-    intlOpts.timeZone = timeZone;
-  }
-  const modified = {
-    timeZoneName: offsetFormat,
-    ...intlOpts
-  };
-  const parsed = new Intl.DateTimeFormat(locale, modified).formatToParts(date2).find((m) => m.type.toLowerCase() === "timezonename");
-  return parsed ? parsed.value : null;
-}
-function signedOffset(offHourStr, offMinuteStr) {
-  let offHour = parseInt(offHourStr, 10);
-  if (Number.isNaN(offHour)) {
-    offHour = 0;
-  }
-  const offMin = parseInt(offMinuteStr, 10) || 0, offMinSigned = offHour < 0 || Object.is(offHour, -0) ? -offMin : offMin;
-  return offHour * 60 + offMinSigned;
-}
-function asNumber(value) {
-  const numericValue = Number(value);
-  if (typeof value === "boolean" || value === "" || Number.isNaN(numericValue)) throw new InvalidArgumentError(`Invalid unit value ${value}`);
-  return numericValue;
-}
-function normalizeObject(obj, normalizer) {
-  const normalized = {};
-  for (const u in obj) {
-    if (hasOwnProperty(obj, u)) {
-      const v = obj[u];
-      if (v === void 0 || v === null) continue;
-      normalized[normalizer(u)] = asNumber(v);
-    }
-  }
-  return normalized;
-}
-function formatOffset(offset2, format) {
-  const hours = Math.trunc(Math.abs(offset2 / 60)), minutes = Math.trunc(Math.abs(offset2 % 60)), sign = offset2 >= 0 ? "+" : "-";
-  switch (format) {
-    case "short":
-      return `${sign}${padStart(hours, 2)}:${padStart(minutes, 2)}`;
-    case "narrow":
-      return `${sign}${hours}${minutes > 0 ? `:${minutes}` : ""}`;
-    case "techie":
-      return `${sign}${padStart(hours, 2)}${padStart(minutes, 2)}`;
-    default:
-      throw new RangeError(`Value format ${format} is out of range for property format`);
-  }
-}
-function timeObject(obj) {
-  return pick(obj, ["hour", "minute", "second", "millisecond"]);
-}
-const monthsLong = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const monthsNarrow = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-function months(length) {
-  switch (length) {
-    case "narrow":
-      return [...monthsNarrow];
-    case "short":
-      return [...monthsShort];
-    case "long":
-      return [...monthsLong];
-    case "numeric":
-      return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-    case "2-digit":
-      return ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-    default:
-      return null;
-  }
-}
-const weekdaysLong = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const weekdaysShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const weekdaysNarrow = ["M", "T", "W", "T", "F", "S", "S"];
-function weekdays(length) {
-  switch (length) {
-    case "narrow":
-      return [...weekdaysNarrow];
-    case "short":
-      return [...weekdaysShort];
-    case "long":
-      return [...weekdaysLong];
-    case "numeric":
-      return ["1", "2", "3", "4", "5", "6", "7"];
-    default:
-      return null;
-  }
-}
-const meridiems = ["AM", "PM"];
-const erasLong = ["Before Christ", "Anno Domini"];
-const erasShort = ["BC", "AD"];
-const erasNarrow = ["B", "A"];
-function eras(length) {
-  switch (length) {
-    case "narrow":
-      return [...erasNarrow];
-    case "short":
-      return [...erasShort];
-    case "long":
-      return [...erasLong];
-    default:
-      return null;
-  }
-}
-function meridiemForDateTime(dt) {
-  return meridiems[dt.hour < 12 ? 0 : 1];
-}
-function weekdayForDateTime(dt, length) {
-  return weekdays(length)[dt.weekday - 1];
-}
-function monthForDateTime(dt, length) {
-  return months(length)[dt.month - 1];
-}
-function eraForDateTime(dt, length) {
-  return eras(length)[dt.year < 0 ? 0 : 1];
-}
-function formatRelativeTime(unit, count, numeric = "always", narrow = false) {
-  const units = {
-    years: ["year", "yr."],
-    quarters: ["quarter", "qtr."],
-    months: ["month", "mo."],
-    weeks: ["week", "wk."],
-    days: ["day", "day", "days"],
-    hours: ["hour", "hr."],
-    minutes: ["minute", "min."],
-    seconds: ["second", "sec."]
-  };
-  const lastable = ["hours", "minutes", "seconds"].indexOf(unit) === -1;
-  if (numeric === "auto" && lastable) {
-    const isDay = unit === "days";
-    switch (count) {
-      case 1:
-        return isDay ? "tomorrow" : `next ${units[unit][0]}`;
-      case -1:
-        return isDay ? "yesterday" : `last ${units[unit][0]}`;
-      case 0:
-        return isDay ? "today" : `this ${units[unit][0]}`;
-    }
-  }
-  const isInPast = Object.is(count, -0) || count < 0, fmtValue = Math.abs(count), singular = fmtValue === 1, lilUnits = units[unit], fmtUnit = narrow ? singular ? lilUnits[1] : lilUnits[2] || lilUnits[1] : singular ? units[unit][0] : unit;
-  return isInPast ? `${fmtValue} ${fmtUnit} ago` : `in ${fmtValue} ${fmtUnit}`;
-}
-function stringifyTokens(splits, tokenToString) {
-  let s2 = "";
-  for (const token of splits) {
-    if (token.literal) {
-      s2 += token.val;
-    } else {
-      s2 += tokenToString(token.val);
-    }
-  }
-  return s2;
-}
-const macroTokenToFormatOpts = {
-  D: DATE_SHORT,
-  DD: DATE_MED,
-  DDD: DATE_FULL,
-  DDDD: DATE_HUGE,
-  t: TIME_SIMPLE,
-  tt: TIME_WITH_SECONDS,
-  ttt: TIME_WITH_SHORT_OFFSET,
-  tttt: TIME_WITH_LONG_OFFSET,
-  T: TIME_24_SIMPLE,
-  TT: TIME_24_WITH_SECONDS,
-  TTT: TIME_24_WITH_SHORT_OFFSET,
-  TTTT: TIME_24_WITH_LONG_OFFSET,
-  f: DATETIME_SHORT,
-  ff: DATETIME_MED,
-  fff: DATETIME_FULL,
-  ffff: DATETIME_HUGE,
-  F: DATETIME_SHORT_WITH_SECONDS,
-  FF: DATETIME_MED_WITH_SECONDS,
-  FFF: DATETIME_FULL_WITH_SECONDS,
-  FFFF: DATETIME_HUGE_WITH_SECONDS
+const { toString: toString$1 } = Object.prototype;
+const { getPrototypeOf } = Object;
+const kindOf = /* @__PURE__ */ ((cache) => (thing) => {
+  const str = toString$1.call(thing);
+  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
+})(/* @__PURE__ */ Object.create(null));
+const kindOfTest = (type) => {
+  type = type.toLowerCase();
+  return (thing) => kindOf(thing) === type;
 };
-class Formatter {
-  static create(locale, opts = {}) {
-    return new Formatter(locale, opts);
-  }
-  static parseFormat(fmt) {
-    let current = null, currentFull = "", bracketed = false;
-    const splits = [];
-    for (let i = 0; i < fmt.length; i++) {
-      const c = fmt.charAt(i);
-      if (c === "'") {
-        if (currentFull.length > 0) {
-          splits.push({
-            literal: bracketed || /^\s+$/.test(currentFull),
-            val: currentFull
-          });
-        }
-        current = null;
-        currentFull = "";
-        bracketed = !bracketed;
-      } else if (bracketed) {
-        currentFull += c;
-      } else if (c === current) {
-        currentFull += c;
-      } else {
-        if (currentFull.length > 0) {
-          splits.push({
-            literal: /^\s+$/.test(currentFull),
-            val: currentFull
-          });
-        }
-        currentFull = c;
-        current = c;
-      }
-    }
-    if (currentFull.length > 0) {
-      splits.push({
-        literal: bracketed || /^\s+$/.test(currentFull),
-        val: currentFull
-      });
-    }
-    return splits;
-  }
-  static macroTokenToFormatOpts(token) {
-    return macroTokenToFormatOpts[token];
-  }
-  constructor(locale, formatOpts) {
-    this.opts = formatOpts;
-    this.loc = locale;
-    this.systemLoc = null;
-  }
-  formatWithSystemDefault(dt, opts) {
-    if (this.systemLoc === null) {
-      this.systemLoc = this.loc.redefaultToSystem();
-    }
-    const df = this.systemLoc.dtFormatter(dt, {
-      ...this.opts,
-      ...opts
-    });
-    return df.format();
-  }
-  dtFormatter(dt, opts = {}) {
-    return this.loc.dtFormatter(dt, {
-      ...this.opts,
-      ...opts
-    });
-  }
-  formatDateTime(dt, opts) {
-    return this.dtFormatter(dt, opts).format();
-  }
-  formatDateTimeParts(dt, opts) {
-    return this.dtFormatter(dt, opts).formatToParts();
-  }
-  formatInterval(interval, opts) {
-    const df = this.dtFormatter(interval.start, opts);
-    return df.dtf.formatRange(interval.start.toJSDate(), interval.end.toJSDate());
-  }
-  resolvedOptions(dt, opts) {
-    return this.dtFormatter(dt, opts).resolvedOptions();
-  }
-  num(n2, p = 0) {
-    if (this.opts.forceSimple) {
-      return padStart(n2, p);
-    }
-    const opts = {
-      ...this.opts
-    };
-    if (p > 0) {
-      opts.padTo = p;
-    }
-    return this.loc.numberFormatter(opts).format(n2);
-  }
-  formatDateTimeFromString(dt, fmt) {
-    const knownEnglish = this.loc.listingMode() === "en", useDateTimeFormatter = this.loc.outputCalendar && this.loc.outputCalendar !== "gregory", string = (opts, extract) => this.loc.extract(dt, opts, extract), formatOffset2 = (opts) => {
-      if (dt.isOffsetFixed && dt.offset === 0 && opts.allowZ) {
-        return "Z";
-      }
-      return dt.isValid ? dt.zone.formatOffset(dt.ts, opts.format) : "";
-    }, meridiem = () => knownEnglish ? meridiemForDateTime(dt) : string({
-      hour: "numeric",
-      hourCycle: "h12"
-    }, "dayperiod"), month = (length, standalone) => knownEnglish ? monthForDateTime(dt, length) : string(standalone ? {
-      month: length
-    } : {
-      month: length,
-      day: "numeric"
-    }, "month"), weekday = (length, standalone) => knownEnglish ? weekdayForDateTime(dt, length) : string(standalone ? {
-      weekday: length
-    } : {
-      weekday: length,
-      month: "long",
-      day: "numeric"
-    }, "weekday"), maybeMacro = (token) => {
-      const formatOpts = Formatter.macroTokenToFormatOpts(token);
-      if (formatOpts) {
-        return this.formatWithSystemDefault(dt, formatOpts);
-      } else {
-        return token;
-      }
-    }, era = (length) => knownEnglish ? eraForDateTime(dt, length) : string({
-      era: length
-    }, "era"), tokenToString = (token) => {
-      switch (token) {
-        case "S":
-          return this.num(dt.millisecond);
-        case "u":
-        case "SSS":
-          return this.num(dt.millisecond, 3);
-        case "s":
-          return this.num(dt.second);
-        case "ss":
-          return this.num(dt.second, 2);
-        case "uu":
-          return this.num(Math.floor(dt.millisecond / 10), 2);
-        case "uuu":
-          return this.num(Math.floor(dt.millisecond / 100));
-        case "m":
-          return this.num(dt.minute);
-        case "mm":
-          return this.num(dt.minute, 2);
-        case "h":
-          return this.num(dt.hour % 12 === 0 ? 12 : dt.hour % 12);
-        case "hh":
-          return this.num(dt.hour % 12 === 0 ? 12 : dt.hour % 12, 2);
-        case "H":
-          return this.num(dt.hour);
-        case "HH":
-          return this.num(dt.hour, 2);
-        case "Z":
-          return formatOffset2({
-            format: "narrow",
-            allowZ: this.opts.allowZ
-          });
-        case "ZZ":
-          return formatOffset2({
-            format: "short",
-            allowZ: this.opts.allowZ
-          });
-        case "ZZZ":
-          return formatOffset2({
-            format: "techie",
-            allowZ: this.opts.allowZ
-          });
-        case "ZZZZ":
-          return dt.zone.offsetName(dt.ts, {
-            format: "short",
-            locale: this.loc.locale
-          });
-        case "ZZZZZ":
-          return dt.zone.offsetName(dt.ts, {
-            format: "long",
-            locale: this.loc.locale
-          });
-        case "z":
-          return dt.zoneName;
-        case "a":
-          return meridiem();
-        case "d":
-          return useDateTimeFormatter ? string({
-            day: "numeric"
-          }, "day") : this.num(dt.day);
-        case "dd":
-          return useDateTimeFormatter ? string({
-            day: "2-digit"
-          }, "day") : this.num(dt.day, 2);
-        case "c":
-          return this.num(dt.weekday);
-        case "ccc":
-          return weekday("short", true);
-        case "cccc":
-          return weekday("long", true);
-        case "ccccc":
-          return weekday("narrow", true);
-        case "E":
-          return this.num(dt.weekday);
-        case "EEE":
-          return weekday("short", false);
-        case "EEEE":
-          return weekday("long", false);
-        case "EEEEE":
-          return weekday("narrow", false);
-        case "L":
-          return useDateTimeFormatter ? string({
-            month: "numeric",
-            day: "numeric"
-          }, "month") : this.num(dt.month);
-        case "LL":
-          return useDateTimeFormatter ? string({
-            month: "2-digit",
-            day: "numeric"
-          }, "month") : this.num(dt.month, 2);
-        case "LLL":
-          return month("short", true);
-        case "LLLL":
-          return month("long", true);
-        case "LLLLL":
-          return month("narrow", true);
-        case "M":
-          return useDateTimeFormatter ? string({
-            month: "numeric"
-          }, "month") : this.num(dt.month);
-        case "MM":
-          return useDateTimeFormatter ? string({
-            month: "2-digit"
-          }, "month") : this.num(dt.month, 2);
-        case "MMM":
-          return month("short", false);
-        case "MMMM":
-          return month("long", false);
-        case "MMMMM":
-          return month("narrow", false);
-        case "y":
-          return useDateTimeFormatter ? string({
-            year: "numeric"
-          }, "year") : this.num(dt.year);
-        case "yy":
-          return useDateTimeFormatter ? string({
-            year: "2-digit"
-          }, "year") : this.num(dt.year.toString().slice(-2), 2);
-        case "yyyy":
-          return useDateTimeFormatter ? string({
-            year: "numeric"
-          }, "year") : this.num(dt.year, 4);
-        case "yyyyyy":
-          return useDateTimeFormatter ? string({
-            year: "numeric"
-          }, "year") : this.num(dt.year, 6);
-        case "G":
-          return era("short");
-        case "GG":
-          return era("long");
-        case "GGGGG":
-          return era("narrow");
-        case "kk":
-          return this.num(dt.weekYear.toString().slice(-2), 2);
-        case "kkkk":
-          return this.num(dt.weekYear, 4);
-        case "W":
-          return this.num(dt.weekNumber);
-        case "WW":
-          return this.num(dt.weekNumber, 2);
-        case "n":
-          return this.num(dt.localWeekNumber);
-        case "nn":
-          return this.num(dt.localWeekNumber, 2);
-        case "ii":
-          return this.num(dt.localWeekYear.toString().slice(-2), 2);
-        case "iiii":
-          return this.num(dt.localWeekYear, 4);
-        case "o":
-          return this.num(dt.ordinal);
-        case "ooo":
-          return this.num(dt.ordinal, 3);
-        case "q":
-          return this.num(dt.quarter);
-        case "qq":
-          return this.num(dt.quarter, 2);
-        case "X":
-          return this.num(Math.floor(dt.ts / 1e3));
-        case "x":
-          return this.num(dt.ts);
-        default:
-          return maybeMacro(token);
-      }
-    };
-    return stringifyTokens(Formatter.parseFormat(fmt), tokenToString);
-  }
-  formatDurationFromString(dur, fmt) {
-    const tokenToField = (token) => {
-      switch (token[0]) {
-        case "S":
-          return "millisecond";
-        case "s":
-          return "second";
-        case "m":
-          return "minute";
-        case "h":
-          return "hour";
-        case "d":
-          return "day";
-        case "w":
-          return "week";
-        case "M":
-          return "month";
-        case "y":
-          return "year";
-        default:
-          return null;
-      }
-    }, tokenToString = (lildur) => (token) => {
-      const mapped = tokenToField(token);
-      if (mapped) {
-        return this.num(lildur.get(mapped), token.length);
-      } else {
-        return token;
-      }
-    }, tokens = Formatter.parseFormat(fmt), realTokens = tokens.reduce((found, {
-      literal,
-      val
-    }) => literal ? found : found.concat(val), []), collapsed = dur.shiftTo(...realTokens.map(tokenToField).filter((t) => t));
-    return stringifyTokens(tokens, tokenToString(collapsed));
-  }
+const typeOfTest = (type) => (thing) => typeof thing === type;
+const { isArray } = Array;
+const isUndefined = typeOfTest("undefined");
+function isBuffer$1(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction$2(val.constructor.isBuffer) && val.constructor.isBuffer(val);
 }
-const ianaRegex = /[A-Za-z_+-]{1,256}(?::?\/[A-Za-z0-9_+-]{1,256}(?:\/[A-Za-z0-9_+-]{1,256})?)?/;
-function combineRegexes(...regexes) {
-  const full = regexes.reduce((f, r) => f + r.source, "");
-  return RegExp(`^${full}$`);
-}
-function combineExtractors(...extractors) {
-  return (m) => extractors.reduce(([mergedVals, mergedZone, cursor], ex) => {
-    const [val, zone, next2] = ex(m, cursor);
-    return [{
-      ...mergedVals,
-      ...val
-    }, zone || mergedZone, next2];
-  }, [{}, null, 1]).slice(0, 2);
-}
-function parse(s2, ...patterns) {
-  if (s2 == null) {
-    return [null, null];
-  }
-  for (const [regex, extractor] of patterns) {
-    const m = regex.exec(s2);
-    if (m) {
-      return extractor(m);
-    }
-  }
-  return [null, null];
-}
-function simpleParse(...keys) {
-  return (match2, cursor) => {
-    const ret = {};
-    let i;
-    for (i = 0; i < keys.length; i++) {
-      ret[keys[i]] = parseInteger(match2[cursor + i]);
-    }
-    return [ret, null, cursor + i];
-  };
-}
-const offsetRegex = /(?:(Z)|([+-]\d\d)(?::?(\d\d))?)/;
-const isoExtendedZone = `(?:${offsetRegex.source}?(?:\\[(${ianaRegex.source})\\])?)?`;
-const isoTimeBaseRegex = /(\d\d)(?::?(\d\d)(?::?(\d\d)(?:[.,](\d{1,30}))?)?)?/;
-const isoTimeRegex = RegExp(`${isoTimeBaseRegex.source}${isoExtendedZone}`);
-const isoTimeExtensionRegex = RegExp(`(?:T${isoTimeRegex.source})?`);
-const isoYmdRegex = /([+-]\d{6}|\d{4})(?:-?(\d\d)(?:-?(\d\d))?)?/;
-const isoWeekRegex = /(\d{4})-?W(\d\d)(?:-?(\d))?/;
-const isoOrdinalRegex = /(\d{4})-?(\d{3})/;
-const extractISOWeekData = simpleParse("weekYear", "weekNumber", "weekDay");
-const extractISOOrdinalData = simpleParse("year", "ordinal");
-const sqlYmdRegex = /(\d{4})-(\d\d)-(\d\d)/;
-const sqlTimeRegex = RegExp(`${isoTimeBaseRegex.source} ?(?:${offsetRegex.source}|(${ianaRegex.source}))?`);
-const sqlTimeExtensionRegex = RegExp(`(?: ${sqlTimeRegex.source})?`);
-function int(match2, pos, fallback) {
-  const m = match2[pos];
-  return isUndefined(m) ? fallback : parseInteger(m);
-}
-function extractISOYmd(match2, cursor) {
-  const item = {
-    year: int(match2, cursor),
-    month: int(match2, cursor + 1, 1),
-    day: int(match2, cursor + 2, 1)
-  };
-  return [item, null, cursor + 3];
-}
-function extractISOTime(match2, cursor) {
-  const item = {
-    hours: int(match2, cursor, 0),
-    minutes: int(match2, cursor + 1, 0),
-    seconds: int(match2, cursor + 2, 0),
-    milliseconds: parseMillis(match2[cursor + 3])
-  };
-  return [item, null, cursor + 4];
-}
-function extractISOOffset(match2, cursor) {
-  const local = !match2[cursor] && !match2[cursor + 1], fullOffset = signedOffset(match2[cursor + 1], match2[cursor + 2]), zone = local ? null : FixedOffsetZone.instance(fullOffset);
-  return [{}, zone, cursor + 3];
-}
-function extractIANAZone(match2, cursor) {
-  const zone = match2[cursor] ? IANAZone.create(match2[cursor]) : null;
-  return [{}, zone, cursor + 1];
-}
-const isoTimeOnly = RegExp(`^T?${isoTimeBaseRegex.source}$`);
-const isoDuration = /^-?P(?:(?:(-?\d{1,20}(?:\.\d{1,20})?)Y)?(?:(-?\d{1,20}(?:\.\d{1,20})?)M)?(?:(-?\d{1,20}(?:\.\d{1,20})?)W)?(?:(-?\d{1,20}(?:\.\d{1,20})?)D)?(?:T(?:(-?\d{1,20}(?:\.\d{1,20})?)H)?(?:(-?\d{1,20}(?:\.\d{1,20})?)M)?(?:(-?\d{1,20})(?:[.,](-?\d{1,20}))?S)?)?)$/;
-function extractISODuration(match2) {
-  const [s2, yearStr, monthStr, weekStr, dayStr, hourStr, minuteStr, secondStr, millisecondsStr] = match2;
-  const hasNegativePrefix = s2[0] === "-";
-  const negativeSeconds = secondStr && secondStr[0] === "-";
-  const maybeNegate = (num, force = false) => num !== void 0 && (force || num && hasNegativePrefix) ? -num : num;
-  return [{
-    years: maybeNegate(parseFloating(yearStr)),
-    months: maybeNegate(parseFloating(monthStr)),
-    weeks: maybeNegate(parseFloating(weekStr)),
-    days: maybeNegate(parseFloating(dayStr)),
-    hours: maybeNegate(parseFloating(hourStr)),
-    minutes: maybeNegate(parseFloating(minuteStr)),
-    seconds: maybeNegate(parseFloating(secondStr), secondStr === "-0"),
-    milliseconds: maybeNegate(parseMillis(millisecondsStr), negativeSeconds)
-  }];
-}
-const obsOffsets = {
-  GMT: 0,
-  EDT: -4 * 60,
-  EST: -5 * 60,
-  CDT: -5 * 60,
-  CST: -6 * 60,
-  MDT: -6 * 60,
-  MST: -7 * 60,
-  PDT: -7 * 60,
-  PST: -8 * 60
-};
-function fromStrings(weekdayStr, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr) {
-  const result = {
-    year: yearStr.length === 2 ? untruncateYear(parseInteger(yearStr)) : parseInteger(yearStr),
-    month: monthsShort.indexOf(monthStr) + 1,
-    day: parseInteger(dayStr),
-    hour: parseInteger(hourStr),
-    minute: parseInteger(minuteStr)
-  };
-  if (secondStr) result.second = parseInteger(secondStr);
-  if (weekdayStr) {
-    result.weekday = weekdayStr.length > 3 ? weekdaysLong.indexOf(weekdayStr) + 1 : weekdaysShort.indexOf(weekdayStr) + 1;
+const isArrayBuffer = kindOfTest("ArrayBuffer");
+function isArrayBufferView(val) {
+  let result;
+  if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = val && val.buffer && isArrayBuffer(val.buffer);
   }
   return result;
 }
-const rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|(?:([+-]\d\d)(\d\d)))$/;
-function extractRFC2822(match2) {
-  const [, weekdayStr, dayStr, monthStr, yearStr, hourStr, minuteStr, secondStr, obsOffset, milOffset, offHourStr, offMinuteStr] = match2, result = fromStrings(weekdayStr, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr);
-  let offset2;
-  if (obsOffset) {
-    offset2 = obsOffsets[obsOffset];
-  } else if (milOffset) {
-    offset2 = 0;
-  } else {
-    offset2 = signedOffset(offHourStr, offMinuteStr);
+const isString$1 = typeOfTest("string");
+const isFunction$2 = typeOfTest("function");
+const isNumber = typeOfTest("number");
+const isObject$1 = (thing) => thing !== null && typeof thing === "object";
+const isBoolean = (thing) => thing === true || thing === false;
+const isPlainObject$1 = (val) => {
+  if (kindOf(val) !== "object") {
+    return false;
   }
-  return [result, new FixedOffsetZone(offset2)];
-}
-function preprocessRFC2822(s2) {
-  return s2.replace(/\([^()]*\)|[\n\t]/g, " ").replace(/(\s\s+)/g, " ").trim();
-}
-const rfc1123 = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (\d\d) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) (\d\d):(\d\d):(\d\d) GMT$/, rfc850 = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), (\d\d)-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d\d) (\d\d):(\d\d):(\d\d) GMT$/, ascii = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ( \d|\d\d) (\d\d):(\d\d):(\d\d) (\d{4})$/;
-function extractRFC1123Or850(match2) {
-  const [, weekdayStr, dayStr, monthStr, yearStr, hourStr, minuteStr, secondStr] = match2, result = fromStrings(weekdayStr, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr);
-  return [result, FixedOffsetZone.utcInstance];
-}
-function extractASCII(match2) {
-  const [, weekdayStr, monthStr, dayStr, hourStr, minuteStr, secondStr, yearStr] = match2, result = fromStrings(weekdayStr, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr);
-  return [result, FixedOffsetZone.utcInstance];
-}
-const isoYmdWithTimeExtensionRegex = combineRegexes(isoYmdRegex, isoTimeExtensionRegex);
-const isoWeekWithTimeExtensionRegex = combineRegexes(isoWeekRegex, isoTimeExtensionRegex);
-const isoOrdinalWithTimeExtensionRegex = combineRegexes(isoOrdinalRegex, isoTimeExtensionRegex);
-const isoTimeCombinedRegex = combineRegexes(isoTimeRegex);
-const extractISOYmdTimeAndOffset = combineExtractors(extractISOYmd, extractISOTime, extractISOOffset, extractIANAZone);
-const extractISOWeekTimeAndOffset = combineExtractors(extractISOWeekData, extractISOTime, extractISOOffset, extractIANAZone);
-const extractISOOrdinalDateAndTime = combineExtractors(extractISOOrdinalData, extractISOTime, extractISOOffset, extractIANAZone);
-const extractISOTimeAndOffset = combineExtractors(extractISOTime, extractISOOffset, extractIANAZone);
-function parseISODate(s2) {
-  return parse(s2, [isoYmdWithTimeExtensionRegex, extractISOYmdTimeAndOffset], [isoWeekWithTimeExtensionRegex, extractISOWeekTimeAndOffset], [isoOrdinalWithTimeExtensionRegex, extractISOOrdinalDateAndTime], [isoTimeCombinedRegex, extractISOTimeAndOffset]);
-}
-function parseRFC2822Date(s2) {
-  return parse(preprocessRFC2822(s2), [rfc2822, extractRFC2822]);
-}
-function parseHTTPDate(s2) {
-  return parse(s2, [rfc1123, extractRFC1123Or850], [rfc850, extractRFC1123Or850], [ascii, extractASCII]);
-}
-function parseISODuration(s2) {
-  return parse(s2, [isoDuration, extractISODuration]);
-}
-const extractISOTimeOnly = combineExtractors(extractISOTime);
-function parseISOTimeOnly(s2) {
-  return parse(s2, [isoTimeOnly, extractISOTimeOnly]);
-}
-const sqlYmdWithTimeExtensionRegex = combineRegexes(sqlYmdRegex, sqlTimeExtensionRegex);
-const sqlTimeCombinedRegex = combineRegexes(sqlTimeRegex);
-const extractISOTimeOffsetAndIANAZone = combineExtractors(extractISOTime, extractISOOffset, extractIANAZone);
-function parseSQL(s2) {
-  return parse(s2, [sqlYmdWithTimeExtensionRegex, extractISOYmdTimeAndOffset], [sqlTimeCombinedRegex, extractISOTimeOffsetAndIANAZone]);
-}
-const INVALID$2 = "Invalid Duration";
-const lowOrderMatrix = {
-  weeks: {
-    days: 7,
-    hours: 7 * 24,
-    minutes: 7 * 24 * 60,
-    seconds: 7 * 24 * 60 * 60,
-    milliseconds: 7 * 24 * 60 * 60 * 1e3
-  },
-  days: {
-    hours: 24,
-    minutes: 24 * 60,
-    seconds: 24 * 60 * 60,
-    milliseconds: 24 * 60 * 60 * 1e3
-  },
-  hours: {
-    minutes: 60,
-    seconds: 60 * 60,
-    milliseconds: 60 * 60 * 1e3
-  },
-  minutes: {
-    seconds: 60,
-    milliseconds: 60 * 1e3
-  },
-  seconds: {
-    milliseconds: 1e3
-  }
-}, casualMatrix = {
-  years: {
-    quarters: 4,
-    months: 12,
-    weeks: 52,
-    days: 365,
-    hours: 365 * 24,
-    minutes: 365 * 24 * 60,
-    seconds: 365 * 24 * 60 * 60,
-    milliseconds: 365 * 24 * 60 * 60 * 1e3
-  },
-  quarters: {
-    months: 3,
-    weeks: 13,
-    days: 91,
-    hours: 91 * 24,
-    minutes: 91 * 24 * 60,
-    seconds: 91 * 24 * 60 * 60,
-    milliseconds: 91 * 24 * 60 * 60 * 1e3
-  },
-  months: {
-    weeks: 4,
-    days: 30,
-    hours: 30 * 24,
-    minutes: 30 * 24 * 60,
-    seconds: 30 * 24 * 60 * 60,
-    milliseconds: 30 * 24 * 60 * 60 * 1e3
-  },
-  ...lowOrderMatrix
-}, daysInYearAccurate = 146097 / 400, daysInMonthAccurate = 146097 / 4800, accurateMatrix = {
-  years: {
-    quarters: 4,
-    months: 12,
-    weeks: daysInYearAccurate / 7,
-    days: daysInYearAccurate,
-    hours: daysInYearAccurate * 24,
-    minutes: daysInYearAccurate * 24 * 60,
-    seconds: daysInYearAccurate * 24 * 60 * 60,
-    milliseconds: daysInYearAccurate * 24 * 60 * 60 * 1e3
-  },
-  quarters: {
-    months: 3,
-    weeks: daysInYearAccurate / 28,
-    days: daysInYearAccurate / 4,
-    hours: daysInYearAccurate * 24 / 4,
-    minutes: daysInYearAccurate * 24 * 60 / 4,
-    seconds: daysInYearAccurate * 24 * 60 * 60 / 4,
-    milliseconds: daysInYearAccurate * 24 * 60 * 60 * 1e3 / 4
-  },
-  months: {
-    weeks: daysInMonthAccurate / 7,
-    days: daysInMonthAccurate,
-    hours: daysInMonthAccurate * 24,
-    minutes: daysInMonthAccurate * 24 * 60,
-    seconds: daysInMonthAccurate * 24 * 60 * 60,
-    milliseconds: daysInMonthAccurate * 24 * 60 * 60 * 1e3
-  },
-  ...lowOrderMatrix
+  const prototype2 = getPrototypeOf(val);
+  return (prototype2 === null || prototype2 === Object.prototype || Object.getPrototypeOf(prototype2) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
 };
-const orderedUnits$1 = ["years", "quarters", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds"];
-const reverseUnits = orderedUnits$1.slice(0).reverse();
-function clone$1(dur, alts, clear = false) {
-  const conf = {
-    values: clear ? alts.values : {
-      ...dur.values,
-      ...alts.values || {}
-    },
-    loc: dur.loc.clone(alts.loc),
-    conversionAccuracy: alts.conversionAccuracy || dur.conversionAccuracy,
-    matrix: alts.matrix || dur.matrix
+const isDate = kindOfTest("Date");
+const isFile = kindOfTest("File");
+const isBlob = kindOfTest("Blob");
+const isFileList = kindOfTest("FileList");
+const isStream = (val) => isObject$1(val) && isFunction$2(val.pipe);
+const isFormData = (thing) => {
+  let kind;
+  return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction$2(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
+  kind === "object" && isFunction$2(thing.toString) && thing.toString() === "[object FormData]"));
+};
+const isURLSearchParams = kindOfTest("URLSearchParams");
+const [isReadableStream, isRequest, isResponse, isHeaders] = ["ReadableStream", "Request", "Response", "Headers"].map(kindOfTest);
+const trim = (str) => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
+function forEach(obj, fn, { allOwnKeys = false } = {}) {
+  if (obj === null || typeof obj === "undefined") {
+    return;
+  }
+  let i;
+  let l;
+  if (typeof obj !== "object") {
+    obj = [obj];
+  }
+  if (isArray(obj)) {
+    for (i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
+    const len = keys.length;
+    let key;
+    for (i = 0; i < len; i++) {
+      key = keys[i];
+      fn.call(null, obj[key], key, obj);
+    }
+  }
+}
+function findKey(obj, key) {
+  key = key.toLowerCase();
+  const keys = Object.keys(obj);
+  let i = keys.length;
+  let _key;
+  while (i-- > 0) {
+    _key = keys[i];
+    if (key === _key.toLowerCase()) {
+      return _key;
+    }
+  }
+  return null;
+}
+const _global = (() => {
+  if (typeof globalThis !== "undefined") return globalThis;
+  return typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : global;
+})();
+const isContextDefined = (context) => !isUndefined(context) && context !== _global;
+function merge() {
+  const { caseless } = isContextDefined(this) && this || {};
+  const result = {};
+  const assignValue = (val, key) => {
+    const targetKey = caseless && findKey(result, key) || key;
+    if (isPlainObject$1(result[targetKey]) && isPlainObject$1(val)) {
+      result[targetKey] = merge(result[targetKey], val);
+    } else if (isPlainObject$1(val)) {
+      result[targetKey] = merge({}, val);
+    } else if (isArray(val)) {
+      result[targetKey] = val.slice();
+    } else {
+      result[targetKey] = val;
+    }
   };
-  return new Duration(conf);
-}
-function durationToMillis(matrix, vals) {
-  var _vals$milliseconds;
-  let sum = (_vals$milliseconds = vals.milliseconds) != null ? _vals$milliseconds : 0;
-  for (const unit of reverseUnits.slice(1)) {
-    if (vals[unit]) {
-      sum += vals[unit] * matrix[unit]["milliseconds"];
-    }
+  for (let i = 0, l = arguments.length; i < l; i++) {
+    arguments[i] && forEach(arguments[i], assignValue);
   }
-  return sum;
+  return result;
 }
-function normalizeValues(matrix, vals) {
-  const factor = durationToMillis(matrix, vals) < 0 ? -1 : 1;
-  orderedUnits$1.reduceRight((previous, current) => {
-    if (!isUndefined(vals[current])) {
-      if (previous) {
-        const previousVal = vals[previous] * factor;
-        const conv = matrix[current][previous];
-        const rollUp = Math.floor(previousVal / conv);
-        vals[current] += rollUp * factor;
-        vals[previous] -= rollUp * conv * factor;
-      }
-      return current;
+const extend = (a, b, thisArg, { allOwnKeys } = {}) => {
+  forEach(b, (val, key) => {
+    if (thisArg && isFunction$2(val)) {
+      a[key] = bind(val, thisArg);
     } else {
-      return previous;
+      a[key] = val;
     }
-  }, null);
-  orderedUnits$1.reduce((previous, current) => {
-    if (!isUndefined(vals[current])) {
-      if (previous) {
-        const fraction = vals[previous] % 1;
-        vals[previous] -= fraction;
-        vals[current] += fraction * matrix[previous][current];
+  }, { allOwnKeys });
+  return a;
+};
+const stripBOM = (content) => {
+  if (content.charCodeAt(0) === 65279) {
+    content = content.slice(1);
+  }
+  return content;
+};
+const inherits = (constructor, superConstructor, props, descriptors2) => {
+  constructor.prototype = Object.create(superConstructor.prototype, descriptors2);
+  constructor.prototype.constructor = constructor;
+  Object.defineProperty(constructor, "super", {
+    value: superConstructor.prototype
+  });
+  props && Object.assign(constructor.prototype, props);
+};
+const toFlatObject = (sourceObj, destObj, filter2, propFilter) => {
+  let props;
+  let i;
+  let prop;
+  const merged = {};
+  destObj = destObj || {};
+  if (sourceObj == null) return destObj;
+  do {
+    props = Object.getOwnPropertyNames(sourceObj);
+    i = props.length;
+    while (i-- > 0) {
+      prop = props[i];
+      if ((!propFilter || propFilter(prop, sourceObj, destObj)) && !merged[prop]) {
+        destObj[prop] = sourceObj[prop];
+        merged[prop] = true;
       }
-      return current;
-    } else {
-      return previous;
     }
-  }, null);
+    sourceObj = filter2 !== false && getPrototypeOf(sourceObj);
+  } while (sourceObj && (!filter2 || filter2(sourceObj, destObj)) && sourceObj !== Object.prototype);
+  return destObj;
+};
+const endsWith = (str, searchString, position) => {
+  str = String(str);
+  if (position === void 0 || position > str.length) {
+    position = str.length;
+  }
+  position -= searchString.length;
+  const lastIndex = str.indexOf(searchString, position);
+  return lastIndex !== -1 && lastIndex === position;
+};
+const toArray = (thing) => {
+  if (!thing) return null;
+  if (isArray(thing)) return thing;
+  let i = thing.length;
+  if (!isNumber(i)) return null;
+  const arr = new Array(i);
+  while (i-- > 0) {
+    arr[i] = thing[i];
+  }
+  return arr;
+};
+const isTypedArray = /* @__PURE__ */ ((TypedArray) => {
+  return (thing) => {
+    return TypedArray && thing instanceof TypedArray;
+  };
+})(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
+const forEachEntry = (obj, fn) => {
+  const generator = obj && obj[Symbol.iterator];
+  const iterator = generator.call(obj);
+  let result;
+  while ((result = iterator.next()) && !result.done) {
+    const pair = result.value;
+    fn.call(obj, pair[0], pair[1]);
+  }
+};
+const matchAll = (regExp, str) => {
+  let matches;
+  const arr = [];
+  while ((matches = regExp.exec(str)) !== null) {
+    arr.push(matches);
+  }
+  return arr;
+};
+const isHTMLForm = kindOfTest("HTMLFormElement");
+const toCamelCase = (str) => {
+  return str.toLowerCase().replace(
+    /[-_\s]([a-z\d])(\w*)/g,
+    function replacer(m, p1, p2) {
+      return p1.toUpperCase() + p2;
+    }
+  );
+};
+const hasOwnProperty = (({ hasOwnProperty: hasOwnProperty2 }) => (obj, prop) => hasOwnProperty2.call(obj, prop))(Object.prototype);
+const isRegExp = kindOfTest("RegExp");
+const reduceDescriptors = (obj, reducer) => {
+  const descriptors2 = Object.getOwnPropertyDescriptors(obj);
+  const reducedDescriptors = {};
+  forEach(descriptors2, (descriptor, name) => {
+    let ret;
+    if ((ret = reducer(descriptor, name, obj)) !== false) {
+      reducedDescriptors[name] = ret || descriptor;
+    }
+  });
+  Object.defineProperties(obj, reducedDescriptors);
+};
+const freezeMethods = (obj) => {
+  reduceDescriptors(obj, (descriptor, name) => {
+    if (isFunction$2(obj) && ["arguments", "caller", "callee"].indexOf(name) !== -1) {
+      return false;
+    }
+    const value = obj[name];
+    if (!isFunction$2(value)) return;
+    descriptor.enumerable = false;
+    if ("writable" in descriptor) {
+      descriptor.writable = false;
+      return;
+    }
+    if (!descriptor.set) {
+      descriptor.set = () => {
+        throw Error("Can not rewrite read-only method '" + name + "'");
+      };
+    }
+  });
+};
+const toObjectSet = (arrayOrString, delimiter) => {
+  const obj = {};
+  const define = (arr) => {
+    arr.forEach((value) => {
+      obj[value] = true;
+    });
+  };
+  isArray(arrayOrString) ? define(arrayOrString) : define(String(arrayOrString).split(delimiter));
+  return obj;
+};
+const noop$2 = () => {
+};
+const toFiniteNumber = (value, defaultValue) => {
+  return value != null && Number.isFinite(value = +value) ? value : defaultValue;
+};
+const ALPHA = "abcdefghijklmnopqrstuvwxyz";
+const DIGIT = "0123456789";
+const ALPHABET = {
+  DIGIT,
+  ALPHA,
+  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+};
+const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+  let str = "";
+  const { length } = alphabet;
+  while (size--) {
+    str += alphabet[Math.random() * length | 0];
+  }
+  return str;
+};
+function isSpecCompliantForm(thing) {
+  return !!(thing && isFunction$2(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
 }
-function removeZeroes(vals) {
-  const newVals = {};
-  for (const [key, value] of Object.entries(vals)) {
-    if (value !== 0) {
-      newVals[key] = value;
+const toJSONObject = (obj) => {
+  const stack = new Array(10);
+  const visit = (source, i) => {
+    if (isObject$1(source)) {
+      if (stack.indexOf(source) >= 0) {
+        return;
+      }
+      if (!("toJSON" in source)) {
+        stack[i] = source;
+        const target = isArray(source) ? [] : {};
+        forEach(source, (value, key) => {
+          const reducedValue = visit(value, i + 1);
+          !isUndefined(reducedValue) && (target[key] = reducedValue);
+        });
+        stack[i] = void 0;
+        return target;
+      }
     }
+    return source;
+  };
+  return visit(obj, 0);
+};
+const isAsyncFn = kindOfTest("AsyncFunction");
+const isThenable = (thing) => thing && (isObject$1(thing) || isFunction$2(thing)) && isFunction$2(thing.then) && isFunction$2(thing.catch);
+const _setImmediate = ((setImmediateSupported, postMessageSupported) => {
+  if (setImmediateSupported) {
+    return setImmediate;
   }
-  return newVals;
+  return postMessageSupported ? ((token, callbacks) => {
+    _global.addEventListener("message", ({ source, data }) => {
+      if (source === _global && data === token) {
+        callbacks.length && callbacks.shift()();
+      }
+    }, false);
+    return (cb) => {
+      callbacks.push(cb);
+      _global.postMessage(token, "*");
+    };
+  })(`axios@${Math.random()}`, []) : (cb) => setTimeout(cb);
+})(
+  typeof setImmediate === "function",
+  isFunction$2(_global.postMessage)
+);
+const asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
+const utils$1 = {
+  isArray,
+  isArrayBuffer,
+  isBuffer: isBuffer$1,
+  isFormData,
+  isArrayBufferView,
+  isString: isString$1,
+  isNumber,
+  isBoolean,
+  isObject: isObject$1,
+  isPlainObject: isPlainObject$1,
+  isReadableStream,
+  isRequest,
+  isResponse,
+  isHeaders,
+  isUndefined,
+  isDate,
+  isFile,
+  isBlob,
+  isRegExp,
+  isFunction: isFunction$2,
+  isStream,
+  isURLSearchParams,
+  isTypedArray,
+  isFileList,
+  forEach,
+  merge,
+  extend,
+  trim,
+  stripBOM,
+  inherits,
+  toFlatObject,
+  kindOf,
+  kindOfTest,
+  endsWith,
+  toArray,
+  forEachEntry,
+  matchAll,
+  isHTMLForm,
+  hasOwnProperty,
+  hasOwnProp: hasOwnProperty,
+  // an alias to avoid ESLint no-prototype-builtins detection
+  reduceDescriptors,
+  freezeMethods,
+  toObjectSet,
+  toCamelCase,
+  noop: noop$2,
+  toFiniteNumber,
+  findKey,
+  global: _global,
+  isContextDefined,
+  ALPHABET,
+  generateString,
+  isSpecCompliantForm,
+  toJSONObject,
+  isAsyncFn,
+  isThenable,
+  setImmediate: _setImmediate,
+  asap
+};
+function AxiosError(message, code, config, request, response) {
+  Error.call(this);
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, this.constructor);
+  } else {
+    this.stack = new Error().stack;
+  }
+  this.message = message;
+  this.name = "AxiosError";
+  code && (this.code = code);
+  config && (this.config = config);
+  request && (this.request = request);
+  if (response) {
+    this.response = response;
+    this.status = response.status ? response.status : null;
+  }
 }
-class Duration {
-  /**
-   * @private
-   */
-  constructor(config) {
-    const accurate = config.conversionAccuracy === "longterm" || false;
-    let matrix = accurate ? accurateMatrix : casualMatrix;
-    if (config.matrix) {
-      matrix = config.matrix;
-    }
-    this.values = config.values;
-    this.loc = config.loc || Locale.create();
-    this.conversionAccuracy = accurate ? "longterm" : "casual";
-    this.invalid = config.invalid || null;
-    this.matrix = matrix;
-    this.isLuxonDuration = true;
+utils$1.inherits(AxiosError, Error, {
+  toJSON: function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: utils$1.toJSONObject(this.config),
+      code: this.code,
+      status: this.status
+    };
   }
-  /**
-   * Create Duration from a number of milliseconds.
-   * @param {number} count of milliseconds
-   * @param {Object} opts - options for parsing
-   * @param {string} [opts.locale='en-US'] - the locale to use
-   * @param {string} opts.numberingSystem - the numbering system to use
-   * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-   * @return {Duration}
-   */
-  static fromMillis(count, opts) {
-    return Duration.fromObject({
-      milliseconds: count
-    }, opts);
+});
+const prototype$1 = AxiosError.prototype;
+const descriptors = {};
+[
+  "ERR_BAD_OPTION_VALUE",
+  "ERR_BAD_OPTION",
+  "ECONNABORTED",
+  "ETIMEDOUT",
+  "ERR_NETWORK",
+  "ERR_FR_TOO_MANY_REDIRECTS",
+  "ERR_DEPRECATED",
+  "ERR_BAD_RESPONSE",
+  "ERR_BAD_REQUEST",
+  "ERR_CANCELED",
+  "ERR_NOT_SUPPORT",
+  "ERR_INVALID_URL"
+  // eslint-disable-next-line func-names
+].forEach((code) => {
+  descriptors[code] = { value: code };
+});
+Object.defineProperties(AxiosError, descriptors);
+Object.defineProperty(prototype$1, "isAxiosError", { value: true });
+AxiosError.from = (error, code, config, request, response, customProps) => {
+  const axiosError = Object.create(prototype$1);
+  utils$1.toFlatObject(error, axiosError, function filter2(obj) {
+    return obj !== Error.prototype;
+  }, (prop) => {
+    return prop !== "isAxiosError";
+  });
+  AxiosError.call(axiosError, error.message, code, config, request, response);
+  axiosError.cause = error;
+  axiosError.name = error.name;
+  customProps && Object.assign(axiosError, customProps);
+  return axiosError;
+};
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+var Stream$2 = stream.Stream;
+var util$2 = require$$1;
+var delayed_stream = DelayedStream$1;
+function DelayedStream$1() {
+  this.source = null;
+  this.dataSize = 0;
+  this.maxDataSize = 1024 * 1024;
+  this.pauseStream = true;
+  this._maxDataSizeExceeded = false;
+  this._released = false;
+  this._bufferedEvents = [];
+}
+util$2.inherits(DelayedStream$1, Stream$2);
+DelayedStream$1.create = function(source, options) {
+  var delayedStream = new this();
+  options = options || {};
+  for (var option in options) {
+    delayedStream[option] = options[option];
   }
-  /**
-   * Create a Duration from a JavaScript object with keys like 'years' and 'hours'.
-   * If this object is empty then a zero milliseconds duration is returned.
-   * @param {Object} obj - the object to create the DateTime from
-   * @param {number} obj.years
-   * @param {number} obj.quarters
-   * @param {number} obj.months
-   * @param {number} obj.weeks
-   * @param {number} obj.days
-   * @param {number} obj.hours
-   * @param {number} obj.minutes
-   * @param {number} obj.seconds
-   * @param {number} obj.milliseconds
-   * @param {Object} [opts=[]] - options for creating this Duration
-   * @param {string} [opts.locale='en-US'] - the locale to use
-   * @param {string} opts.numberingSystem - the numbering system to use
-   * @param {string} [opts.conversionAccuracy='casual'] - the preset conversion system to use
-   * @param {string} [opts.matrix=Object] - the custom conversion system to use
-   * @return {Duration}
-   */
-  static fromObject(obj, opts = {}) {
-    if (obj == null || typeof obj !== "object") {
-      throw new InvalidArgumentError(`Duration.fromObject: argument expected to be an object, got ${obj === null ? "null" : typeof obj}`);
+  delayedStream.source = source;
+  var realEmit = source.emit;
+  source.emit = function() {
+    delayedStream._handleEmit(arguments);
+    return realEmit.apply(source, arguments);
+  };
+  source.on("error", function() {
+  });
+  if (delayedStream.pauseStream) {
+    source.pause();
+  }
+  return delayedStream;
+};
+Object.defineProperty(DelayedStream$1.prototype, "readable", {
+  configurable: true,
+  enumerable: true,
+  get: function() {
+    return this.source.readable;
+  }
+});
+DelayedStream$1.prototype.setEncoding = function() {
+  return this.source.setEncoding.apply(this.source, arguments);
+};
+DelayedStream$1.prototype.resume = function() {
+  if (!this._released) {
+    this.release();
+  }
+  this.source.resume();
+};
+DelayedStream$1.prototype.pause = function() {
+  this.source.pause();
+};
+DelayedStream$1.prototype.release = function() {
+  this._released = true;
+  this._bufferedEvents.forEach((function(args) {
+    this.emit.apply(this, args);
+  }).bind(this));
+  this._bufferedEvents = [];
+};
+DelayedStream$1.prototype.pipe = function() {
+  var r = Stream$2.prototype.pipe.apply(this, arguments);
+  this.resume();
+  return r;
+};
+DelayedStream$1.prototype._handleEmit = function(args) {
+  if (this._released) {
+    this.emit.apply(this, args);
+    return;
+  }
+  if (args[0] === "data") {
+    this.dataSize += args[1].length;
+    this._checkIfMaxDataSizeExceeded();
+  }
+  this._bufferedEvents.push(args);
+};
+DelayedStream$1.prototype._checkIfMaxDataSizeExceeded = function() {
+  if (this._maxDataSizeExceeded) {
+    return;
+  }
+  if (this.dataSize <= this.maxDataSize) {
+    return;
+  }
+  this._maxDataSizeExceeded = true;
+  var message = "DelayedStream#maxDataSize of " + this.maxDataSize + " bytes exceeded.";
+  this.emit("error", new Error(message));
+};
+var util$1 = require$$1;
+var Stream$1 = stream.Stream;
+var DelayedStream = delayed_stream;
+var combined_stream = CombinedStream$1;
+function CombinedStream$1() {
+  this.writable = false;
+  this.readable = true;
+  this.dataSize = 0;
+  this.maxDataSize = 2 * 1024 * 1024;
+  this.pauseStreams = true;
+  this._released = false;
+  this._streams = [];
+  this._currentStream = null;
+  this._insideLoop = false;
+  this._pendingNext = false;
+}
+util$1.inherits(CombinedStream$1, Stream$1);
+CombinedStream$1.create = function(options) {
+  var combinedStream = new this();
+  options = options || {};
+  for (var option in options) {
+    combinedStream[option] = options[option];
+  }
+  return combinedStream;
+};
+CombinedStream$1.isStreamLike = function(stream2) {
+  return typeof stream2 !== "function" && typeof stream2 !== "string" && typeof stream2 !== "boolean" && typeof stream2 !== "number" && !Buffer.isBuffer(stream2);
+};
+CombinedStream$1.prototype.append = function(stream2) {
+  var isStreamLike = CombinedStream$1.isStreamLike(stream2);
+  if (isStreamLike) {
+    if (!(stream2 instanceof DelayedStream)) {
+      var newStream = DelayedStream.create(stream2, {
+        maxDataSize: Infinity,
+        pauseStream: this.pauseStreams
+      });
+      stream2.on("data", this._checkDataSize.bind(this));
+      stream2 = newStream;
     }
-    return new Duration({
-      values: normalizeObject(obj, Duration.normalizeUnit),
-      loc: Locale.fromObject(opts),
-      conversionAccuracy: opts.conversionAccuracy,
-      matrix: opts.matrix
+    this._handleErrors(stream2);
+    if (this.pauseStreams) {
+      stream2.pause();
+    }
+  }
+  this._streams.push(stream2);
+  return this;
+};
+CombinedStream$1.prototype.pipe = function(dest, options) {
+  Stream$1.prototype.pipe.call(this, dest, options);
+  this.resume();
+  return dest;
+};
+CombinedStream$1.prototype._getNext = function() {
+  this._currentStream = null;
+  if (this._insideLoop) {
+    this._pendingNext = true;
+    return;
+  }
+  this._insideLoop = true;
+  try {
+    do {
+      this._pendingNext = false;
+      this._realGetNext();
+    } while (this._pendingNext);
+  } finally {
+    this._insideLoop = false;
+  }
+};
+CombinedStream$1.prototype._realGetNext = function() {
+  var stream2 = this._streams.shift();
+  if (typeof stream2 == "undefined") {
+    this.end();
+    return;
+  }
+  if (typeof stream2 !== "function") {
+    this._pipeNext(stream2);
+    return;
+  }
+  var getStream = stream2;
+  getStream((function(stream3) {
+    var isStreamLike = CombinedStream$1.isStreamLike(stream3);
+    if (isStreamLike) {
+      stream3.on("data", this._checkDataSize.bind(this));
+      this._handleErrors(stream3);
+    }
+    this._pipeNext(stream3);
+  }).bind(this));
+};
+CombinedStream$1.prototype._pipeNext = function(stream2) {
+  this._currentStream = stream2;
+  var isStreamLike = CombinedStream$1.isStreamLike(stream2);
+  if (isStreamLike) {
+    stream2.on("end", this._getNext.bind(this));
+    stream2.pipe(this, { end: false });
+    return;
+  }
+  var value = stream2;
+  this.write(value);
+  this._getNext();
+};
+CombinedStream$1.prototype._handleErrors = function(stream2) {
+  var self2 = this;
+  stream2.on("error", function(err) {
+    self2._emitError(err);
+  });
+};
+CombinedStream$1.prototype.write = function(data) {
+  this.emit("data", data);
+};
+CombinedStream$1.prototype.pause = function() {
+  if (!this.pauseStreams) {
+    return;
+  }
+  if (this.pauseStreams && this._currentStream && typeof this._currentStream.pause == "function") this._currentStream.pause();
+  this.emit("pause");
+};
+CombinedStream$1.prototype.resume = function() {
+  if (!this._released) {
+    this._released = true;
+    this.writable = true;
+    this._getNext();
+  }
+  if (this.pauseStreams && this._currentStream && typeof this._currentStream.resume == "function") this._currentStream.resume();
+  this.emit("resume");
+};
+CombinedStream$1.prototype.end = function() {
+  this._reset();
+  this.emit("end");
+};
+CombinedStream$1.prototype.destroy = function() {
+  this._reset();
+  this.emit("close");
+};
+CombinedStream$1.prototype._reset = function() {
+  this.writable = false;
+  this._streams = [];
+  this._currentStream = null;
+};
+CombinedStream$1.prototype._checkDataSize = function() {
+  this._updateDataSize();
+  if (this.dataSize <= this.maxDataSize) {
+    return;
+  }
+  var message = "DelayedStream#maxDataSize of " + this.maxDataSize + " bytes exceeded.";
+  this._emitError(new Error(message));
+};
+CombinedStream$1.prototype._updateDataSize = function() {
+  this.dataSize = 0;
+  var self2 = this;
+  this._streams.forEach(function(stream2) {
+    if (!stream2.dataSize) {
+      return;
+    }
+    self2.dataSize += stream2.dataSize;
+  });
+  if (this._currentStream && this._currentStream.dataSize) {
+    this.dataSize += this._currentStream.dataSize;
+  }
+};
+CombinedStream$1.prototype._emitError = function(err) {
+  this._reset();
+  this.emit("error", err);
+};
+var mimeTypes = {};
+const require$$0 = {
+  "application/1d-interleaved-parityfec": {
+    source: "iana"
+  },
+  "application/3gpdash-qoe-report+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/3gpp-ims+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/3gpphal+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/3gpphalforms+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/a2l": {
+    source: "iana"
+  },
+  "application/ace+cbor": {
+    source: "iana"
+  },
+  "application/activemessage": {
+    source: "iana"
+  },
+  "application/activity+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-costmap+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-costmapfilter+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-directory+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-endpointcost+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-endpointcostparams+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-endpointprop+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-endpointpropparams+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-error+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-networkmap+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-networkmapfilter+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-updatestreamcontrol+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/alto-updatestreamparams+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/aml": {
+    source: "iana"
+  },
+  "application/andrew-inset": {
+    source: "iana",
+    extensions: [
+      "ez"
+    ]
+  },
+  "application/applefile": {
+    source: "iana"
+  },
+  "application/applixware": {
+    source: "apache",
+    extensions: [
+      "aw"
+    ]
+  },
+  "application/at+jwt": {
+    source: "iana"
+  },
+  "application/atf": {
+    source: "iana"
+  },
+  "application/atfx": {
+    source: "iana"
+  },
+  "application/atom+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "atom"
+    ]
+  },
+  "application/atomcat+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "atomcat"
+    ]
+  },
+  "application/atomdeleted+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "atomdeleted"
+    ]
+  },
+  "application/atomicmail": {
+    source: "iana"
+  },
+  "application/atomsvc+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "atomsvc"
+    ]
+  },
+  "application/atsc-dwd+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "dwd"
+    ]
+  },
+  "application/atsc-dynamic-event-message": {
+    source: "iana"
+  },
+  "application/atsc-held+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "held"
+    ]
+  },
+  "application/atsc-rdt+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/atsc-rsat+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rsat"
+    ]
+  },
+  "application/atxml": {
+    source: "iana"
+  },
+  "application/auth-policy+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/bacnet-xdd+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/batch-smtp": {
+    source: "iana"
+  },
+  "application/bdoc": {
+    compressible: false,
+    extensions: [
+      "bdoc"
+    ]
+  },
+  "application/beep+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/calendar+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/calendar+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xcs"
+    ]
+  },
+  "application/call-completion": {
+    source: "iana"
+  },
+  "application/cals-1840": {
+    source: "iana"
+  },
+  "application/captive+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cbor": {
+    source: "iana"
+  },
+  "application/cbor-seq": {
+    source: "iana"
+  },
+  "application/cccex": {
+    source: "iana"
+  },
+  "application/ccmp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/ccxml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ccxml"
+    ]
+  },
+  "application/cdfx+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "cdfx"
+    ]
+  },
+  "application/cdmi-capability": {
+    source: "iana",
+    extensions: [
+      "cdmia"
+    ]
+  },
+  "application/cdmi-container": {
+    source: "iana",
+    extensions: [
+      "cdmic"
+    ]
+  },
+  "application/cdmi-domain": {
+    source: "iana",
+    extensions: [
+      "cdmid"
+    ]
+  },
+  "application/cdmi-object": {
+    source: "iana",
+    extensions: [
+      "cdmio"
+    ]
+  },
+  "application/cdmi-queue": {
+    source: "iana",
+    extensions: [
+      "cdmiq"
+    ]
+  },
+  "application/cdni": {
+    source: "iana"
+  },
+  "application/cea": {
+    source: "iana"
+  },
+  "application/cea-2018+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cellml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cfw": {
+    source: "iana"
+  },
+  "application/city+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/clr": {
+    source: "iana"
+  },
+  "application/clue+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/clue_info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cms": {
+    source: "iana"
+  },
+  "application/cnrp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/coap-group+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/coap-payload": {
+    source: "iana"
+  },
+  "application/commonground": {
+    source: "iana"
+  },
+  "application/conference-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cose": {
+    source: "iana"
+  },
+  "application/cose-key": {
+    source: "iana"
+  },
+  "application/cose-key-set": {
+    source: "iana"
+  },
+  "application/cpl+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "cpl"
+    ]
+  },
+  "application/csrattrs": {
+    source: "iana"
+  },
+  "application/csta+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cstadata+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/csvm+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/cu-seeme": {
+    source: "apache",
+    extensions: [
+      "cu"
+    ]
+  },
+  "application/cwt": {
+    source: "iana"
+  },
+  "application/cybercash": {
+    source: "iana"
+  },
+  "application/dart": {
+    compressible: true
+  },
+  "application/dash+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mpd"
+    ]
+  },
+  "application/dash-patch+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mpp"
+    ]
+  },
+  "application/dashdelta": {
+    source: "iana"
+  },
+  "application/davmount+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "davmount"
+    ]
+  },
+  "application/dca-rft": {
+    source: "iana"
+  },
+  "application/dcd": {
+    source: "iana"
+  },
+  "application/dec-dx": {
+    source: "iana"
+  },
+  "application/dialog-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/dicom": {
+    source: "iana"
+  },
+  "application/dicom+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/dicom+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/dii": {
+    source: "iana"
+  },
+  "application/dit": {
+    source: "iana"
+  },
+  "application/dns": {
+    source: "iana"
+  },
+  "application/dns+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/dns-message": {
+    source: "iana"
+  },
+  "application/docbook+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "dbk"
+    ]
+  },
+  "application/dots+cbor": {
+    source: "iana"
+  },
+  "application/dskpp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/dssc+der": {
+    source: "iana",
+    extensions: [
+      "dssc"
+    ]
+  },
+  "application/dssc+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xdssc"
+    ]
+  },
+  "application/dvcs": {
+    source: "iana"
+  },
+  "application/ecmascript": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "es",
+      "ecma"
+    ]
+  },
+  "application/edi-consent": {
+    source: "iana"
+  },
+  "application/edi-x12": {
+    source: "iana",
+    compressible: false
+  },
+  "application/edifact": {
+    source: "iana",
+    compressible: false
+  },
+  "application/efi": {
+    source: "iana"
+  },
+  "application/elm+json": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/elm+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.cap+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/emergencycalldata.comment+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.control+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.deviceinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.ecall.msd": {
+    source: "iana"
+  },
+  "application/emergencycalldata.providerinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.serviceinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.subscriberinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emergencycalldata.veds+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/emma+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "emma"
+    ]
+  },
+  "application/emotionml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "emotionml"
+    ]
+  },
+  "application/encaprtp": {
+    source: "iana"
+  },
+  "application/epp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/epub+zip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "epub"
+    ]
+  },
+  "application/eshop": {
+    source: "iana"
+  },
+  "application/exi": {
+    source: "iana",
+    extensions: [
+      "exi"
+    ]
+  },
+  "application/expect-ct-report+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/express": {
+    source: "iana",
+    extensions: [
+      "exp"
+    ]
+  },
+  "application/fastinfoset": {
+    source: "iana"
+  },
+  "application/fastsoap": {
+    source: "iana"
+  },
+  "application/fdt+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "fdt"
+    ]
+  },
+  "application/fhir+json": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/fhir+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/fido.trusted-apps+json": {
+    compressible: true
+  },
+  "application/fits": {
+    source: "iana"
+  },
+  "application/flexfec": {
+    source: "iana"
+  },
+  "application/font-sfnt": {
+    source: "iana"
+  },
+  "application/font-tdpfr": {
+    source: "iana",
+    extensions: [
+      "pfr"
+    ]
+  },
+  "application/font-woff": {
+    source: "iana",
+    compressible: false
+  },
+  "application/framework-attributes+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/geo+json": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "geojson"
+    ]
+  },
+  "application/geo+json-seq": {
+    source: "iana"
+  },
+  "application/geopackage+sqlite3": {
+    source: "iana"
+  },
+  "application/geoxacml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/gltf-buffer": {
+    source: "iana"
+  },
+  "application/gml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "gml"
+    ]
+  },
+  "application/gpx+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "gpx"
+    ]
+  },
+  "application/gxf": {
+    source: "apache",
+    extensions: [
+      "gxf"
+    ]
+  },
+  "application/gzip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "gz"
+    ]
+  },
+  "application/h224": {
+    source: "iana"
+  },
+  "application/held+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/hjson": {
+    extensions: [
+      "hjson"
+    ]
+  },
+  "application/http": {
+    source: "iana"
+  },
+  "application/hyperstudio": {
+    source: "iana",
+    extensions: [
+      "stk"
+    ]
+  },
+  "application/ibe-key-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/ibe-pkg-reply+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/ibe-pp-data": {
+    source: "iana"
+  },
+  "application/iges": {
+    source: "iana"
+  },
+  "application/im-iscomposing+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/index": {
+    source: "iana"
+  },
+  "application/index.cmd": {
+    source: "iana"
+  },
+  "application/index.obj": {
+    source: "iana"
+  },
+  "application/index.response": {
+    source: "iana"
+  },
+  "application/index.vnd": {
+    source: "iana"
+  },
+  "application/inkml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ink",
+      "inkml"
+    ]
+  },
+  "application/iotp": {
+    source: "iana"
+  },
+  "application/ipfix": {
+    source: "iana",
+    extensions: [
+      "ipfix"
+    ]
+  },
+  "application/ipp": {
+    source: "iana"
+  },
+  "application/isup": {
+    source: "iana"
+  },
+  "application/its+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "its"
+    ]
+  },
+  "application/java-archive": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "jar",
+      "war",
+      "ear"
+    ]
+  },
+  "application/java-serialized-object": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "ser"
+    ]
+  },
+  "application/java-vm": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "class"
+    ]
+  },
+  "application/javascript": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "js",
+      "mjs"
+    ]
+  },
+  "application/jf2feed+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/jose": {
+    source: "iana"
+  },
+  "application/jose+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/jrd+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/jscalendar+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/json": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "json",
+      "map"
+    ]
+  },
+  "application/json-patch+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/json-seq": {
+    source: "iana"
+  },
+  "application/json5": {
+    extensions: [
+      "json5"
+    ]
+  },
+  "application/jsonml+json": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "jsonml"
+    ]
+  },
+  "application/jwk+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/jwk-set+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/jwt": {
+    source: "iana"
+  },
+  "application/kpml-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/kpml-response+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/ld+json": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "jsonld"
+    ]
+  },
+  "application/lgr+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "lgr"
+    ]
+  },
+  "application/link-format": {
+    source: "iana"
+  },
+  "application/load-control+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/lost+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "lostxml"
+    ]
+  },
+  "application/lostsync+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/lpf+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/lxf": {
+    source: "iana"
+  },
+  "application/mac-binhex40": {
+    source: "iana",
+    extensions: [
+      "hqx"
+    ]
+  },
+  "application/mac-compactpro": {
+    source: "apache",
+    extensions: [
+      "cpt"
+    ]
+  },
+  "application/macwriteii": {
+    source: "iana"
+  },
+  "application/mads+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mads"
+    ]
+  },
+  "application/manifest+json": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "webmanifest"
+    ]
+  },
+  "application/marc": {
+    source: "iana",
+    extensions: [
+      "mrc"
+    ]
+  },
+  "application/marcxml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mrcx"
+    ]
+  },
+  "application/mathematica": {
+    source: "iana",
+    extensions: [
+      "ma",
+      "nb",
+      "mb"
+    ]
+  },
+  "application/mathml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mathml"
+    ]
+  },
+  "application/mathml-content+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mathml-presentation+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-associated-procedure-description+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-deregister+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-envelope+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-msk+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-msk-response+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-protection-description+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-reception-report+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-register+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-register-response+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-schedule+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbms-user-service-description+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mbox": {
+    source: "iana",
+    extensions: [
+      "mbox"
+    ]
+  },
+  "application/media-policy-dataset+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mpf"
+    ]
+  },
+  "application/media_control+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mediaservercontrol+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mscml"
+    ]
+  },
+  "application/merge-patch+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/metalink+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "metalink"
+    ]
+  },
+  "application/metalink4+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "meta4"
+    ]
+  },
+  "application/mets+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mets"
+    ]
+  },
+  "application/mf4": {
+    source: "iana"
+  },
+  "application/mikey": {
+    source: "iana"
+  },
+  "application/mipc": {
+    source: "iana"
+  },
+  "application/missing-blocks+cbor-seq": {
+    source: "iana"
+  },
+  "application/mmt-aei+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "maei"
+    ]
+  },
+  "application/mmt-usd+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "musd"
+    ]
+  },
+  "application/mods+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mods"
+    ]
+  },
+  "application/moss-keys": {
+    source: "iana"
+  },
+  "application/moss-signature": {
+    source: "iana"
+  },
+  "application/mosskey-data": {
+    source: "iana"
+  },
+  "application/mosskey-request": {
+    source: "iana"
+  },
+  "application/mp21": {
+    source: "iana",
+    extensions: [
+      "m21",
+      "mp21"
+    ]
+  },
+  "application/mp4": {
+    source: "iana",
+    extensions: [
+      "mp4s",
+      "m4p"
+    ]
+  },
+  "application/mpeg4-generic": {
+    source: "iana"
+  },
+  "application/mpeg4-iod": {
+    source: "iana"
+  },
+  "application/mpeg4-iod-xmt": {
+    source: "iana"
+  },
+  "application/mrb-consumer+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/mrb-publish+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/msc-ivr+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/msc-mixer+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/msword": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "doc",
+      "dot"
+    ]
+  },
+  "application/mud+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/multipart-core": {
+    source: "iana"
+  },
+  "application/mxf": {
+    source: "iana",
+    extensions: [
+      "mxf"
+    ]
+  },
+  "application/n-quads": {
+    source: "iana",
+    extensions: [
+      "nq"
+    ]
+  },
+  "application/n-triples": {
+    source: "iana",
+    extensions: [
+      "nt"
+    ]
+  },
+  "application/nasdata": {
+    source: "iana"
+  },
+  "application/news-checkgroups": {
+    source: "iana",
+    charset: "US-ASCII"
+  },
+  "application/news-groupinfo": {
+    source: "iana",
+    charset: "US-ASCII"
+  },
+  "application/news-transmission": {
+    source: "iana"
+  },
+  "application/nlsml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/node": {
+    source: "iana",
+    extensions: [
+      "cjs"
+    ]
+  },
+  "application/nss": {
+    source: "iana"
+  },
+  "application/oauth-authz-req+jwt": {
+    source: "iana"
+  },
+  "application/oblivious-dns-message": {
+    source: "iana"
+  },
+  "application/ocsp-request": {
+    source: "iana"
+  },
+  "application/ocsp-response": {
+    source: "iana"
+  },
+  "application/octet-stream": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "bin",
+      "dms",
+      "lrf",
+      "mar",
+      "so",
+      "dist",
+      "distz",
+      "pkg",
+      "bpk",
+      "dump",
+      "elc",
+      "deploy",
+      "exe",
+      "dll",
+      "deb",
+      "dmg",
+      "iso",
+      "img",
+      "msi",
+      "msp",
+      "msm",
+      "buffer"
+    ]
+  },
+  "application/oda": {
+    source: "iana",
+    extensions: [
+      "oda"
+    ]
+  },
+  "application/odm+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/odx": {
+    source: "iana"
+  },
+  "application/oebps-package+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "opf"
+    ]
+  },
+  "application/ogg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "ogx"
+    ]
+  },
+  "application/omdoc+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "omdoc"
+    ]
+  },
+  "application/onenote": {
+    source: "apache",
+    extensions: [
+      "onetoc",
+      "onetoc2",
+      "onetmp",
+      "onepkg"
+    ]
+  },
+  "application/opc-nodeset+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/oscore": {
+    source: "iana"
+  },
+  "application/oxps": {
+    source: "iana",
+    extensions: [
+      "oxps"
+    ]
+  },
+  "application/p21": {
+    source: "iana"
+  },
+  "application/p21+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/p2p-overlay+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "relo"
+    ]
+  },
+  "application/parityfec": {
+    source: "iana"
+  },
+  "application/passport": {
+    source: "iana"
+  },
+  "application/patch-ops-error+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xer"
+    ]
+  },
+  "application/pdf": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "pdf"
+    ]
+  },
+  "application/pdx": {
+    source: "iana"
+  },
+  "application/pem-certificate-chain": {
+    source: "iana"
+  },
+  "application/pgp-encrypted": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "pgp"
+    ]
+  },
+  "application/pgp-keys": {
+    source: "iana",
+    extensions: [
+      "asc"
+    ]
+  },
+  "application/pgp-signature": {
+    source: "iana",
+    extensions: [
+      "asc",
+      "sig"
+    ]
+  },
+  "application/pics-rules": {
+    source: "apache",
+    extensions: [
+      "prf"
+    ]
+  },
+  "application/pidf+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/pidf-diff+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/pkcs10": {
+    source: "iana",
+    extensions: [
+      "p10"
+    ]
+  },
+  "application/pkcs12": {
+    source: "iana"
+  },
+  "application/pkcs7-mime": {
+    source: "iana",
+    extensions: [
+      "p7m",
+      "p7c"
+    ]
+  },
+  "application/pkcs7-signature": {
+    source: "iana",
+    extensions: [
+      "p7s"
+    ]
+  },
+  "application/pkcs8": {
+    source: "iana",
+    extensions: [
+      "p8"
+    ]
+  },
+  "application/pkcs8-encrypted": {
+    source: "iana"
+  },
+  "application/pkix-attr-cert": {
+    source: "iana",
+    extensions: [
+      "ac"
+    ]
+  },
+  "application/pkix-cert": {
+    source: "iana",
+    extensions: [
+      "cer"
+    ]
+  },
+  "application/pkix-crl": {
+    source: "iana",
+    extensions: [
+      "crl"
+    ]
+  },
+  "application/pkix-pkipath": {
+    source: "iana",
+    extensions: [
+      "pkipath"
+    ]
+  },
+  "application/pkixcmp": {
+    source: "iana",
+    extensions: [
+      "pki"
+    ]
+  },
+  "application/pls+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "pls"
+    ]
+  },
+  "application/poc-settings+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/postscript": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ai",
+      "eps",
+      "ps"
+    ]
+  },
+  "application/ppsp-tracker+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/problem+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/problem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/provenance+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "provx"
+    ]
+  },
+  "application/prs.alvestrand.titrax-sheet": {
+    source: "iana"
+  },
+  "application/prs.cww": {
+    source: "iana",
+    extensions: [
+      "cww"
+    ]
+  },
+  "application/prs.cyn": {
+    source: "iana",
+    charset: "7-BIT"
+  },
+  "application/prs.hpub+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/prs.nprend": {
+    source: "iana"
+  },
+  "application/prs.plucker": {
+    source: "iana"
+  },
+  "application/prs.rdf-xml-crypt": {
+    source: "iana"
+  },
+  "application/prs.xsf+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/pskc+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "pskcxml"
+    ]
+  },
+  "application/pvd+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/qsig": {
+    source: "iana"
+  },
+  "application/raml+yaml": {
+    compressible: true,
+    extensions: [
+      "raml"
+    ]
+  },
+  "application/raptorfec": {
+    source: "iana"
+  },
+  "application/rdap+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/rdf+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rdf",
+      "owl"
+    ]
+  },
+  "application/reginfo+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rif"
+    ]
+  },
+  "application/relax-ng-compact-syntax": {
+    source: "iana",
+    extensions: [
+      "rnc"
+    ]
+  },
+  "application/remote-printing": {
+    source: "iana"
+  },
+  "application/reputon+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/resource-lists+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rl"
+    ]
+  },
+  "application/resource-lists-diff+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rld"
+    ]
+  },
+  "application/rfc+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/riscos": {
+    source: "iana"
+  },
+  "application/rlmi+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/rls-services+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rs"
+    ]
+  },
+  "application/route-apd+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rapd"
+    ]
+  },
+  "application/route-s-tsid+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "sls"
+    ]
+  },
+  "application/route-usd+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rusd"
+    ]
+  },
+  "application/rpki-ghostbusters": {
+    source: "iana",
+    extensions: [
+      "gbr"
+    ]
+  },
+  "application/rpki-manifest": {
+    source: "iana",
+    extensions: [
+      "mft"
+    ]
+  },
+  "application/rpki-publication": {
+    source: "iana"
+  },
+  "application/rpki-roa": {
+    source: "iana",
+    extensions: [
+      "roa"
+    ]
+  },
+  "application/rpki-updown": {
+    source: "iana"
+  },
+  "application/rsd+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "rsd"
+    ]
+  },
+  "application/rss+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "rss"
+    ]
+  },
+  "application/rtf": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rtf"
+    ]
+  },
+  "application/rtploopback": {
+    source: "iana"
+  },
+  "application/rtx": {
+    source: "iana"
+  },
+  "application/samlassertion+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/samlmetadata+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sarif+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sarif-external-properties+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sbe": {
+    source: "iana"
+  },
+  "application/sbml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "sbml"
+    ]
+  },
+  "application/scaip+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/scim+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/scvp-cv-request": {
+    source: "iana",
+    extensions: [
+      "scq"
+    ]
+  },
+  "application/scvp-cv-response": {
+    source: "iana",
+    extensions: [
+      "scs"
+    ]
+  },
+  "application/scvp-vp-request": {
+    source: "iana",
+    extensions: [
+      "spq"
+    ]
+  },
+  "application/scvp-vp-response": {
+    source: "iana",
+    extensions: [
+      "spp"
+    ]
+  },
+  "application/sdp": {
+    source: "iana",
+    extensions: [
+      "sdp"
+    ]
+  },
+  "application/secevent+jwt": {
+    source: "iana"
+  },
+  "application/senml+cbor": {
+    source: "iana"
+  },
+  "application/senml+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/senml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "senmlx"
+    ]
+  },
+  "application/senml-etch+cbor": {
+    source: "iana"
+  },
+  "application/senml-etch+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/senml-exi": {
+    source: "iana"
+  },
+  "application/sensml+cbor": {
+    source: "iana"
+  },
+  "application/sensml+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sensml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "sensmlx"
+    ]
+  },
+  "application/sensml-exi": {
+    source: "iana"
+  },
+  "application/sep+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sep-exi": {
+    source: "iana"
+  },
+  "application/session-info": {
+    source: "iana"
+  },
+  "application/set-payment": {
+    source: "iana"
+  },
+  "application/set-payment-initiation": {
+    source: "iana",
+    extensions: [
+      "setpay"
+    ]
+  },
+  "application/set-registration": {
+    source: "iana"
+  },
+  "application/set-registration-initiation": {
+    source: "iana",
+    extensions: [
+      "setreg"
+    ]
+  },
+  "application/sgml": {
+    source: "iana"
+  },
+  "application/sgml-open-catalog": {
+    source: "iana"
+  },
+  "application/shf+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "shf"
+    ]
+  },
+  "application/sieve": {
+    source: "iana",
+    extensions: [
+      "siv",
+      "sieve"
+    ]
+  },
+  "application/simple-filter+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/simple-message-summary": {
+    source: "iana"
+  },
+  "application/simplesymbolcontainer": {
+    source: "iana"
+  },
+  "application/sipc": {
+    source: "iana"
+  },
+  "application/slate": {
+    source: "iana"
+  },
+  "application/smil": {
+    source: "iana"
+  },
+  "application/smil+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "smi",
+      "smil"
+    ]
+  },
+  "application/smpte336m": {
+    source: "iana"
+  },
+  "application/soap+fastinfoset": {
+    source: "iana"
+  },
+  "application/soap+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sparql-query": {
+    source: "iana",
+    extensions: [
+      "rq"
+    ]
+  },
+  "application/sparql-results+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "srx"
+    ]
+  },
+  "application/spdx+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/spirits-event+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/sql": {
+    source: "iana"
+  },
+  "application/srgs": {
+    source: "iana",
+    extensions: [
+      "gram"
+    ]
+  },
+  "application/srgs+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "grxml"
+    ]
+  },
+  "application/sru+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "sru"
+    ]
+  },
+  "application/ssdl+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "ssdl"
+    ]
+  },
+  "application/ssml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ssml"
+    ]
+  },
+  "application/stix+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/swid+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "swidtag"
+    ]
+  },
+  "application/tamp-apex-update": {
+    source: "iana"
+  },
+  "application/tamp-apex-update-confirm": {
+    source: "iana"
+  },
+  "application/tamp-community-update": {
+    source: "iana"
+  },
+  "application/tamp-community-update-confirm": {
+    source: "iana"
+  },
+  "application/tamp-error": {
+    source: "iana"
+  },
+  "application/tamp-sequence-adjust": {
+    source: "iana"
+  },
+  "application/tamp-sequence-adjust-confirm": {
+    source: "iana"
+  },
+  "application/tamp-status-query": {
+    source: "iana"
+  },
+  "application/tamp-status-response": {
+    source: "iana"
+  },
+  "application/tamp-update": {
+    source: "iana"
+  },
+  "application/tamp-update-confirm": {
+    source: "iana"
+  },
+  "application/tar": {
+    compressible: true
+  },
+  "application/taxii+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/td+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/tei+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "tei",
+      "teicorpus"
+    ]
+  },
+  "application/tetra_isi": {
+    source: "iana"
+  },
+  "application/thraud+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "tfi"
+    ]
+  },
+  "application/timestamp-query": {
+    source: "iana"
+  },
+  "application/timestamp-reply": {
+    source: "iana"
+  },
+  "application/timestamped-data": {
+    source: "iana",
+    extensions: [
+      "tsd"
+    ]
+  },
+  "application/tlsrpt+gzip": {
+    source: "iana"
+  },
+  "application/tlsrpt+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/tnauthlist": {
+    source: "iana"
+  },
+  "application/token-introspection+jwt": {
+    source: "iana"
+  },
+  "application/toml": {
+    compressible: true,
+    extensions: [
+      "toml"
+    ]
+  },
+  "application/trickle-ice-sdpfrag": {
+    source: "iana"
+  },
+  "application/trig": {
+    source: "iana",
+    extensions: [
+      "trig"
+    ]
+  },
+  "application/ttml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ttml"
+    ]
+  },
+  "application/tve-trigger": {
+    source: "iana"
+  },
+  "application/tzif": {
+    source: "iana"
+  },
+  "application/tzif-leap": {
+    source: "iana"
+  },
+  "application/ubjson": {
+    compressible: false,
+    extensions: [
+      "ubj"
+    ]
+  },
+  "application/ulpfec": {
+    source: "iana"
+  },
+  "application/urc-grpsheet+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/urc-ressheet+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rsheet"
+    ]
+  },
+  "application/urc-targetdesc+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "td"
+    ]
+  },
+  "application/urc-uisocketdesc+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vcard+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vcard+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vemmi": {
+    source: "iana"
+  },
+  "application/vividence.scriptfile": {
+    source: "apache"
+  },
+  "application/vnd.1000minds.decision-model+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "1km"
+    ]
+  },
+  "application/vnd.3gpp-prose+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp-prose-pc3ch+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp-v2x-local-service-information": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.5gnas": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.access-transfer-events+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.bsf+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.gmop+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.gtpc": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.interworking-data": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.lpp": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.mc-signalling-ear": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.mcdata-affiliation-command+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcdata-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcdata-payload": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.mcdata-service-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcdata-signalling": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.mcdata-ue-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcdata-user-profile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-affiliation-command+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-floor-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-location-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-mbms-usage-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-service-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-signed+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-ue-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-ue-init-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcptt-user-profile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-affiliation-command+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-affiliation-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-location-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-mbms-usage-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-service-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-transmission-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-ue-config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mcvideo-user-profile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.mid-call+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.ngap": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.pfcp": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.pic-bw-large": {
+    source: "iana",
+    extensions: [
+      "plb"
+    ]
+  },
+  "application/vnd.3gpp.pic-bw-small": {
+    source: "iana",
+    extensions: [
+      "psb"
+    ]
+  },
+  "application/vnd.3gpp.pic-bw-var": {
+    source: "iana",
+    extensions: [
+      "pvb"
+    ]
+  },
+  "application/vnd.3gpp.s1ap": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.sms": {
+    source: "iana"
+  },
+  "application/vnd.3gpp.sms+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.srvcc-ext+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.srvcc-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.state-and-event-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp.ussd+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp2.bcmcsinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.3gpp2.sms": {
+    source: "iana"
+  },
+  "application/vnd.3gpp2.tcap": {
+    source: "iana",
+    extensions: [
+      "tcap"
+    ]
+  },
+  "application/vnd.3lightssoftware.imagescal": {
+    source: "iana"
+  },
+  "application/vnd.3m.post-it-notes": {
+    source: "iana",
+    extensions: [
+      "pwn"
+    ]
+  },
+  "application/vnd.accpac.simply.aso": {
+    source: "iana",
+    extensions: [
+      "aso"
+    ]
+  },
+  "application/vnd.accpac.simply.imp": {
+    source: "iana",
+    extensions: [
+      "imp"
+    ]
+  },
+  "application/vnd.acucobol": {
+    source: "iana",
+    extensions: [
+      "acu"
+    ]
+  },
+  "application/vnd.acucorp": {
+    source: "iana",
+    extensions: [
+      "atc",
+      "acutc"
+    ]
+  },
+  "application/vnd.adobe.air-application-installer-package+zip": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "air"
+    ]
+  },
+  "application/vnd.adobe.flash.movie": {
+    source: "iana"
+  },
+  "application/vnd.adobe.formscentral.fcdt": {
+    source: "iana",
+    extensions: [
+      "fcdt"
+    ]
+  },
+  "application/vnd.adobe.fxp": {
+    source: "iana",
+    extensions: [
+      "fxp",
+      "fxpl"
+    ]
+  },
+  "application/vnd.adobe.partial-upload": {
+    source: "iana"
+  },
+  "application/vnd.adobe.xdp+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xdp"
+    ]
+  },
+  "application/vnd.adobe.xfdf": {
+    source: "iana",
+    extensions: [
+      "xfdf"
+    ]
+  },
+  "application/vnd.aether.imp": {
+    source: "iana"
+  },
+  "application/vnd.afpc.afplinedata": {
+    source: "iana"
+  },
+  "application/vnd.afpc.afplinedata-pagedef": {
+    source: "iana"
+  },
+  "application/vnd.afpc.cmoca-cmresource": {
+    source: "iana"
+  },
+  "application/vnd.afpc.foca-charset": {
+    source: "iana"
+  },
+  "application/vnd.afpc.foca-codedfont": {
+    source: "iana"
+  },
+  "application/vnd.afpc.foca-codepage": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-cmtable": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-formdef": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-mediummap": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-objectcontainer": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-overlay": {
+    source: "iana"
+  },
+  "application/vnd.afpc.modca-pagesegment": {
+    source: "iana"
+  },
+  "application/vnd.age": {
+    source: "iana",
+    extensions: [
+      "age"
+    ]
+  },
+  "application/vnd.ah-barcode": {
+    source: "iana"
+  },
+  "application/vnd.ahead.space": {
+    source: "iana",
+    extensions: [
+      "ahead"
+    ]
+  },
+  "application/vnd.airzip.filesecure.azf": {
+    source: "iana",
+    extensions: [
+      "azf"
+    ]
+  },
+  "application/vnd.airzip.filesecure.azs": {
+    source: "iana",
+    extensions: [
+      "azs"
+    ]
+  },
+  "application/vnd.amadeus+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.amazon.ebook": {
+    source: "apache",
+    extensions: [
+      "azw"
+    ]
+  },
+  "application/vnd.amazon.mobi8-ebook": {
+    source: "iana"
+  },
+  "application/vnd.americandynamics.acc": {
+    source: "iana",
+    extensions: [
+      "acc"
+    ]
+  },
+  "application/vnd.amiga.ami": {
+    source: "iana",
+    extensions: [
+      "ami"
+    ]
+  },
+  "application/vnd.amundsen.maze+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.android.ota": {
+    source: "iana"
+  },
+  "application/vnd.android.package-archive": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "apk"
+    ]
+  },
+  "application/vnd.anki": {
+    source: "iana"
+  },
+  "application/vnd.anser-web-certificate-issue-initiation": {
+    source: "iana",
+    extensions: [
+      "cii"
+    ]
+  },
+  "application/vnd.anser-web-funds-transfer-initiation": {
+    source: "apache",
+    extensions: [
+      "fti"
+    ]
+  },
+  "application/vnd.antix.game-component": {
+    source: "iana",
+    extensions: [
+      "atx"
+    ]
+  },
+  "application/vnd.apache.arrow.file": {
+    source: "iana"
+  },
+  "application/vnd.apache.arrow.stream": {
+    source: "iana"
+  },
+  "application/vnd.apache.thrift.binary": {
+    source: "iana"
+  },
+  "application/vnd.apache.thrift.compact": {
+    source: "iana"
+  },
+  "application/vnd.apache.thrift.json": {
+    source: "iana"
+  },
+  "application/vnd.api+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.aplextor.warrp+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.apothekende.reservation+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.apple.installer+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mpkg"
+    ]
+  },
+  "application/vnd.apple.keynote": {
+    source: "iana",
+    extensions: [
+      "key"
+    ]
+  },
+  "application/vnd.apple.mpegurl": {
+    source: "iana",
+    extensions: [
+      "m3u8"
+    ]
+  },
+  "application/vnd.apple.numbers": {
+    source: "iana",
+    extensions: [
+      "numbers"
+    ]
+  },
+  "application/vnd.apple.pages": {
+    source: "iana",
+    extensions: [
+      "pages"
+    ]
+  },
+  "application/vnd.apple.pkpass": {
+    compressible: false,
+    extensions: [
+      "pkpass"
+    ]
+  },
+  "application/vnd.arastra.swi": {
+    source: "iana"
+  },
+  "application/vnd.aristanetworks.swi": {
+    source: "iana",
+    extensions: [
+      "swi"
+    ]
+  },
+  "application/vnd.artisan+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.artsquare": {
+    source: "iana"
+  },
+  "application/vnd.astraea-software.iota": {
+    source: "iana",
+    extensions: [
+      "iota"
+    ]
+  },
+  "application/vnd.audiograph": {
+    source: "iana",
+    extensions: [
+      "aep"
+    ]
+  },
+  "application/vnd.autopackage": {
+    source: "iana"
+  },
+  "application/vnd.avalon+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.avistar+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.balsamiq.bmml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "bmml"
+    ]
+  },
+  "application/vnd.balsamiq.bmpr": {
+    source: "iana"
+  },
+  "application/vnd.banana-accounting": {
+    source: "iana"
+  },
+  "application/vnd.bbf.usp.error": {
+    source: "iana"
+  },
+  "application/vnd.bbf.usp.msg": {
+    source: "iana"
+  },
+  "application/vnd.bbf.usp.msg+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.bekitzur-stech+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.bint.med-content": {
+    source: "iana"
+  },
+  "application/vnd.biopax.rdf+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.blink-idb-value-wrapper": {
+    source: "iana"
+  },
+  "application/vnd.blueice.multipass": {
+    source: "iana",
+    extensions: [
+      "mpm"
+    ]
+  },
+  "application/vnd.bluetooth.ep.oob": {
+    source: "iana"
+  },
+  "application/vnd.bluetooth.le.oob": {
+    source: "iana"
+  },
+  "application/vnd.bmi": {
+    source: "iana",
+    extensions: [
+      "bmi"
+    ]
+  },
+  "application/vnd.bpf": {
+    source: "iana"
+  },
+  "application/vnd.bpf3": {
+    source: "iana"
+  },
+  "application/vnd.businessobjects": {
+    source: "iana",
+    extensions: [
+      "rep"
+    ]
+  },
+  "application/vnd.byu.uapi+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cab-jscript": {
+    source: "iana"
+  },
+  "application/vnd.canon-cpdl": {
+    source: "iana"
+  },
+  "application/vnd.canon-lips": {
+    source: "iana"
+  },
+  "application/vnd.capasystems-pg+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cendio.thinlinc.clientconf": {
+    source: "iana"
+  },
+  "application/vnd.century-systems.tcp_stream": {
+    source: "iana"
+  },
+  "application/vnd.chemdraw+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "cdxml"
+    ]
+  },
+  "application/vnd.chess-pgn": {
+    source: "iana"
+  },
+  "application/vnd.chipnuts.karaoke-mmd": {
+    source: "iana",
+    extensions: [
+      "mmd"
+    ]
+  },
+  "application/vnd.ciedi": {
+    source: "iana"
+  },
+  "application/vnd.cinderella": {
+    source: "iana",
+    extensions: [
+      "cdy"
+    ]
+  },
+  "application/vnd.cirpack.isdn-ext": {
+    source: "iana"
+  },
+  "application/vnd.citationstyles.style+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "csl"
+    ]
+  },
+  "application/vnd.claymore": {
+    source: "iana",
+    extensions: [
+      "cla"
+    ]
+  },
+  "application/vnd.cloanto.rp9": {
+    source: "iana",
+    extensions: [
+      "rp9"
+    ]
+  },
+  "application/vnd.clonk.c4group": {
+    source: "iana",
+    extensions: [
+      "c4g",
+      "c4d",
+      "c4f",
+      "c4p",
+      "c4u"
+    ]
+  },
+  "application/vnd.cluetrust.cartomobile-config": {
+    source: "iana",
+    extensions: [
+      "c11amc"
+    ]
+  },
+  "application/vnd.cluetrust.cartomobile-config-pkg": {
+    source: "iana",
+    extensions: [
+      "c11amz"
+    ]
+  },
+  "application/vnd.coffeescript": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.document": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.document-template": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.presentation": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.presentation-template": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.spreadsheet": {
+    source: "iana"
+  },
+  "application/vnd.collabio.xodocuments.spreadsheet-template": {
+    source: "iana"
+  },
+  "application/vnd.collection+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.collection.doc+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.collection.next+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.comicbook+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.comicbook-rar": {
+    source: "iana"
+  },
+  "application/vnd.commerce-battelle": {
+    source: "iana"
+  },
+  "application/vnd.commonspace": {
+    source: "iana",
+    extensions: [
+      "csp"
+    ]
+  },
+  "application/vnd.contact.cmsg": {
+    source: "iana",
+    extensions: [
+      "cdbcmsg"
+    ]
+  },
+  "application/vnd.coreos.ignition+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cosmocaller": {
+    source: "iana",
+    extensions: [
+      "cmc"
+    ]
+  },
+  "application/vnd.crick.clicker": {
+    source: "iana",
+    extensions: [
+      "clkx"
+    ]
+  },
+  "application/vnd.crick.clicker.keyboard": {
+    source: "iana",
+    extensions: [
+      "clkk"
+    ]
+  },
+  "application/vnd.crick.clicker.palette": {
+    source: "iana",
+    extensions: [
+      "clkp"
+    ]
+  },
+  "application/vnd.crick.clicker.template": {
+    source: "iana",
+    extensions: [
+      "clkt"
+    ]
+  },
+  "application/vnd.crick.clicker.wordbank": {
+    source: "iana",
+    extensions: [
+      "clkw"
+    ]
+  },
+  "application/vnd.criticaltools.wbs+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wbs"
+    ]
+  },
+  "application/vnd.cryptii.pipe+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.crypto-shade-file": {
+    source: "iana"
+  },
+  "application/vnd.cryptomator.encrypted": {
+    source: "iana"
+  },
+  "application/vnd.cryptomator.vault": {
+    source: "iana"
+  },
+  "application/vnd.ctc-posml": {
+    source: "iana",
+    extensions: [
+      "pml"
+    ]
+  },
+  "application/vnd.ctct.ws+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cups-pdf": {
+    source: "iana"
+  },
+  "application/vnd.cups-postscript": {
+    source: "iana"
+  },
+  "application/vnd.cups-ppd": {
+    source: "iana",
+    extensions: [
+      "ppd"
+    ]
+  },
+  "application/vnd.cups-raster": {
+    source: "iana"
+  },
+  "application/vnd.cups-raw": {
+    source: "iana"
+  },
+  "application/vnd.curl": {
+    source: "iana"
+  },
+  "application/vnd.curl.car": {
+    source: "apache",
+    extensions: [
+      "car"
+    ]
+  },
+  "application/vnd.curl.pcurl": {
+    source: "apache",
+    extensions: [
+      "pcurl"
+    ]
+  },
+  "application/vnd.cyan.dean.root+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cybank": {
+    source: "iana"
+  },
+  "application/vnd.cyclonedx+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.cyclonedx+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.d2l.coursepackage1p0+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.d3m-dataset": {
+    source: "iana"
+  },
+  "application/vnd.d3m-problem": {
+    source: "iana"
+  },
+  "application/vnd.dart": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "dart"
+    ]
+  },
+  "application/vnd.data-vision.rdz": {
+    source: "iana",
+    extensions: [
+      "rdz"
+    ]
+  },
+  "application/vnd.datapackage+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dataresource+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dbf": {
+    source: "iana",
+    extensions: [
+      "dbf"
+    ]
+  },
+  "application/vnd.debian.binary-package": {
+    source: "iana"
+  },
+  "application/vnd.dece.data": {
+    source: "iana",
+    extensions: [
+      "uvf",
+      "uvvf",
+      "uvd",
+      "uvvd"
+    ]
+  },
+  "application/vnd.dece.ttml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "uvt",
+      "uvvt"
+    ]
+  },
+  "application/vnd.dece.unspecified": {
+    source: "iana",
+    extensions: [
+      "uvx",
+      "uvvx"
+    ]
+  },
+  "application/vnd.dece.zip": {
+    source: "iana",
+    extensions: [
+      "uvz",
+      "uvvz"
+    ]
+  },
+  "application/vnd.denovo.fcselayout-link": {
+    source: "iana",
+    extensions: [
+      "fe_launch"
+    ]
+  },
+  "application/vnd.desmume.movie": {
+    source: "iana"
+  },
+  "application/vnd.dir-bi.plate-dl-nosuffix": {
+    source: "iana"
+  },
+  "application/vnd.dm.delegation+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dna": {
+    source: "iana",
+    extensions: [
+      "dna"
+    ]
+  },
+  "application/vnd.document+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dolby.mlp": {
+    source: "apache",
+    extensions: [
+      "mlp"
+    ]
+  },
+  "application/vnd.dolby.mobile.1": {
+    source: "iana"
+  },
+  "application/vnd.dolby.mobile.2": {
+    source: "iana"
+  },
+  "application/vnd.doremir.scorecloud-binary-document": {
+    source: "iana"
+  },
+  "application/vnd.dpgraph": {
+    source: "iana",
+    extensions: [
+      "dpg"
+    ]
+  },
+  "application/vnd.dreamfactory": {
+    source: "iana",
+    extensions: [
+      "dfac"
+    ]
+  },
+  "application/vnd.drive+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ds-keypoint": {
+    source: "apache",
+    extensions: [
+      "kpxx"
+    ]
+  },
+  "application/vnd.dtg.local": {
+    source: "iana"
+  },
+  "application/vnd.dtg.local.flash": {
+    source: "iana"
+  },
+  "application/vnd.dtg.local.html": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ait": {
+    source: "iana",
+    extensions: [
+      "ait"
+    ]
+  },
+  "application/vnd.dvb.dvbisl+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.dvbj": {
+    source: "iana"
+  },
+  "application/vnd.dvb.esgcontainer": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ipdcdftnotifaccess": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ipdcesgaccess": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ipdcesgaccess2": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ipdcesgpdd": {
+    source: "iana"
+  },
+  "application/vnd.dvb.ipdcroaming": {
+    source: "iana"
+  },
+  "application/vnd.dvb.iptv.alfec-base": {
+    source: "iana"
+  },
+  "application/vnd.dvb.iptv.alfec-enhancement": {
+    source: "iana"
+  },
+  "application/vnd.dvb.notif-aggregate-root+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-container+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-generic+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-ia-msglist+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-ia-registration-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-ia-registration-response+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.notif-init+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.dvb.pfr": {
+    source: "iana"
+  },
+  "application/vnd.dvb.service": {
+    source: "iana",
+    extensions: [
+      "svc"
+    ]
+  },
+  "application/vnd.dxr": {
+    source: "iana"
+  },
+  "application/vnd.dynageo": {
+    source: "iana",
+    extensions: [
+      "geo"
+    ]
+  },
+  "application/vnd.dzr": {
+    source: "iana"
+  },
+  "application/vnd.easykaraoke.cdgdownload": {
+    source: "iana"
+  },
+  "application/vnd.ecdis-update": {
+    source: "iana"
+  },
+  "application/vnd.ecip.rlp": {
+    source: "iana"
+  },
+  "application/vnd.eclipse.ditto+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ecowin.chart": {
+    source: "iana",
+    extensions: [
+      "mag"
+    ]
+  },
+  "application/vnd.ecowin.filerequest": {
+    source: "iana"
+  },
+  "application/vnd.ecowin.fileupdate": {
+    source: "iana"
+  },
+  "application/vnd.ecowin.series": {
+    source: "iana"
+  },
+  "application/vnd.ecowin.seriesrequest": {
+    source: "iana"
+  },
+  "application/vnd.ecowin.seriesupdate": {
+    source: "iana"
+  },
+  "application/vnd.efi.img": {
+    source: "iana"
+  },
+  "application/vnd.efi.iso": {
+    source: "iana"
+  },
+  "application/vnd.emclient.accessrequest+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.enliven": {
+    source: "iana",
+    extensions: [
+      "nml"
+    ]
+  },
+  "application/vnd.enphase.envoy": {
+    source: "iana"
+  },
+  "application/vnd.eprints.data+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.epson.esf": {
+    source: "iana",
+    extensions: [
+      "esf"
+    ]
+  },
+  "application/vnd.epson.msf": {
+    source: "iana",
+    extensions: [
+      "msf"
+    ]
+  },
+  "application/vnd.epson.quickanime": {
+    source: "iana",
+    extensions: [
+      "qam"
+    ]
+  },
+  "application/vnd.epson.salt": {
+    source: "iana",
+    extensions: [
+      "slt"
+    ]
+  },
+  "application/vnd.epson.ssf": {
+    source: "iana",
+    extensions: [
+      "ssf"
+    ]
+  },
+  "application/vnd.ericsson.quickcall": {
+    source: "iana"
+  },
+  "application/vnd.espass-espass+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.eszigno3+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "es3",
+      "et3"
+    ]
+  },
+  "application/vnd.etsi.aoc+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.asic-e+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.etsi.asic-s+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.etsi.cug+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvcommand+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvdiscovery+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvprofile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvsad-bc+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvsad-cod+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvsad-npvr+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvservice+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvsync+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.iptvueprofile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.mcid+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.mheg5": {
+    source: "iana"
+  },
+  "application/vnd.etsi.overload-control-policy-dataset+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.pstn+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.sci+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.simservs+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.timestamp-token": {
+    source: "iana"
+  },
+  "application/vnd.etsi.tsl+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.etsi.tsl.der": {
+    source: "iana"
+  },
+  "application/vnd.eu.kasparian.car+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.eudora.data": {
+    source: "iana"
+  },
+  "application/vnd.evolv.ecig.profile": {
+    source: "iana"
+  },
+  "application/vnd.evolv.ecig.settings": {
+    source: "iana"
+  },
+  "application/vnd.evolv.ecig.theme": {
+    source: "iana"
+  },
+  "application/vnd.exstream-empower+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.exstream-package": {
+    source: "iana"
+  },
+  "application/vnd.ezpix-album": {
+    source: "iana",
+    extensions: [
+      "ez2"
+    ]
+  },
+  "application/vnd.ezpix-package": {
+    source: "iana",
+    extensions: [
+      "ez3"
+    ]
+  },
+  "application/vnd.f-secure.mobile": {
+    source: "iana"
+  },
+  "application/vnd.familysearch.gedcom+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.fastcopy-disk-image": {
+    source: "iana"
+  },
+  "application/vnd.fdf": {
+    source: "iana",
+    extensions: [
+      "fdf"
+    ]
+  },
+  "application/vnd.fdsn.mseed": {
+    source: "iana",
+    extensions: [
+      "mseed"
+    ]
+  },
+  "application/vnd.fdsn.seed": {
+    source: "iana",
+    extensions: [
+      "seed",
+      "dataless"
+    ]
+  },
+  "application/vnd.ffsns": {
+    source: "iana"
+  },
+  "application/vnd.ficlab.flb+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.filmit.zfc": {
+    source: "iana"
+  },
+  "application/vnd.fints": {
+    source: "iana"
+  },
+  "application/vnd.firemonkeys.cloudcell": {
+    source: "iana"
+  },
+  "application/vnd.flographit": {
+    source: "iana",
+    extensions: [
+      "gph"
+    ]
+  },
+  "application/vnd.fluxtime.clip": {
+    source: "iana",
+    extensions: [
+      "ftc"
+    ]
+  },
+  "application/vnd.font-fontforge-sfd": {
+    source: "iana"
+  },
+  "application/vnd.framemaker": {
+    source: "iana",
+    extensions: [
+      "fm",
+      "frame",
+      "maker",
+      "book"
+    ]
+  },
+  "application/vnd.frogans.fnc": {
+    source: "iana",
+    extensions: [
+      "fnc"
+    ]
+  },
+  "application/vnd.frogans.ltf": {
+    source: "iana",
+    extensions: [
+      "ltf"
+    ]
+  },
+  "application/vnd.fsc.weblaunch": {
+    source: "iana",
+    extensions: [
+      "fsc"
+    ]
+  },
+  "application/vnd.fujifilm.fb.docuworks": {
+    source: "iana"
+  },
+  "application/vnd.fujifilm.fb.docuworks.binder": {
+    source: "iana"
+  },
+  "application/vnd.fujifilm.fb.docuworks.container": {
+    source: "iana"
+  },
+  "application/vnd.fujifilm.fb.jfi+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.fujitsu.oasys": {
+    source: "iana",
+    extensions: [
+      "oas"
+    ]
+  },
+  "application/vnd.fujitsu.oasys2": {
+    source: "iana",
+    extensions: [
+      "oa2"
+    ]
+  },
+  "application/vnd.fujitsu.oasys3": {
+    source: "iana",
+    extensions: [
+      "oa3"
+    ]
+  },
+  "application/vnd.fujitsu.oasysgp": {
+    source: "iana",
+    extensions: [
+      "fg5"
+    ]
+  },
+  "application/vnd.fujitsu.oasysprs": {
+    source: "iana",
+    extensions: [
+      "bh2"
+    ]
+  },
+  "application/vnd.fujixerox.art-ex": {
+    source: "iana"
+  },
+  "application/vnd.fujixerox.art4": {
+    source: "iana"
+  },
+  "application/vnd.fujixerox.ddd": {
+    source: "iana",
+    extensions: [
+      "ddd"
+    ]
+  },
+  "application/vnd.fujixerox.docuworks": {
+    source: "iana",
+    extensions: [
+      "xdw"
+    ]
+  },
+  "application/vnd.fujixerox.docuworks.binder": {
+    source: "iana",
+    extensions: [
+      "xbd"
+    ]
+  },
+  "application/vnd.fujixerox.docuworks.container": {
+    source: "iana"
+  },
+  "application/vnd.fujixerox.hbpl": {
+    source: "iana"
+  },
+  "application/vnd.fut-misnet": {
+    source: "iana"
+  },
+  "application/vnd.futoin+cbor": {
+    source: "iana"
+  },
+  "application/vnd.futoin+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.fuzzysheet": {
+    source: "iana",
+    extensions: [
+      "fzs"
+    ]
+  },
+  "application/vnd.genomatix.tuxedo": {
+    source: "iana",
+    extensions: [
+      "txd"
+    ]
+  },
+  "application/vnd.gentics.grd+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.geo+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.geocube+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.geogebra.file": {
+    source: "iana",
+    extensions: [
+      "ggb"
+    ]
+  },
+  "application/vnd.geogebra.slides": {
+    source: "iana"
+  },
+  "application/vnd.geogebra.tool": {
+    source: "iana",
+    extensions: [
+      "ggt"
+    ]
+  },
+  "application/vnd.geometry-explorer": {
+    source: "iana",
+    extensions: [
+      "gex",
+      "gre"
+    ]
+  },
+  "application/vnd.geonext": {
+    source: "iana",
+    extensions: [
+      "gxt"
+    ]
+  },
+  "application/vnd.geoplan": {
+    source: "iana",
+    extensions: [
+      "g2w"
+    ]
+  },
+  "application/vnd.geospace": {
+    source: "iana",
+    extensions: [
+      "g3w"
+    ]
+  },
+  "application/vnd.gerber": {
+    source: "iana"
+  },
+  "application/vnd.globalplatform.card-content-mgt": {
+    source: "iana"
+  },
+  "application/vnd.globalplatform.card-content-mgt-response": {
+    source: "iana"
+  },
+  "application/vnd.gmx": {
+    source: "iana",
+    extensions: [
+      "gmx"
+    ]
+  },
+  "application/vnd.google-apps.document": {
+    compressible: false,
+    extensions: [
+      "gdoc"
+    ]
+  },
+  "application/vnd.google-apps.presentation": {
+    compressible: false,
+    extensions: [
+      "gslides"
+    ]
+  },
+  "application/vnd.google-apps.spreadsheet": {
+    compressible: false,
+    extensions: [
+      "gsheet"
+    ]
+  },
+  "application/vnd.google-earth.kml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "kml"
+    ]
+  },
+  "application/vnd.google-earth.kmz": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "kmz"
+    ]
+  },
+  "application/vnd.gov.sk.e-form+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.gov.sk.e-form+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.gov.sk.xmldatacontainer+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.grafeq": {
+    source: "iana",
+    extensions: [
+      "gqf",
+      "gqs"
+    ]
+  },
+  "application/vnd.gridmp": {
+    source: "iana"
+  },
+  "application/vnd.groove-account": {
+    source: "iana",
+    extensions: [
+      "gac"
+    ]
+  },
+  "application/vnd.groove-help": {
+    source: "iana",
+    extensions: [
+      "ghf"
+    ]
+  },
+  "application/vnd.groove-identity-message": {
+    source: "iana",
+    extensions: [
+      "gim"
+    ]
+  },
+  "application/vnd.groove-injector": {
+    source: "iana",
+    extensions: [
+      "grv"
+    ]
+  },
+  "application/vnd.groove-tool-message": {
+    source: "iana",
+    extensions: [
+      "gtm"
+    ]
+  },
+  "application/vnd.groove-tool-template": {
+    source: "iana",
+    extensions: [
+      "tpl"
+    ]
+  },
+  "application/vnd.groove-vcard": {
+    source: "iana",
+    extensions: [
+      "vcg"
+    ]
+  },
+  "application/vnd.hal+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hal+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "hal"
+    ]
+  },
+  "application/vnd.handheld-entertainment+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "zmm"
+    ]
+  },
+  "application/vnd.hbci": {
+    source: "iana",
+    extensions: [
+      "hbci"
+    ]
+  },
+  "application/vnd.hc+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hcl-bireports": {
+    source: "iana"
+  },
+  "application/vnd.hdt": {
+    source: "iana"
+  },
+  "application/vnd.heroku+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hhe.lesson-player": {
+    source: "iana",
+    extensions: [
+      "les"
+    ]
+  },
+  "application/vnd.hl7cda+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.hl7v2+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.hp-hpgl": {
+    source: "iana",
+    extensions: [
+      "hpgl"
+    ]
+  },
+  "application/vnd.hp-hpid": {
+    source: "iana",
+    extensions: [
+      "hpid"
+    ]
+  },
+  "application/vnd.hp-hps": {
+    source: "iana",
+    extensions: [
+      "hps"
+    ]
+  },
+  "application/vnd.hp-jlyt": {
+    source: "iana",
+    extensions: [
+      "jlt"
+    ]
+  },
+  "application/vnd.hp-pcl": {
+    source: "iana",
+    extensions: [
+      "pcl"
+    ]
+  },
+  "application/vnd.hp-pclxl": {
+    source: "iana",
+    extensions: [
+      "pclxl"
+    ]
+  },
+  "application/vnd.httphone": {
+    source: "iana"
+  },
+  "application/vnd.hydrostatix.sof-data": {
+    source: "iana",
+    extensions: [
+      "sfd-hdstx"
+    ]
+  },
+  "application/vnd.hyper+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hyper-item+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hyperdrive+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.hzn-3d-crossword": {
+    source: "iana"
+  },
+  "application/vnd.ibm.afplinedata": {
+    source: "iana"
+  },
+  "application/vnd.ibm.electronic-media": {
+    source: "iana"
+  },
+  "application/vnd.ibm.minipay": {
+    source: "iana",
+    extensions: [
+      "mpy"
+    ]
+  },
+  "application/vnd.ibm.modcap": {
+    source: "iana",
+    extensions: [
+      "afp",
+      "listafp",
+      "list3820"
+    ]
+  },
+  "application/vnd.ibm.rights-management": {
+    source: "iana",
+    extensions: [
+      "irm"
+    ]
+  },
+  "application/vnd.ibm.secure-container": {
+    source: "iana",
+    extensions: [
+      "sc"
+    ]
+  },
+  "application/vnd.iccprofile": {
+    source: "iana",
+    extensions: [
+      "icc",
+      "icm"
+    ]
+  },
+  "application/vnd.ieee.1905": {
+    source: "iana"
+  },
+  "application/vnd.igloader": {
+    source: "iana",
+    extensions: [
+      "igl"
+    ]
+  },
+  "application/vnd.imagemeter.folder+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.imagemeter.image+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.immervision-ivp": {
+    source: "iana",
+    extensions: [
+      "ivp"
+    ]
+  },
+  "application/vnd.immervision-ivu": {
+    source: "iana",
+    extensions: [
+      "ivu"
+    ]
+  },
+  "application/vnd.ims.imsccv1p1": {
+    source: "iana"
+  },
+  "application/vnd.ims.imsccv1p2": {
+    source: "iana"
+  },
+  "application/vnd.ims.imsccv1p3": {
+    source: "iana"
+  },
+  "application/vnd.ims.lis.v2.result+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ims.lti.v2.toolconsumerprofile+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ims.lti.v2.toolproxy+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ims.lti.v2.toolproxy.id+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ims.lti.v2.toolsettings+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ims.lti.v2.toolsettings.simple+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.informedcontrol.rms+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.informix-visionary": {
+    source: "iana"
+  },
+  "application/vnd.infotech.project": {
+    source: "iana"
+  },
+  "application/vnd.infotech.project+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.innopath.wamp.notification": {
+    source: "iana"
+  },
+  "application/vnd.insors.igm": {
+    source: "iana",
+    extensions: [
+      "igm"
+    ]
+  },
+  "application/vnd.intercon.formnet": {
+    source: "iana",
+    extensions: [
+      "xpw",
+      "xpx"
+    ]
+  },
+  "application/vnd.intergeo": {
+    source: "iana",
+    extensions: [
+      "i2g"
+    ]
+  },
+  "application/vnd.intertrust.digibox": {
+    source: "iana"
+  },
+  "application/vnd.intertrust.nncp": {
+    source: "iana"
+  },
+  "application/vnd.intu.qbo": {
+    source: "iana",
+    extensions: [
+      "qbo"
+    ]
+  },
+  "application/vnd.intu.qfx": {
+    source: "iana",
+    extensions: [
+      "qfx"
+    ]
+  },
+  "application/vnd.iptc.g2.catalogitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.conceptitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.knowledgeitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.newsitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.newsmessage+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.packageitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.iptc.g2.planningitem+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ipunplugged.rcprofile": {
+    source: "iana",
+    extensions: [
+      "rcprofile"
+    ]
+  },
+  "application/vnd.irepository.package+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "irp"
+    ]
+  },
+  "application/vnd.is-xpr": {
+    source: "iana",
+    extensions: [
+      "xpr"
+    ]
+  },
+  "application/vnd.isac.fcs": {
+    source: "iana",
+    extensions: [
+      "fcs"
+    ]
+  },
+  "application/vnd.iso11783-10+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.jam": {
+    source: "iana",
+    extensions: [
+      "jam"
+    ]
+  },
+  "application/vnd.japannet-directory-service": {
+    source: "iana"
+  },
+  "application/vnd.japannet-jpnstore-wakeup": {
+    source: "iana"
+  },
+  "application/vnd.japannet-payment-wakeup": {
+    source: "iana"
+  },
+  "application/vnd.japannet-registration": {
+    source: "iana"
+  },
+  "application/vnd.japannet-registration-wakeup": {
+    source: "iana"
+  },
+  "application/vnd.japannet-setstore-wakeup": {
+    source: "iana"
+  },
+  "application/vnd.japannet-verification": {
+    source: "iana"
+  },
+  "application/vnd.japannet-verification-wakeup": {
+    source: "iana"
+  },
+  "application/vnd.jcp.javame.midlet-rms": {
+    source: "iana",
+    extensions: [
+      "rms"
+    ]
+  },
+  "application/vnd.jisp": {
+    source: "iana",
+    extensions: [
+      "jisp"
+    ]
+  },
+  "application/vnd.joost.joda-archive": {
+    source: "iana",
+    extensions: [
+      "joda"
+    ]
+  },
+  "application/vnd.jsk.isdn-ngn": {
+    source: "iana"
+  },
+  "application/vnd.kahootz": {
+    source: "iana",
+    extensions: [
+      "ktz",
+      "ktr"
+    ]
+  },
+  "application/vnd.kde.karbon": {
+    source: "iana",
+    extensions: [
+      "karbon"
+    ]
+  },
+  "application/vnd.kde.kchart": {
+    source: "iana",
+    extensions: [
+      "chrt"
+    ]
+  },
+  "application/vnd.kde.kformula": {
+    source: "iana",
+    extensions: [
+      "kfo"
+    ]
+  },
+  "application/vnd.kde.kivio": {
+    source: "iana",
+    extensions: [
+      "flw"
+    ]
+  },
+  "application/vnd.kde.kontour": {
+    source: "iana",
+    extensions: [
+      "kon"
+    ]
+  },
+  "application/vnd.kde.kpresenter": {
+    source: "iana",
+    extensions: [
+      "kpr",
+      "kpt"
+    ]
+  },
+  "application/vnd.kde.kspread": {
+    source: "iana",
+    extensions: [
+      "ksp"
+    ]
+  },
+  "application/vnd.kde.kword": {
+    source: "iana",
+    extensions: [
+      "kwd",
+      "kwt"
+    ]
+  },
+  "application/vnd.kenameaapp": {
+    source: "iana",
+    extensions: [
+      "htke"
+    ]
+  },
+  "application/vnd.kidspiration": {
+    source: "iana",
+    extensions: [
+      "kia"
+    ]
+  },
+  "application/vnd.kinar": {
+    source: "iana",
+    extensions: [
+      "kne",
+      "knp"
+    ]
+  },
+  "application/vnd.koan": {
+    source: "iana",
+    extensions: [
+      "skp",
+      "skd",
+      "skt",
+      "skm"
+    ]
+  },
+  "application/vnd.kodak-descriptor": {
+    source: "iana",
+    extensions: [
+      "sse"
+    ]
+  },
+  "application/vnd.las": {
+    source: "iana"
+  },
+  "application/vnd.las.las+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.las.las+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "lasxml"
+    ]
+  },
+  "application/vnd.laszip": {
+    source: "iana"
+  },
+  "application/vnd.leap+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.liberty-request+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.llamagraphics.life-balance.desktop": {
+    source: "iana",
+    extensions: [
+      "lbd"
+    ]
+  },
+  "application/vnd.llamagraphics.life-balance.exchange+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "lbe"
+    ]
+  },
+  "application/vnd.logipipe.circuit+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.loom": {
+    source: "iana"
+  },
+  "application/vnd.lotus-1-2-3": {
+    source: "iana",
+    extensions: [
+      "123"
+    ]
+  },
+  "application/vnd.lotus-approach": {
+    source: "iana",
+    extensions: [
+      "apr"
+    ]
+  },
+  "application/vnd.lotus-freelance": {
+    source: "iana",
+    extensions: [
+      "pre"
+    ]
+  },
+  "application/vnd.lotus-notes": {
+    source: "iana",
+    extensions: [
+      "nsf"
+    ]
+  },
+  "application/vnd.lotus-organizer": {
+    source: "iana",
+    extensions: [
+      "org"
+    ]
+  },
+  "application/vnd.lotus-screencam": {
+    source: "iana",
+    extensions: [
+      "scm"
+    ]
+  },
+  "application/vnd.lotus-wordpro": {
+    source: "iana",
+    extensions: [
+      "lwp"
+    ]
+  },
+  "application/vnd.macports.portpkg": {
+    source: "iana",
+    extensions: [
+      "portpkg"
+    ]
+  },
+  "application/vnd.mapbox-vector-tile": {
+    source: "iana",
+    extensions: [
+      "mvt"
+    ]
+  },
+  "application/vnd.marlin.drm.actiontoken+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.marlin.drm.conftoken+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.marlin.drm.license+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.marlin.drm.mdcf": {
+    source: "iana"
+  },
+  "application/vnd.mason+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.maxar.archive.3tz+zip": {
+    source: "iana",
+    compressible: false
+  },
+  "application/vnd.maxmind.maxmind-db": {
+    source: "iana"
+  },
+  "application/vnd.mcd": {
+    source: "iana",
+    extensions: [
+      "mcd"
+    ]
+  },
+  "application/vnd.medcalcdata": {
+    source: "iana",
+    extensions: [
+      "mc1"
+    ]
+  },
+  "application/vnd.mediastation.cdkey": {
+    source: "iana",
+    extensions: [
+      "cdkey"
+    ]
+  },
+  "application/vnd.meridian-slingshot": {
+    source: "iana"
+  },
+  "application/vnd.mfer": {
+    source: "iana",
+    extensions: [
+      "mwf"
+    ]
+  },
+  "application/vnd.mfmp": {
+    source: "iana",
+    extensions: [
+      "mfm"
+    ]
+  },
+  "application/vnd.micro+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.micrografx.flo": {
+    source: "iana",
+    extensions: [
+      "flo"
+    ]
+  },
+  "application/vnd.micrografx.igx": {
+    source: "iana",
+    extensions: [
+      "igx"
+    ]
+  },
+  "application/vnd.microsoft.portable-executable": {
+    source: "iana"
+  },
+  "application/vnd.microsoft.windows.thumbnail-cache": {
+    source: "iana"
+  },
+  "application/vnd.miele+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.mif": {
+    source: "iana",
+    extensions: [
+      "mif"
+    ]
+  },
+  "application/vnd.minisoft-hp3000-save": {
+    source: "iana"
+  },
+  "application/vnd.mitsubishi.misty-guard.trustweb": {
+    source: "iana"
+  },
+  "application/vnd.mobius.daf": {
+    source: "iana",
+    extensions: [
+      "daf"
+    ]
+  },
+  "application/vnd.mobius.dis": {
+    source: "iana",
+    extensions: [
+      "dis"
+    ]
+  },
+  "application/vnd.mobius.mbk": {
+    source: "iana",
+    extensions: [
+      "mbk"
+    ]
+  },
+  "application/vnd.mobius.mqy": {
+    source: "iana",
+    extensions: [
+      "mqy"
+    ]
+  },
+  "application/vnd.mobius.msl": {
+    source: "iana",
+    extensions: [
+      "msl"
+    ]
+  },
+  "application/vnd.mobius.plc": {
+    source: "iana",
+    extensions: [
+      "plc"
+    ]
+  },
+  "application/vnd.mobius.txf": {
+    source: "iana",
+    extensions: [
+      "txf"
+    ]
+  },
+  "application/vnd.mophun.application": {
+    source: "iana",
+    extensions: [
+      "mpn"
+    ]
+  },
+  "application/vnd.mophun.certificate": {
+    source: "iana",
+    extensions: [
+      "mpc"
+    ]
+  },
+  "application/vnd.motorola.flexsuite": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.adsi": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.fis": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.gotap": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.kmr": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.ttc": {
+    source: "iana"
+  },
+  "application/vnd.motorola.flexsuite.wem": {
+    source: "iana"
+  },
+  "application/vnd.motorola.iprm": {
+    source: "iana"
+  },
+  "application/vnd.mozilla.xul+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xul"
+    ]
+  },
+  "application/vnd.ms-3mfdocument": {
+    source: "iana"
+  },
+  "application/vnd.ms-artgalry": {
+    source: "iana",
+    extensions: [
+      "cil"
+    ]
+  },
+  "application/vnd.ms-asf": {
+    source: "iana"
+  },
+  "application/vnd.ms-cab-compressed": {
+    source: "iana",
+    extensions: [
+      "cab"
+    ]
+  },
+  "application/vnd.ms-color.iccprofile": {
+    source: "apache"
+  },
+  "application/vnd.ms-excel": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "xls",
+      "xlm",
+      "xla",
+      "xlc",
+      "xlt",
+      "xlw"
+    ]
+  },
+  "application/vnd.ms-excel.addin.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "xlam"
+    ]
+  },
+  "application/vnd.ms-excel.sheet.binary.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "xlsb"
+    ]
+  },
+  "application/vnd.ms-excel.sheet.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "xlsm"
+    ]
+  },
+  "application/vnd.ms-excel.template.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "xltm"
+    ]
+  },
+  "application/vnd.ms-fontobject": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "eot"
+    ]
+  },
+  "application/vnd.ms-htmlhelp": {
+    source: "iana",
+    extensions: [
+      "chm"
+    ]
+  },
+  "application/vnd.ms-ims": {
+    source: "iana",
+    extensions: [
+      "ims"
+    ]
+  },
+  "application/vnd.ms-lrm": {
+    source: "iana",
+    extensions: [
+      "lrm"
+    ]
+  },
+  "application/vnd.ms-office.activex+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ms-officetheme": {
+    source: "iana",
+    extensions: [
+      "thmx"
+    ]
+  },
+  "application/vnd.ms-opentype": {
+    source: "apache",
+    compressible: true
+  },
+  "application/vnd.ms-outlook": {
+    compressible: false,
+    extensions: [
+      "msg"
+    ]
+  },
+  "application/vnd.ms-package.obfuscated-opentype": {
+    source: "apache"
+  },
+  "application/vnd.ms-pki.seccat": {
+    source: "apache",
+    extensions: [
+      "cat"
+    ]
+  },
+  "application/vnd.ms-pki.stl": {
+    source: "apache",
+    extensions: [
+      "stl"
+    ]
+  },
+  "application/vnd.ms-playready.initiator+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ms-powerpoint": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "ppt",
+      "pps",
+      "pot"
+    ]
+  },
+  "application/vnd.ms-powerpoint.addin.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "ppam"
+    ]
+  },
+  "application/vnd.ms-powerpoint.presentation.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "pptm"
+    ]
+  },
+  "application/vnd.ms-powerpoint.slide.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "sldm"
+    ]
+  },
+  "application/vnd.ms-powerpoint.slideshow.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "ppsm"
+    ]
+  },
+  "application/vnd.ms-powerpoint.template.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "potm"
+    ]
+  },
+  "application/vnd.ms-printdevicecapabilities+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ms-printing.printticket+xml": {
+    source: "apache",
+    compressible: true
+  },
+  "application/vnd.ms-printschematicket+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ms-project": {
+    source: "iana",
+    extensions: [
+      "mpp",
+      "mpt"
+    ]
+  },
+  "application/vnd.ms-tnef": {
+    source: "iana"
+  },
+  "application/vnd.ms-windows.devicepairing": {
+    source: "iana"
+  },
+  "application/vnd.ms-windows.nwprinting.oob": {
+    source: "iana"
+  },
+  "application/vnd.ms-windows.printerpairing": {
+    source: "iana"
+  },
+  "application/vnd.ms-windows.wsd.oob": {
+    source: "iana"
+  },
+  "application/vnd.ms-wmdrm.lic-chlg-req": {
+    source: "iana"
+  },
+  "application/vnd.ms-wmdrm.lic-resp": {
+    source: "iana"
+  },
+  "application/vnd.ms-wmdrm.meter-chlg-req": {
+    source: "iana"
+  },
+  "application/vnd.ms-wmdrm.meter-resp": {
+    source: "iana"
+  },
+  "application/vnd.ms-word.document.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "docm"
+    ]
+  },
+  "application/vnd.ms-word.template.macroenabled.12": {
+    source: "iana",
+    extensions: [
+      "dotm"
+    ]
+  },
+  "application/vnd.ms-works": {
+    source: "iana",
+    extensions: [
+      "wps",
+      "wks",
+      "wcm",
+      "wdb"
+    ]
+  },
+  "application/vnd.ms-wpl": {
+    source: "iana",
+    extensions: [
+      "wpl"
+    ]
+  },
+  "application/vnd.ms-xpsdocument": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "xps"
+    ]
+  },
+  "application/vnd.msa-disk-image": {
+    source: "iana"
+  },
+  "application/vnd.mseq": {
+    source: "iana",
+    extensions: [
+      "mseq"
+    ]
+  },
+  "application/vnd.msign": {
+    source: "iana"
+  },
+  "application/vnd.multiad.creator": {
+    source: "iana"
+  },
+  "application/vnd.multiad.creator.cif": {
+    source: "iana"
+  },
+  "application/vnd.music-niff": {
+    source: "iana"
+  },
+  "application/vnd.musician": {
+    source: "iana",
+    extensions: [
+      "mus"
+    ]
+  },
+  "application/vnd.muvee.style": {
+    source: "iana",
+    extensions: [
+      "msty"
+    ]
+  },
+  "application/vnd.mynfc": {
+    source: "iana",
+    extensions: [
+      "taglet"
+    ]
+  },
+  "application/vnd.nacamar.ybrid+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.ncd.control": {
+    source: "iana"
+  },
+  "application/vnd.ncd.reference": {
+    source: "iana"
+  },
+  "application/vnd.nearst.inv+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nebumind.line": {
+    source: "iana"
+  },
+  "application/vnd.nervana": {
+    source: "iana"
+  },
+  "application/vnd.netfpx": {
+    source: "iana"
+  },
+  "application/vnd.neurolanguage.nlu": {
+    source: "iana",
+    extensions: [
+      "nlu"
+    ]
+  },
+  "application/vnd.nimn": {
+    source: "iana"
+  },
+  "application/vnd.nintendo.nitro.rom": {
+    source: "iana"
+  },
+  "application/vnd.nintendo.snes.rom": {
+    source: "iana"
+  },
+  "application/vnd.nitf": {
+    source: "iana",
+    extensions: [
+      "ntf",
+      "nitf"
+    ]
+  },
+  "application/vnd.noblenet-directory": {
+    source: "iana",
+    extensions: [
+      "nnd"
+    ]
+  },
+  "application/vnd.noblenet-sealer": {
+    source: "iana",
+    extensions: [
+      "nns"
+    ]
+  },
+  "application/vnd.noblenet-web": {
+    source: "iana",
+    extensions: [
+      "nnw"
+    ]
+  },
+  "application/vnd.nokia.catalogs": {
+    source: "iana"
+  },
+  "application/vnd.nokia.conml+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.nokia.conml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nokia.iptv.config+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nokia.isds-radio-presets": {
+    source: "iana"
+  },
+  "application/vnd.nokia.landmark+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.nokia.landmark+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nokia.landmarkcollection+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nokia.n-gage.ac+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ac"
+    ]
+  },
+  "application/vnd.nokia.n-gage.data": {
+    source: "iana",
+    extensions: [
+      "ngdat"
+    ]
+  },
+  "application/vnd.nokia.n-gage.symbian.install": {
+    source: "iana",
+    extensions: [
+      "n-gage"
+    ]
+  },
+  "application/vnd.nokia.ncd": {
+    source: "iana"
+  },
+  "application/vnd.nokia.pcd+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.nokia.pcd+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.nokia.radio-preset": {
+    source: "iana",
+    extensions: [
+      "rpst"
+    ]
+  },
+  "application/vnd.nokia.radio-presets": {
+    source: "iana",
+    extensions: [
+      "rpss"
+    ]
+  },
+  "application/vnd.novadigm.edm": {
+    source: "iana",
+    extensions: [
+      "edm"
+    ]
+  },
+  "application/vnd.novadigm.edx": {
+    source: "iana",
+    extensions: [
+      "edx"
+    ]
+  },
+  "application/vnd.novadigm.ext": {
+    source: "iana",
+    extensions: [
+      "ext"
+    ]
+  },
+  "application/vnd.ntt-local.content-share": {
+    source: "iana"
+  },
+  "application/vnd.ntt-local.file-transfer": {
+    source: "iana"
+  },
+  "application/vnd.ntt-local.ogw_remote-access": {
+    source: "iana"
+  },
+  "application/vnd.ntt-local.sip-ta_remote": {
+    source: "iana"
+  },
+  "application/vnd.ntt-local.sip-ta_tcp_stream": {
+    source: "iana"
+  },
+  "application/vnd.oasis.opendocument.chart": {
+    source: "iana",
+    extensions: [
+      "odc"
+    ]
+  },
+  "application/vnd.oasis.opendocument.chart-template": {
+    source: "iana",
+    extensions: [
+      "otc"
+    ]
+  },
+  "application/vnd.oasis.opendocument.database": {
+    source: "iana",
+    extensions: [
+      "odb"
+    ]
+  },
+  "application/vnd.oasis.opendocument.formula": {
+    source: "iana",
+    extensions: [
+      "odf"
+    ]
+  },
+  "application/vnd.oasis.opendocument.formula-template": {
+    source: "iana",
+    extensions: [
+      "odft"
+    ]
+  },
+  "application/vnd.oasis.opendocument.graphics": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "odg"
+    ]
+  },
+  "application/vnd.oasis.opendocument.graphics-template": {
+    source: "iana",
+    extensions: [
+      "otg"
+    ]
+  },
+  "application/vnd.oasis.opendocument.image": {
+    source: "iana",
+    extensions: [
+      "odi"
+    ]
+  },
+  "application/vnd.oasis.opendocument.image-template": {
+    source: "iana",
+    extensions: [
+      "oti"
+    ]
+  },
+  "application/vnd.oasis.opendocument.presentation": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "odp"
+    ]
+  },
+  "application/vnd.oasis.opendocument.presentation-template": {
+    source: "iana",
+    extensions: [
+      "otp"
+    ]
+  },
+  "application/vnd.oasis.opendocument.spreadsheet": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "ods"
+    ]
+  },
+  "application/vnd.oasis.opendocument.spreadsheet-template": {
+    source: "iana",
+    extensions: [
+      "ots"
+    ]
+  },
+  "application/vnd.oasis.opendocument.text": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "odt"
+    ]
+  },
+  "application/vnd.oasis.opendocument.text-master": {
+    source: "iana",
+    extensions: [
+      "odm"
+    ]
+  },
+  "application/vnd.oasis.opendocument.text-template": {
+    source: "iana",
+    extensions: [
+      "ott"
+    ]
+  },
+  "application/vnd.oasis.opendocument.text-web": {
+    source: "iana",
+    extensions: [
+      "oth"
+    ]
+  },
+  "application/vnd.obn": {
+    source: "iana"
+  },
+  "application/vnd.ocf+cbor": {
+    source: "iana"
+  },
+  "application/vnd.oci.image.manifest.v1+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oftn.l10n+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.contentaccessdownload+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.contentaccessstreaming+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.cspg-hexbinary": {
+    source: "iana"
+  },
+  "application/vnd.oipf.dae.svg+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.dae.xhtml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.mippvcontrolmessage+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.pae.gem": {
+    source: "iana"
+  },
+  "application/vnd.oipf.spdiscovery+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.spdlist+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.ueprofile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oipf.userprofile+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.olpc-sugar": {
+    source: "iana",
+    extensions: [
+      "xo"
+    ]
+  },
+  "application/vnd.oma-scws-config": {
+    source: "iana"
+  },
+  "application/vnd.oma-scws-http-request": {
+    source: "iana"
+  },
+  "application/vnd.oma-scws-http-response": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.associated-procedure-parameter+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.drm-trigger+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.imd+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.ltkm": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.notification+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.provisioningtrigger": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.sgboot": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.sgdd+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.sgdu": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.simple-symbol-container": {
+    source: "iana"
+  },
+  "application/vnd.oma.bcast.smartcard-trigger+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.sprov+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.bcast.stkm": {
+    source: "iana"
+  },
+  "application/vnd.oma.cab-address-book+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.cab-feature-handler+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.cab-pcc+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.cab-subs-invite+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.cab-user-prefs+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.dcd": {
+    source: "iana"
+  },
+  "application/vnd.oma.dcdc": {
+    source: "iana"
+  },
+  "application/vnd.oma.dd2+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "dd2"
+    ]
+  },
+  "application/vnd.oma.drm.risd+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.group-usage-list+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.lwm2m+cbor": {
+    source: "iana"
+  },
+  "application/vnd.oma.lwm2m+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.lwm2m+tlv": {
+    source: "iana"
+  },
+  "application/vnd.oma.pal+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.poc.detailed-progress-report+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.poc.final-report+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.poc.groups+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.poc.invocation-descriptor+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.poc.optimized-progress-report+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.push": {
+    source: "iana"
+  },
+  "application/vnd.oma.scidm.messages+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oma.xcap-directory+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.omads-email+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.omads-file+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.omads-folder+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.omaloc-supl-init": {
+    source: "iana"
+  },
+  "application/vnd.onepager": {
+    source: "iana"
+  },
+  "application/vnd.onepagertamp": {
+    source: "iana"
+  },
+  "application/vnd.onepagertamx": {
+    source: "iana"
+  },
+  "application/vnd.onepagertat": {
+    source: "iana"
+  },
+  "application/vnd.onepagertatp": {
+    source: "iana"
+  },
+  "application/vnd.onepagertatx": {
+    source: "iana"
+  },
+  "application/vnd.openblox.game+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "obgx"
+    ]
+  },
+  "application/vnd.openblox.game-binary": {
+    source: "iana"
+  },
+  "application/vnd.openeye.oeb": {
+    source: "iana"
+  },
+  "application/vnd.openofficeorg.extension": {
+    source: "apache",
+    extensions: [
+      "oxt"
+    ]
+  },
+  "application/vnd.openstreetmap.data+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "osm"
+    ]
+  },
+  "application/vnd.opentimestamps.ots": {
+    source: "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.custom-properties+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.customxmlproperties+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawing+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.chart+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.chartshapes+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramcolors+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramdata+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramlayout+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.drawingml.diagramstyle+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.extended-properties+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.commentauthors+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.comments+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.handoutmaster+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.notesmaster+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.notesslide+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "pptx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.presprops+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slide": {
+    source: "iana",
+    extensions: [
+      "sldx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slide+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slidelayout+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slidemaster+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow": {
+    source: "iana",
+    extensions: [
+      "ppsx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideshow.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.slideupdateinfo+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.tablestyles+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.tags+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.template": {
+    source: "iana",
+    extensions: [
+      "potx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.template.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.presentationml.viewprops+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.calcchain+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.connections+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.dialogsheet+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.externallink+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcachedefinition+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivotcacherecords+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.pivottable+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.querytable+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionheaders+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.revisionlog+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedstrings+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "xlsx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheetmetadata+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.tablesinglecells+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.template": {
+    source: "iana",
+    extensions: [
+      "xltx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.usernames+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.volatiledependencies+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.theme+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.themeoverride+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.vmldrawing": {
+    source: "iana"
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "docx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.fonttable+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.template": {
+    source: "iana",
+    extensions: [
+      "dotx"
+    ]
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.websettings+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-package.core-properties+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-package.digital-signature-xmlsignature+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.openxmlformats-package.relationships+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oracle.resource+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.orange.indata": {
+    source: "iana"
+  },
+  "application/vnd.osa.netdeploy": {
+    source: "iana"
+  },
+  "application/vnd.osgeo.mapguide.package": {
+    source: "iana",
+    extensions: [
+      "mgp"
+    ]
+  },
+  "application/vnd.osgi.bundle": {
+    source: "iana"
+  },
+  "application/vnd.osgi.dp": {
+    source: "iana",
+    extensions: [
+      "dp"
+    ]
+  },
+  "application/vnd.osgi.subsystem": {
+    source: "iana",
+    extensions: [
+      "esa"
+    ]
+  },
+  "application/vnd.otps.ct-kip+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.oxli.countgraph": {
+    source: "iana"
+  },
+  "application/vnd.pagerduty+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.palm": {
+    source: "iana",
+    extensions: [
+      "pdb",
+      "pqa",
+      "oprc"
+    ]
+  },
+  "application/vnd.panoply": {
+    source: "iana"
+  },
+  "application/vnd.paos.xml": {
+    source: "iana"
+  },
+  "application/vnd.patentdive": {
+    source: "iana"
+  },
+  "application/vnd.patientecommsdoc": {
+    source: "iana"
+  },
+  "application/vnd.pawaafile": {
+    source: "iana",
+    extensions: [
+      "paw"
+    ]
+  },
+  "application/vnd.pcos": {
+    source: "iana"
+  },
+  "application/vnd.pg.format": {
+    source: "iana",
+    extensions: [
+      "str"
+    ]
+  },
+  "application/vnd.pg.osasli": {
+    source: "iana",
+    extensions: [
+      "ei6"
+    ]
+  },
+  "application/vnd.piaccess.application-licence": {
+    source: "iana"
+  },
+  "application/vnd.picsel": {
+    source: "iana",
+    extensions: [
+      "efif"
+    ]
+  },
+  "application/vnd.pmi.widget": {
+    source: "iana",
+    extensions: [
+      "wg"
+    ]
+  },
+  "application/vnd.poc.group-advertisement+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.pocketlearn": {
+    source: "iana",
+    extensions: [
+      "plf"
+    ]
+  },
+  "application/vnd.powerbuilder6": {
+    source: "iana",
+    extensions: [
+      "pbd"
+    ]
+  },
+  "application/vnd.powerbuilder6-s": {
+    source: "iana"
+  },
+  "application/vnd.powerbuilder7": {
+    source: "iana"
+  },
+  "application/vnd.powerbuilder7-s": {
+    source: "iana"
+  },
+  "application/vnd.powerbuilder75": {
+    source: "iana"
+  },
+  "application/vnd.powerbuilder75-s": {
+    source: "iana"
+  },
+  "application/vnd.preminet": {
+    source: "iana"
+  },
+  "application/vnd.previewsystems.box": {
+    source: "iana",
+    extensions: [
+      "box"
+    ]
+  },
+  "application/vnd.proteus.magazine": {
+    source: "iana",
+    extensions: [
+      "mgz"
+    ]
+  },
+  "application/vnd.psfs": {
+    source: "iana"
+  },
+  "application/vnd.publishare-delta-tree": {
+    source: "iana",
+    extensions: [
+      "qps"
+    ]
+  },
+  "application/vnd.pvi.ptid1": {
+    source: "iana",
+    extensions: [
+      "ptid"
+    ]
+  },
+  "application/vnd.pwg-multiplexed": {
+    source: "iana"
+  },
+  "application/vnd.pwg-xhtml-print+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.qualcomm.brew-app-res": {
+    source: "iana"
+  },
+  "application/vnd.quarantainenet": {
+    source: "iana"
+  },
+  "application/vnd.quark.quarkxpress": {
+    source: "iana",
+    extensions: [
+      "qxd",
+      "qxt",
+      "qwd",
+      "qwt",
+      "qxl",
+      "qxb"
+    ]
+  },
+  "application/vnd.quobject-quoxdocument": {
+    source: "iana"
+  },
+  "application/vnd.radisys.moml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-audit+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-audit-conf+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-audit-conn+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-audit-dialog+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-audit-stream+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-conf+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-base+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-fax-detect+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-fax-sendrecv+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-group+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-speech+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.radisys.msml-dialog-transform+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.rainstor.data": {
+    source: "iana"
+  },
+  "application/vnd.rapid": {
+    source: "iana"
+  },
+  "application/vnd.rar": {
+    source: "iana",
+    extensions: [
+      "rar"
+    ]
+  },
+  "application/vnd.realvnc.bed": {
+    source: "iana",
+    extensions: [
+      "bed"
+    ]
+  },
+  "application/vnd.recordare.musicxml": {
+    source: "iana",
+    extensions: [
+      "mxl"
+    ]
+  },
+  "application/vnd.recordare.musicxml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "musicxml"
+    ]
+  },
+  "application/vnd.renlearn.rlprint": {
+    source: "iana"
+  },
+  "application/vnd.resilient.logic": {
+    source: "iana"
+  },
+  "application/vnd.restful+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.rig.cryptonote": {
+    source: "iana",
+    extensions: [
+      "cryptonote"
+    ]
+  },
+  "application/vnd.rim.cod": {
+    source: "apache",
+    extensions: [
+      "cod"
+    ]
+  },
+  "application/vnd.rn-realmedia": {
+    source: "apache",
+    extensions: [
+      "rm"
+    ]
+  },
+  "application/vnd.rn-realmedia-vbr": {
+    source: "apache",
+    extensions: [
+      "rmvb"
+    ]
+  },
+  "application/vnd.route66.link66+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "link66"
+    ]
+  },
+  "application/vnd.rs-274x": {
+    source: "iana"
+  },
+  "application/vnd.ruckus.download": {
+    source: "iana"
+  },
+  "application/vnd.s3sms": {
+    source: "iana"
+  },
+  "application/vnd.sailingtracker.track": {
+    source: "iana",
+    extensions: [
+      "st"
+    ]
+  },
+  "application/vnd.sar": {
+    source: "iana"
+  },
+  "application/vnd.sbm.cid": {
+    source: "iana"
+  },
+  "application/vnd.sbm.mid2": {
+    source: "iana"
+  },
+  "application/vnd.scribus": {
+    source: "iana"
+  },
+  "application/vnd.sealed.3df": {
+    source: "iana"
+  },
+  "application/vnd.sealed.csf": {
+    source: "iana"
+  },
+  "application/vnd.sealed.doc": {
+    source: "iana"
+  },
+  "application/vnd.sealed.eml": {
+    source: "iana"
+  },
+  "application/vnd.sealed.mht": {
+    source: "iana"
+  },
+  "application/vnd.sealed.net": {
+    source: "iana"
+  },
+  "application/vnd.sealed.ppt": {
+    source: "iana"
+  },
+  "application/vnd.sealed.tiff": {
+    source: "iana"
+  },
+  "application/vnd.sealed.xls": {
+    source: "iana"
+  },
+  "application/vnd.sealedmedia.softseal.html": {
+    source: "iana"
+  },
+  "application/vnd.sealedmedia.softseal.pdf": {
+    source: "iana"
+  },
+  "application/vnd.seemail": {
+    source: "iana",
+    extensions: [
+      "see"
+    ]
+  },
+  "application/vnd.seis+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.sema": {
+    source: "iana",
+    extensions: [
+      "sema"
+    ]
+  },
+  "application/vnd.semd": {
+    source: "iana",
+    extensions: [
+      "semd"
+    ]
+  },
+  "application/vnd.semf": {
+    source: "iana",
+    extensions: [
+      "semf"
+    ]
+  },
+  "application/vnd.shade-save-file": {
+    source: "iana"
+  },
+  "application/vnd.shana.informed.formdata": {
+    source: "iana",
+    extensions: [
+      "ifm"
+    ]
+  },
+  "application/vnd.shana.informed.formtemplate": {
+    source: "iana",
+    extensions: [
+      "itp"
+    ]
+  },
+  "application/vnd.shana.informed.interchange": {
+    source: "iana",
+    extensions: [
+      "iif"
+    ]
+  },
+  "application/vnd.shana.informed.package": {
+    source: "iana",
+    extensions: [
+      "ipk"
+    ]
+  },
+  "application/vnd.shootproof+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.shopkick+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.shp": {
+    source: "iana"
+  },
+  "application/vnd.shx": {
+    source: "iana"
+  },
+  "application/vnd.sigrok.session": {
+    source: "iana"
+  },
+  "application/vnd.simtech-mindmapper": {
+    source: "iana",
+    extensions: [
+      "twd",
+      "twds"
+    ]
+  },
+  "application/vnd.siren+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.smaf": {
+    source: "iana",
+    extensions: [
+      "mmf"
+    ]
+  },
+  "application/vnd.smart.notebook": {
+    source: "iana"
+  },
+  "application/vnd.smart.teacher": {
+    source: "iana",
+    extensions: [
+      "teacher"
+    ]
+  },
+  "application/vnd.snesdev-page-table": {
+    source: "iana"
+  },
+  "application/vnd.software602.filler.form+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "fo"
+    ]
+  },
+  "application/vnd.software602.filler.form-xml-zip": {
+    source: "iana"
+  },
+  "application/vnd.solent.sdkm+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "sdkm",
+      "sdkd"
+    ]
+  },
+  "application/vnd.spotfire.dxp": {
+    source: "iana",
+    extensions: [
+      "dxp"
+    ]
+  },
+  "application/vnd.spotfire.sfs": {
+    source: "iana",
+    extensions: [
+      "sfs"
+    ]
+  },
+  "application/vnd.sqlite3": {
+    source: "iana"
+  },
+  "application/vnd.sss-cod": {
+    source: "iana"
+  },
+  "application/vnd.sss-dtf": {
+    source: "iana"
+  },
+  "application/vnd.sss-ntf": {
+    source: "iana"
+  },
+  "application/vnd.stardivision.calc": {
+    source: "apache",
+    extensions: [
+      "sdc"
+    ]
+  },
+  "application/vnd.stardivision.draw": {
+    source: "apache",
+    extensions: [
+      "sda"
+    ]
+  },
+  "application/vnd.stardivision.impress": {
+    source: "apache",
+    extensions: [
+      "sdd"
+    ]
+  },
+  "application/vnd.stardivision.math": {
+    source: "apache",
+    extensions: [
+      "smf"
+    ]
+  },
+  "application/vnd.stardivision.writer": {
+    source: "apache",
+    extensions: [
+      "sdw",
+      "vor"
+    ]
+  },
+  "application/vnd.stardivision.writer-global": {
+    source: "apache",
+    extensions: [
+      "sgl"
+    ]
+  },
+  "application/vnd.stepmania.package": {
+    source: "iana",
+    extensions: [
+      "smzip"
+    ]
+  },
+  "application/vnd.stepmania.stepchart": {
+    source: "iana",
+    extensions: [
+      "sm"
+    ]
+  },
+  "application/vnd.street-stream": {
+    source: "iana"
+  },
+  "application/vnd.sun.wadl+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wadl"
+    ]
+  },
+  "application/vnd.sun.xml.calc": {
+    source: "apache",
+    extensions: [
+      "sxc"
+    ]
+  },
+  "application/vnd.sun.xml.calc.template": {
+    source: "apache",
+    extensions: [
+      "stc"
+    ]
+  },
+  "application/vnd.sun.xml.draw": {
+    source: "apache",
+    extensions: [
+      "sxd"
+    ]
+  },
+  "application/vnd.sun.xml.draw.template": {
+    source: "apache",
+    extensions: [
+      "std"
+    ]
+  },
+  "application/vnd.sun.xml.impress": {
+    source: "apache",
+    extensions: [
+      "sxi"
+    ]
+  },
+  "application/vnd.sun.xml.impress.template": {
+    source: "apache",
+    extensions: [
+      "sti"
+    ]
+  },
+  "application/vnd.sun.xml.math": {
+    source: "apache",
+    extensions: [
+      "sxm"
+    ]
+  },
+  "application/vnd.sun.xml.writer": {
+    source: "apache",
+    extensions: [
+      "sxw"
+    ]
+  },
+  "application/vnd.sun.xml.writer.global": {
+    source: "apache",
+    extensions: [
+      "sxg"
+    ]
+  },
+  "application/vnd.sun.xml.writer.template": {
+    source: "apache",
+    extensions: [
+      "stw"
+    ]
+  },
+  "application/vnd.sus-calendar": {
+    source: "iana",
+    extensions: [
+      "sus",
+      "susp"
+    ]
+  },
+  "application/vnd.svd": {
+    source: "iana",
+    extensions: [
+      "svd"
+    ]
+  },
+  "application/vnd.swiftview-ics": {
+    source: "iana"
+  },
+  "application/vnd.sycle+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.syft+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.symbian.install": {
+    source: "apache",
+    extensions: [
+      "sis",
+      "sisx"
+    ]
+  },
+  "application/vnd.syncml+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "xsm"
+    ]
+  },
+  "application/vnd.syncml.dm+wbxml": {
+    source: "iana",
+    charset: "UTF-8",
+    extensions: [
+      "bdm"
+    ]
+  },
+  "application/vnd.syncml.dm+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "xdm"
+    ]
+  },
+  "application/vnd.syncml.dm.notification": {
+    source: "iana"
+  },
+  "application/vnd.syncml.dmddf+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.syncml.dmddf+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "ddf"
+    ]
+  },
+  "application/vnd.syncml.dmtnds+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.syncml.dmtnds+xml": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true
+  },
+  "application/vnd.syncml.ds.notification": {
+    source: "iana"
+  },
+  "application/vnd.tableschema+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.tao.intent-module-archive": {
+    source: "iana",
+    extensions: [
+      "tao"
+    ]
+  },
+  "application/vnd.tcpdump.pcap": {
+    source: "iana",
+    extensions: [
+      "pcap",
+      "cap",
+      "dmp"
+    ]
+  },
+  "application/vnd.think-cell.ppttc+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.tmd.mediaflex.api+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.tml": {
+    source: "iana"
+  },
+  "application/vnd.tmobile-livetv": {
+    source: "iana",
+    extensions: [
+      "tmo"
+    ]
+  },
+  "application/vnd.tri.onesource": {
+    source: "iana"
+  },
+  "application/vnd.trid.tpt": {
+    source: "iana",
+    extensions: [
+      "tpt"
+    ]
+  },
+  "application/vnd.triscape.mxs": {
+    source: "iana",
+    extensions: [
+      "mxs"
+    ]
+  },
+  "application/vnd.trueapp": {
+    source: "iana",
+    extensions: [
+      "tra"
+    ]
+  },
+  "application/vnd.truedoc": {
+    source: "iana"
+  },
+  "application/vnd.ubisoft.webplayer": {
+    source: "iana"
+  },
+  "application/vnd.ufdl": {
+    source: "iana",
+    extensions: [
+      "ufd",
+      "ufdl"
+    ]
+  },
+  "application/vnd.uiq.theme": {
+    source: "iana",
+    extensions: [
+      "utz"
+    ]
+  },
+  "application/vnd.umajin": {
+    source: "iana",
+    extensions: [
+      "umj"
+    ]
+  },
+  "application/vnd.unity": {
+    source: "iana",
+    extensions: [
+      "unityweb"
+    ]
+  },
+  "application/vnd.uoml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "uoml"
+    ]
+  },
+  "application/vnd.uplanet.alert": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.alert-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.bearer-choice": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.bearer-choice-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.cacheop": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.cacheop-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.channel": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.channel-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.list": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.list-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.listcmd": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.listcmd-wbxml": {
+    source: "iana"
+  },
+  "application/vnd.uplanet.signal": {
+    source: "iana"
+  },
+  "application/vnd.uri-map": {
+    source: "iana"
+  },
+  "application/vnd.valve.source.material": {
+    source: "iana"
+  },
+  "application/vnd.vcx": {
+    source: "iana",
+    extensions: [
+      "vcx"
+    ]
+  },
+  "application/vnd.vd-study": {
+    source: "iana"
+  },
+  "application/vnd.vectorworks": {
+    source: "iana"
+  },
+  "application/vnd.vel+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.verimatrix.vcas": {
+    source: "iana"
+  },
+  "application/vnd.veritone.aion+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.veryant.thin": {
+    source: "iana"
+  },
+  "application/vnd.ves.encrypted": {
+    source: "iana"
+  },
+  "application/vnd.vidsoft.vidconference": {
+    source: "iana"
+  },
+  "application/vnd.visio": {
+    source: "iana",
+    extensions: [
+      "vsd",
+      "vst",
+      "vss",
+      "vsw"
+    ]
+  },
+  "application/vnd.visionary": {
+    source: "iana",
+    extensions: [
+      "vis"
+    ]
+  },
+  "application/vnd.vividence.scriptfile": {
+    source: "iana"
+  },
+  "application/vnd.vsf": {
+    source: "iana",
+    extensions: [
+      "vsf"
+    ]
+  },
+  "application/vnd.wap.sic": {
+    source: "iana"
+  },
+  "application/vnd.wap.slc": {
+    source: "iana"
+  },
+  "application/vnd.wap.wbxml": {
+    source: "iana",
+    charset: "UTF-8",
+    extensions: [
+      "wbxml"
+    ]
+  },
+  "application/vnd.wap.wmlc": {
+    source: "iana",
+    extensions: [
+      "wmlc"
+    ]
+  },
+  "application/vnd.wap.wmlscriptc": {
+    source: "iana",
+    extensions: [
+      "wmlsc"
+    ]
+  },
+  "application/vnd.webturbo": {
+    source: "iana",
+    extensions: [
+      "wtb"
+    ]
+  },
+  "application/vnd.wfa.dpp": {
+    source: "iana"
+  },
+  "application/vnd.wfa.p2p": {
+    source: "iana"
+  },
+  "application/vnd.wfa.wsc": {
+    source: "iana"
+  },
+  "application/vnd.windows.devicepairing": {
+    source: "iana"
+  },
+  "application/vnd.wmc": {
+    source: "iana"
+  },
+  "application/vnd.wmf.bootstrap": {
+    source: "iana"
+  },
+  "application/vnd.wolfram.mathematica": {
+    source: "iana"
+  },
+  "application/vnd.wolfram.mathematica.package": {
+    source: "iana"
+  },
+  "application/vnd.wolfram.player": {
+    source: "iana",
+    extensions: [
+      "nbp"
+    ]
+  },
+  "application/vnd.wordperfect": {
+    source: "iana",
+    extensions: [
+      "wpd"
+    ]
+  },
+  "application/vnd.wqd": {
+    source: "iana",
+    extensions: [
+      "wqd"
+    ]
+  },
+  "application/vnd.wrq-hp3000-labelled": {
+    source: "iana"
+  },
+  "application/vnd.wt.stf": {
+    source: "iana",
+    extensions: [
+      "stf"
+    ]
+  },
+  "application/vnd.wv.csp+wbxml": {
+    source: "iana"
+  },
+  "application/vnd.wv.csp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.wv.ssp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.xacml+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.xara": {
+    source: "iana",
+    extensions: [
+      "xar"
+    ]
+  },
+  "application/vnd.xfdl": {
+    source: "iana",
+    extensions: [
+      "xfdl"
+    ]
+  },
+  "application/vnd.xfdl.webform": {
+    source: "iana"
+  },
+  "application/vnd.xmi+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vnd.xmpie.cpkg": {
+    source: "iana"
+  },
+  "application/vnd.xmpie.dpkg": {
+    source: "iana"
+  },
+  "application/vnd.xmpie.plan": {
+    source: "iana"
+  },
+  "application/vnd.xmpie.ppkg": {
+    source: "iana"
+  },
+  "application/vnd.xmpie.xlim": {
+    source: "iana"
+  },
+  "application/vnd.yamaha.hv-dic": {
+    source: "iana",
+    extensions: [
+      "hvd"
+    ]
+  },
+  "application/vnd.yamaha.hv-script": {
+    source: "iana",
+    extensions: [
+      "hvs"
+    ]
+  },
+  "application/vnd.yamaha.hv-voice": {
+    source: "iana",
+    extensions: [
+      "hvp"
+    ]
+  },
+  "application/vnd.yamaha.openscoreformat": {
+    source: "iana",
+    extensions: [
+      "osf"
+    ]
+  },
+  "application/vnd.yamaha.openscoreformat.osfpvg+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "osfpvg"
+    ]
+  },
+  "application/vnd.yamaha.remote-setup": {
+    source: "iana"
+  },
+  "application/vnd.yamaha.smaf-audio": {
+    source: "iana",
+    extensions: [
+      "saf"
+    ]
+  },
+  "application/vnd.yamaha.smaf-phrase": {
+    source: "iana",
+    extensions: [
+      "spf"
+    ]
+  },
+  "application/vnd.yamaha.through-ngn": {
+    source: "iana"
+  },
+  "application/vnd.yamaha.tunnel-udpencap": {
+    source: "iana"
+  },
+  "application/vnd.yaoweme": {
+    source: "iana"
+  },
+  "application/vnd.yellowriver-custom-menu": {
+    source: "iana",
+    extensions: [
+      "cmp"
+    ]
+  },
+  "application/vnd.youtube.yt": {
+    source: "iana"
+  },
+  "application/vnd.zul": {
+    source: "iana",
+    extensions: [
+      "zir",
+      "zirz"
+    ]
+  },
+  "application/vnd.zzazz.deck+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "zaz"
+    ]
+  },
+  "application/voicexml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "vxml"
+    ]
+  },
+  "application/voucher-cms+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/vq-rtcpxr": {
+    source: "iana"
+  },
+  "application/wasm": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wasm"
+    ]
+  },
+  "application/watcherinfo+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wif"
+    ]
+  },
+  "application/webpush-options+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/whoispp-query": {
+    source: "iana"
+  },
+  "application/whoispp-response": {
+    source: "iana"
+  },
+  "application/widget": {
+    source: "iana",
+    extensions: [
+      "wgt"
+    ]
+  },
+  "application/winhlp": {
+    source: "apache",
+    extensions: [
+      "hlp"
+    ]
+  },
+  "application/wita": {
+    source: "iana"
+  },
+  "application/wordperfect5.1": {
+    source: "iana"
+  },
+  "application/wsdl+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wsdl"
+    ]
+  },
+  "application/wspolicy+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "wspolicy"
+    ]
+  },
+  "application/x-7z-compressed": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "7z"
+    ]
+  },
+  "application/x-abiword": {
+    source: "apache",
+    extensions: [
+      "abw"
+    ]
+  },
+  "application/x-ace-compressed": {
+    source: "apache",
+    extensions: [
+      "ace"
+    ]
+  },
+  "application/x-amf": {
+    source: "apache"
+  },
+  "application/x-apple-diskimage": {
+    source: "apache",
+    extensions: [
+      "dmg"
+    ]
+  },
+  "application/x-arj": {
+    compressible: false,
+    extensions: [
+      "arj"
+    ]
+  },
+  "application/x-authorware-bin": {
+    source: "apache",
+    extensions: [
+      "aab",
+      "x32",
+      "u32",
+      "vox"
+    ]
+  },
+  "application/x-authorware-map": {
+    source: "apache",
+    extensions: [
+      "aam"
+    ]
+  },
+  "application/x-authorware-seg": {
+    source: "apache",
+    extensions: [
+      "aas"
+    ]
+  },
+  "application/x-bcpio": {
+    source: "apache",
+    extensions: [
+      "bcpio"
+    ]
+  },
+  "application/x-bdoc": {
+    compressible: false,
+    extensions: [
+      "bdoc"
+    ]
+  },
+  "application/x-bittorrent": {
+    source: "apache",
+    extensions: [
+      "torrent"
+    ]
+  },
+  "application/x-blorb": {
+    source: "apache",
+    extensions: [
+      "blb",
+      "blorb"
+    ]
+  },
+  "application/x-bzip": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "bz"
+    ]
+  },
+  "application/x-bzip2": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "bz2",
+      "boz"
+    ]
+  },
+  "application/x-cbr": {
+    source: "apache",
+    extensions: [
+      "cbr",
+      "cba",
+      "cbt",
+      "cbz",
+      "cb7"
+    ]
+  },
+  "application/x-cdlink": {
+    source: "apache",
+    extensions: [
+      "vcd"
+    ]
+  },
+  "application/x-cfs-compressed": {
+    source: "apache",
+    extensions: [
+      "cfs"
+    ]
+  },
+  "application/x-chat": {
+    source: "apache",
+    extensions: [
+      "chat"
+    ]
+  },
+  "application/x-chess-pgn": {
+    source: "apache",
+    extensions: [
+      "pgn"
+    ]
+  },
+  "application/x-chrome-extension": {
+    extensions: [
+      "crx"
+    ]
+  },
+  "application/x-cocoa": {
+    source: "nginx",
+    extensions: [
+      "cco"
+    ]
+  },
+  "application/x-compress": {
+    source: "apache"
+  },
+  "application/x-conference": {
+    source: "apache",
+    extensions: [
+      "nsc"
+    ]
+  },
+  "application/x-cpio": {
+    source: "apache",
+    extensions: [
+      "cpio"
+    ]
+  },
+  "application/x-csh": {
+    source: "apache",
+    extensions: [
+      "csh"
+    ]
+  },
+  "application/x-deb": {
+    compressible: false
+  },
+  "application/x-debian-package": {
+    source: "apache",
+    extensions: [
+      "deb",
+      "udeb"
+    ]
+  },
+  "application/x-dgc-compressed": {
+    source: "apache",
+    extensions: [
+      "dgc"
+    ]
+  },
+  "application/x-director": {
+    source: "apache",
+    extensions: [
+      "dir",
+      "dcr",
+      "dxr",
+      "cst",
+      "cct",
+      "cxt",
+      "w3d",
+      "fgd",
+      "swa"
+    ]
+  },
+  "application/x-doom": {
+    source: "apache",
+    extensions: [
+      "wad"
+    ]
+  },
+  "application/x-dtbncx+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "ncx"
+    ]
+  },
+  "application/x-dtbook+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "dtb"
+    ]
+  },
+  "application/x-dtbresource+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "res"
+    ]
+  },
+  "application/x-dvi": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "dvi"
+    ]
+  },
+  "application/x-envoy": {
+    source: "apache",
+    extensions: [
+      "evy"
+    ]
+  },
+  "application/x-eva": {
+    source: "apache",
+    extensions: [
+      "eva"
+    ]
+  },
+  "application/x-font-bdf": {
+    source: "apache",
+    extensions: [
+      "bdf"
+    ]
+  },
+  "application/x-font-dos": {
+    source: "apache"
+  },
+  "application/x-font-framemaker": {
+    source: "apache"
+  },
+  "application/x-font-ghostscript": {
+    source: "apache",
+    extensions: [
+      "gsf"
+    ]
+  },
+  "application/x-font-libgrx": {
+    source: "apache"
+  },
+  "application/x-font-linux-psf": {
+    source: "apache",
+    extensions: [
+      "psf"
+    ]
+  },
+  "application/x-font-pcf": {
+    source: "apache",
+    extensions: [
+      "pcf"
+    ]
+  },
+  "application/x-font-snf": {
+    source: "apache",
+    extensions: [
+      "snf"
+    ]
+  },
+  "application/x-font-speedo": {
+    source: "apache"
+  },
+  "application/x-font-sunos-news": {
+    source: "apache"
+  },
+  "application/x-font-type1": {
+    source: "apache",
+    extensions: [
+      "pfa",
+      "pfb",
+      "pfm",
+      "afm"
+    ]
+  },
+  "application/x-font-vfont": {
+    source: "apache"
+  },
+  "application/x-freearc": {
+    source: "apache",
+    extensions: [
+      "arc"
+    ]
+  },
+  "application/x-futuresplash": {
+    source: "apache",
+    extensions: [
+      "spl"
+    ]
+  },
+  "application/x-gca-compressed": {
+    source: "apache",
+    extensions: [
+      "gca"
+    ]
+  },
+  "application/x-glulx": {
+    source: "apache",
+    extensions: [
+      "ulx"
+    ]
+  },
+  "application/x-gnumeric": {
+    source: "apache",
+    extensions: [
+      "gnumeric"
+    ]
+  },
+  "application/x-gramps-xml": {
+    source: "apache",
+    extensions: [
+      "gramps"
+    ]
+  },
+  "application/x-gtar": {
+    source: "apache",
+    extensions: [
+      "gtar"
+    ]
+  },
+  "application/x-gzip": {
+    source: "apache"
+  },
+  "application/x-hdf": {
+    source: "apache",
+    extensions: [
+      "hdf"
+    ]
+  },
+  "application/x-httpd-php": {
+    compressible: true,
+    extensions: [
+      "php"
+    ]
+  },
+  "application/x-install-instructions": {
+    source: "apache",
+    extensions: [
+      "install"
+    ]
+  },
+  "application/x-iso9660-image": {
+    source: "apache",
+    extensions: [
+      "iso"
+    ]
+  },
+  "application/x-iwork-keynote-sffkey": {
+    extensions: [
+      "key"
+    ]
+  },
+  "application/x-iwork-numbers-sffnumbers": {
+    extensions: [
+      "numbers"
+    ]
+  },
+  "application/x-iwork-pages-sffpages": {
+    extensions: [
+      "pages"
+    ]
+  },
+  "application/x-java-archive-diff": {
+    source: "nginx",
+    extensions: [
+      "jardiff"
+    ]
+  },
+  "application/x-java-jnlp-file": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "jnlp"
+    ]
+  },
+  "application/x-javascript": {
+    compressible: true
+  },
+  "application/x-keepass2": {
+    extensions: [
+      "kdbx"
+    ]
+  },
+  "application/x-latex": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "latex"
+    ]
+  },
+  "application/x-lua-bytecode": {
+    extensions: [
+      "luac"
+    ]
+  },
+  "application/x-lzh-compressed": {
+    source: "apache",
+    extensions: [
+      "lzh",
+      "lha"
+    ]
+  },
+  "application/x-makeself": {
+    source: "nginx",
+    extensions: [
+      "run"
+    ]
+  },
+  "application/x-mie": {
+    source: "apache",
+    extensions: [
+      "mie"
+    ]
+  },
+  "application/x-mobipocket-ebook": {
+    source: "apache",
+    extensions: [
+      "prc",
+      "mobi"
+    ]
+  },
+  "application/x-mpegurl": {
+    compressible: false
+  },
+  "application/x-ms-application": {
+    source: "apache",
+    extensions: [
+      "application"
+    ]
+  },
+  "application/x-ms-shortcut": {
+    source: "apache",
+    extensions: [
+      "lnk"
+    ]
+  },
+  "application/x-ms-wmd": {
+    source: "apache",
+    extensions: [
+      "wmd"
+    ]
+  },
+  "application/x-ms-wmz": {
+    source: "apache",
+    extensions: [
+      "wmz"
+    ]
+  },
+  "application/x-ms-xbap": {
+    source: "apache",
+    extensions: [
+      "xbap"
+    ]
+  },
+  "application/x-msaccess": {
+    source: "apache",
+    extensions: [
+      "mdb"
+    ]
+  },
+  "application/x-msbinder": {
+    source: "apache",
+    extensions: [
+      "obd"
+    ]
+  },
+  "application/x-mscardfile": {
+    source: "apache",
+    extensions: [
+      "crd"
+    ]
+  },
+  "application/x-msclip": {
+    source: "apache",
+    extensions: [
+      "clp"
+    ]
+  },
+  "application/x-msdos-program": {
+    extensions: [
+      "exe"
+    ]
+  },
+  "application/x-msdownload": {
+    source: "apache",
+    extensions: [
+      "exe",
+      "dll",
+      "com",
+      "bat",
+      "msi"
+    ]
+  },
+  "application/x-msmediaview": {
+    source: "apache",
+    extensions: [
+      "mvb",
+      "m13",
+      "m14"
+    ]
+  },
+  "application/x-msmetafile": {
+    source: "apache",
+    extensions: [
+      "wmf",
+      "wmz",
+      "emf",
+      "emz"
+    ]
+  },
+  "application/x-msmoney": {
+    source: "apache",
+    extensions: [
+      "mny"
+    ]
+  },
+  "application/x-mspublisher": {
+    source: "apache",
+    extensions: [
+      "pub"
+    ]
+  },
+  "application/x-msschedule": {
+    source: "apache",
+    extensions: [
+      "scd"
+    ]
+  },
+  "application/x-msterminal": {
+    source: "apache",
+    extensions: [
+      "trm"
+    ]
+  },
+  "application/x-mswrite": {
+    source: "apache",
+    extensions: [
+      "wri"
+    ]
+  },
+  "application/x-netcdf": {
+    source: "apache",
+    extensions: [
+      "nc",
+      "cdf"
+    ]
+  },
+  "application/x-ns-proxy-autoconfig": {
+    compressible: true,
+    extensions: [
+      "pac"
+    ]
+  },
+  "application/x-nzb": {
+    source: "apache",
+    extensions: [
+      "nzb"
+    ]
+  },
+  "application/x-perl": {
+    source: "nginx",
+    extensions: [
+      "pl",
+      "pm"
+    ]
+  },
+  "application/x-pilot": {
+    source: "nginx",
+    extensions: [
+      "prc",
+      "pdb"
+    ]
+  },
+  "application/x-pkcs12": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "p12",
+      "pfx"
+    ]
+  },
+  "application/x-pkcs7-certificates": {
+    source: "apache",
+    extensions: [
+      "p7b",
+      "spc"
+    ]
+  },
+  "application/x-pkcs7-certreqresp": {
+    source: "apache",
+    extensions: [
+      "p7r"
+    ]
+  },
+  "application/x-pki-message": {
+    source: "iana"
+  },
+  "application/x-rar-compressed": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "rar"
+    ]
+  },
+  "application/x-redhat-package-manager": {
+    source: "nginx",
+    extensions: [
+      "rpm"
+    ]
+  },
+  "application/x-research-info-systems": {
+    source: "apache",
+    extensions: [
+      "ris"
+    ]
+  },
+  "application/x-sea": {
+    source: "nginx",
+    extensions: [
+      "sea"
+    ]
+  },
+  "application/x-sh": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "sh"
+    ]
+  },
+  "application/x-shar": {
+    source: "apache",
+    extensions: [
+      "shar"
+    ]
+  },
+  "application/x-shockwave-flash": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "swf"
+    ]
+  },
+  "application/x-silverlight-app": {
+    source: "apache",
+    extensions: [
+      "xap"
+    ]
+  },
+  "application/x-sql": {
+    source: "apache",
+    extensions: [
+      "sql"
+    ]
+  },
+  "application/x-stuffit": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "sit"
+    ]
+  },
+  "application/x-stuffitx": {
+    source: "apache",
+    extensions: [
+      "sitx"
+    ]
+  },
+  "application/x-subrip": {
+    source: "apache",
+    extensions: [
+      "srt"
+    ]
+  },
+  "application/x-sv4cpio": {
+    source: "apache",
+    extensions: [
+      "sv4cpio"
+    ]
+  },
+  "application/x-sv4crc": {
+    source: "apache",
+    extensions: [
+      "sv4crc"
+    ]
+  },
+  "application/x-t3vm-image": {
+    source: "apache",
+    extensions: [
+      "t3"
+    ]
+  },
+  "application/x-tads": {
+    source: "apache",
+    extensions: [
+      "gam"
+    ]
+  },
+  "application/x-tar": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "tar"
+    ]
+  },
+  "application/x-tcl": {
+    source: "apache",
+    extensions: [
+      "tcl",
+      "tk"
+    ]
+  },
+  "application/x-tex": {
+    source: "apache",
+    extensions: [
+      "tex"
+    ]
+  },
+  "application/x-tex-tfm": {
+    source: "apache",
+    extensions: [
+      "tfm"
+    ]
+  },
+  "application/x-texinfo": {
+    source: "apache",
+    extensions: [
+      "texinfo",
+      "texi"
+    ]
+  },
+  "application/x-tgif": {
+    source: "apache",
+    extensions: [
+      "obj"
+    ]
+  },
+  "application/x-ustar": {
+    source: "apache",
+    extensions: [
+      "ustar"
+    ]
+  },
+  "application/x-virtualbox-hdd": {
+    compressible: true,
+    extensions: [
+      "hdd"
+    ]
+  },
+  "application/x-virtualbox-ova": {
+    compressible: true,
+    extensions: [
+      "ova"
+    ]
+  },
+  "application/x-virtualbox-ovf": {
+    compressible: true,
+    extensions: [
+      "ovf"
+    ]
+  },
+  "application/x-virtualbox-vbox": {
+    compressible: true,
+    extensions: [
+      "vbox"
+    ]
+  },
+  "application/x-virtualbox-vbox-extpack": {
+    compressible: false,
+    extensions: [
+      "vbox-extpack"
+    ]
+  },
+  "application/x-virtualbox-vdi": {
+    compressible: true,
+    extensions: [
+      "vdi"
+    ]
+  },
+  "application/x-virtualbox-vhd": {
+    compressible: true,
+    extensions: [
+      "vhd"
+    ]
+  },
+  "application/x-virtualbox-vmdk": {
+    compressible: true,
+    extensions: [
+      "vmdk"
+    ]
+  },
+  "application/x-wais-source": {
+    source: "apache",
+    extensions: [
+      "src"
+    ]
+  },
+  "application/x-web-app-manifest+json": {
+    compressible: true,
+    extensions: [
+      "webapp"
+    ]
+  },
+  "application/x-www-form-urlencoded": {
+    source: "iana",
+    compressible: true
+  },
+  "application/x-x509-ca-cert": {
+    source: "iana",
+    extensions: [
+      "der",
+      "crt",
+      "pem"
+    ]
+  },
+  "application/x-x509-ca-ra-cert": {
+    source: "iana"
+  },
+  "application/x-x509-next-ca-cert": {
+    source: "iana"
+  },
+  "application/x-xfig": {
+    source: "apache",
+    extensions: [
+      "fig"
+    ]
+  },
+  "application/x-xliff+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "xlf"
+    ]
+  },
+  "application/x-xpinstall": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "xpi"
+    ]
+  },
+  "application/x-xz": {
+    source: "apache",
+    extensions: [
+      "xz"
+    ]
+  },
+  "application/x-zmachine": {
+    source: "apache",
+    extensions: [
+      "z1",
+      "z2",
+      "z3",
+      "z4",
+      "z5",
+      "z6",
+      "z7",
+      "z8"
+    ]
+  },
+  "application/x400-bp": {
+    source: "iana"
+  },
+  "application/xacml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xaml+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "xaml"
+    ]
+  },
+  "application/xcap-att+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xav"
+    ]
+  },
+  "application/xcap-caps+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xca"
+    ]
+  },
+  "application/xcap-diff+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xdf"
+    ]
+  },
+  "application/xcap-el+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xel"
+    ]
+  },
+  "application/xcap-error+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xcap-ns+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xns"
+    ]
+  },
+  "application/xcon-conference-info+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xcon-conference-info-diff+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xenc+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xenc"
+    ]
+  },
+  "application/xhtml+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xhtml",
+      "xht"
+    ]
+  },
+  "application/xhtml-voice+xml": {
+    source: "apache",
+    compressible: true
+  },
+  "application/xliff+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xlf"
+    ]
+  },
+  "application/xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xml",
+      "xsl",
+      "xsd",
+      "rng"
+    ]
+  },
+  "application/xml-dtd": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "dtd"
+    ]
+  },
+  "application/xml-external-parsed-entity": {
+    source: "iana"
+  },
+  "application/xml-patch+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xmpp+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/xop+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xop"
+    ]
+  },
+  "application/xproc+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "xpl"
+    ]
+  },
+  "application/xslt+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xsl",
+      "xslt"
+    ]
+  },
+  "application/xspf+xml": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "xspf"
+    ]
+  },
+  "application/xv+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "mxml",
+      "xhvml",
+      "xvml",
+      "xvm"
+    ]
+  },
+  "application/yang": {
+    source: "iana",
+    extensions: [
+      "yang"
+    ]
+  },
+  "application/yang-data+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/yang-data+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/yang-patch+json": {
+    source: "iana",
+    compressible: true
+  },
+  "application/yang-patch+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "application/yin+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "yin"
+    ]
+  },
+  "application/zip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "zip"
+    ]
+  },
+  "application/zlib": {
+    source: "iana"
+  },
+  "application/zstd": {
+    source: "iana"
+  },
+  "audio/1d-interleaved-parityfec": {
+    source: "iana"
+  },
+  "audio/32kadpcm": {
+    source: "iana"
+  },
+  "audio/3gpp": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "3gpp"
+    ]
+  },
+  "audio/3gpp2": {
+    source: "iana"
+  },
+  "audio/aac": {
+    source: "iana"
+  },
+  "audio/ac3": {
+    source: "iana"
+  },
+  "audio/adpcm": {
+    source: "apache",
+    extensions: [
+      "adp"
+    ]
+  },
+  "audio/amr": {
+    source: "iana",
+    extensions: [
+      "amr"
+    ]
+  },
+  "audio/amr-wb": {
+    source: "iana"
+  },
+  "audio/amr-wb+": {
+    source: "iana"
+  },
+  "audio/aptx": {
+    source: "iana"
+  },
+  "audio/asc": {
+    source: "iana"
+  },
+  "audio/atrac-advanced-lossless": {
+    source: "iana"
+  },
+  "audio/atrac-x": {
+    source: "iana"
+  },
+  "audio/atrac3": {
+    source: "iana"
+  },
+  "audio/basic": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "au",
+      "snd"
+    ]
+  },
+  "audio/bv16": {
+    source: "iana"
+  },
+  "audio/bv32": {
+    source: "iana"
+  },
+  "audio/clearmode": {
+    source: "iana"
+  },
+  "audio/cn": {
+    source: "iana"
+  },
+  "audio/dat12": {
+    source: "iana"
+  },
+  "audio/dls": {
+    source: "iana"
+  },
+  "audio/dsr-es201108": {
+    source: "iana"
+  },
+  "audio/dsr-es202050": {
+    source: "iana"
+  },
+  "audio/dsr-es202211": {
+    source: "iana"
+  },
+  "audio/dsr-es202212": {
+    source: "iana"
+  },
+  "audio/dv": {
+    source: "iana"
+  },
+  "audio/dvi4": {
+    source: "iana"
+  },
+  "audio/eac3": {
+    source: "iana"
+  },
+  "audio/encaprtp": {
+    source: "iana"
+  },
+  "audio/evrc": {
+    source: "iana"
+  },
+  "audio/evrc-qcp": {
+    source: "iana"
+  },
+  "audio/evrc0": {
+    source: "iana"
+  },
+  "audio/evrc1": {
+    source: "iana"
+  },
+  "audio/evrcb": {
+    source: "iana"
+  },
+  "audio/evrcb0": {
+    source: "iana"
+  },
+  "audio/evrcb1": {
+    source: "iana"
+  },
+  "audio/evrcnw": {
+    source: "iana"
+  },
+  "audio/evrcnw0": {
+    source: "iana"
+  },
+  "audio/evrcnw1": {
+    source: "iana"
+  },
+  "audio/evrcwb": {
+    source: "iana"
+  },
+  "audio/evrcwb0": {
+    source: "iana"
+  },
+  "audio/evrcwb1": {
+    source: "iana"
+  },
+  "audio/evs": {
+    source: "iana"
+  },
+  "audio/flexfec": {
+    source: "iana"
+  },
+  "audio/fwdred": {
+    source: "iana"
+  },
+  "audio/g711-0": {
+    source: "iana"
+  },
+  "audio/g719": {
+    source: "iana"
+  },
+  "audio/g722": {
+    source: "iana"
+  },
+  "audio/g7221": {
+    source: "iana"
+  },
+  "audio/g723": {
+    source: "iana"
+  },
+  "audio/g726-16": {
+    source: "iana"
+  },
+  "audio/g726-24": {
+    source: "iana"
+  },
+  "audio/g726-32": {
+    source: "iana"
+  },
+  "audio/g726-40": {
+    source: "iana"
+  },
+  "audio/g728": {
+    source: "iana"
+  },
+  "audio/g729": {
+    source: "iana"
+  },
+  "audio/g7291": {
+    source: "iana"
+  },
+  "audio/g729d": {
+    source: "iana"
+  },
+  "audio/g729e": {
+    source: "iana"
+  },
+  "audio/gsm": {
+    source: "iana"
+  },
+  "audio/gsm-efr": {
+    source: "iana"
+  },
+  "audio/gsm-hr-08": {
+    source: "iana"
+  },
+  "audio/ilbc": {
+    source: "iana"
+  },
+  "audio/ip-mr_v2.5": {
+    source: "iana"
+  },
+  "audio/isac": {
+    source: "apache"
+  },
+  "audio/l16": {
+    source: "iana"
+  },
+  "audio/l20": {
+    source: "iana"
+  },
+  "audio/l24": {
+    source: "iana",
+    compressible: false
+  },
+  "audio/l8": {
+    source: "iana"
+  },
+  "audio/lpc": {
+    source: "iana"
+  },
+  "audio/melp": {
+    source: "iana"
+  },
+  "audio/melp1200": {
+    source: "iana"
+  },
+  "audio/melp2400": {
+    source: "iana"
+  },
+  "audio/melp600": {
+    source: "iana"
+  },
+  "audio/mhas": {
+    source: "iana"
+  },
+  "audio/midi": {
+    source: "apache",
+    extensions: [
+      "mid",
+      "midi",
+      "kar",
+      "rmi"
+    ]
+  },
+  "audio/mobile-xmf": {
+    source: "iana",
+    extensions: [
+      "mxmf"
+    ]
+  },
+  "audio/mp3": {
+    compressible: false,
+    extensions: [
+      "mp3"
+    ]
+  },
+  "audio/mp4": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "m4a",
+      "mp4a"
+    ]
+  },
+  "audio/mp4a-latm": {
+    source: "iana"
+  },
+  "audio/mpa": {
+    source: "iana"
+  },
+  "audio/mpa-robust": {
+    source: "iana"
+  },
+  "audio/mpeg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "mpga",
+      "mp2",
+      "mp2a",
+      "mp3",
+      "m2a",
+      "m3a"
+    ]
+  },
+  "audio/mpeg4-generic": {
+    source: "iana"
+  },
+  "audio/musepack": {
+    source: "apache"
+  },
+  "audio/ogg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "oga",
+      "ogg",
+      "spx",
+      "opus"
+    ]
+  },
+  "audio/opus": {
+    source: "iana"
+  },
+  "audio/parityfec": {
+    source: "iana"
+  },
+  "audio/pcma": {
+    source: "iana"
+  },
+  "audio/pcma-wb": {
+    source: "iana"
+  },
+  "audio/pcmu": {
+    source: "iana"
+  },
+  "audio/pcmu-wb": {
+    source: "iana"
+  },
+  "audio/prs.sid": {
+    source: "iana"
+  },
+  "audio/qcelp": {
+    source: "iana"
+  },
+  "audio/raptorfec": {
+    source: "iana"
+  },
+  "audio/red": {
+    source: "iana"
+  },
+  "audio/rtp-enc-aescm128": {
+    source: "iana"
+  },
+  "audio/rtp-midi": {
+    source: "iana"
+  },
+  "audio/rtploopback": {
+    source: "iana"
+  },
+  "audio/rtx": {
+    source: "iana"
+  },
+  "audio/s3m": {
+    source: "apache",
+    extensions: [
+      "s3m"
+    ]
+  },
+  "audio/scip": {
+    source: "iana"
+  },
+  "audio/silk": {
+    source: "apache",
+    extensions: [
+      "sil"
+    ]
+  },
+  "audio/smv": {
+    source: "iana"
+  },
+  "audio/smv-qcp": {
+    source: "iana"
+  },
+  "audio/smv0": {
+    source: "iana"
+  },
+  "audio/sofa": {
+    source: "iana"
+  },
+  "audio/sp-midi": {
+    source: "iana"
+  },
+  "audio/speex": {
+    source: "iana"
+  },
+  "audio/t140c": {
+    source: "iana"
+  },
+  "audio/t38": {
+    source: "iana"
+  },
+  "audio/telephone-event": {
+    source: "iana"
+  },
+  "audio/tetra_acelp": {
+    source: "iana"
+  },
+  "audio/tetra_acelp_bb": {
+    source: "iana"
+  },
+  "audio/tone": {
+    source: "iana"
+  },
+  "audio/tsvcis": {
+    source: "iana"
+  },
+  "audio/uemclip": {
+    source: "iana"
+  },
+  "audio/ulpfec": {
+    source: "iana"
+  },
+  "audio/usac": {
+    source: "iana"
+  },
+  "audio/vdvi": {
+    source: "iana"
+  },
+  "audio/vmr-wb": {
+    source: "iana"
+  },
+  "audio/vnd.3gpp.iufp": {
+    source: "iana"
+  },
+  "audio/vnd.4sb": {
+    source: "iana"
+  },
+  "audio/vnd.audiokoz": {
+    source: "iana"
+  },
+  "audio/vnd.celp": {
+    source: "iana"
+  },
+  "audio/vnd.cisco.nse": {
+    source: "iana"
+  },
+  "audio/vnd.cmles.radio-events": {
+    source: "iana"
+  },
+  "audio/vnd.cns.anp1": {
+    source: "iana"
+  },
+  "audio/vnd.cns.inf1": {
+    source: "iana"
+  },
+  "audio/vnd.dece.audio": {
+    source: "iana",
+    extensions: [
+      "uva",
+      "uvva"
+    ]
+  },
+  "audio/vnd.digital-winds": {
+    source: "iana",
+    extensions: [
+      "eol"
+    ]
+  },
+  "audio/vnd.dlna.adts": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.heaac.1": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.heaac.2": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.mlp": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.mps": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.pl2": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.pl2x": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.pl2z": {
+    source: "iana"
+  },
+  "audio/vnd.dolby.pulse.1": {
+    source: "iana"
+  },
+  "audio/vnd.dra": {
+    source: "iana",
+    extensions: [
+      "dra"
+    ]
+  },
+  "audio/vnd.dts": {
+    source: "iana",
+    extensions: [
+      "dts"
+    ]
+  },
+  "audio/vnd.dts.hd": {
+    source: "iana",
+    extensions: [
+      "dtshd"
+    ]
+  },
+  "audio/vnd.dts.uhd": {
+    source: "iana"
+  },
+  "audio/vnd.dvb.file": {
+    source: "iana"
+  },
+  "audio/vnd.everad.plj": {
+    source: "iana"
+  },
+  "audio/vnd.hns.audio": {
+    source: "iana"
+  },
+  "audio/vnd.lucent.voice": {
+    source: "iana",
+    extensions: [
+      "lvp"
+    ]
+  },
+  "audio/vnd.ms-playready.media.pya": {
+    source: "iana",
+    extensions: [
+      "pya"
+    ]
+  },
+  "audio/vnd.nokia.mobile-xmf": {
+    source: "iana"
+  },
+  "audio/vnd.nortel.vbk": {
+    source: "iana"
+  },
+  "audio/vnd.nuera.ecelp4800": {
+    source: "iana",
+    extensions: [
+      "ecelp4800"
+    ]
+  },
+  "audio/vnd.nuera.ecelp7470": {
+    source: "iana",
+    extensions: [
+      "ecelp7470"
+    ]
+  },
+  "audio/vnd.nuera.ecelp9600": {
+    source: "iana",
+    extensions: [
+      "ecelp9600"
+    ]
+  },
+  "audio/vnd.octel.sbc": {
+    source: "iana"
+  },
+  "audio/vnd.presonus.multitrack": {
+    source: "iana"
+  },
+  "audio/vnd.qcelp": {
+    source: "iana"
+  },
+  "audio/vnd.rhetorex.32kadpcm": {
+    source: "iana"
+  },
+  "audio/vnd.rip": {
+    source: "iana",
+    extensions: [
+      "rip"
+    ]
+  },
+  "audio/vnd.rn-realaudio": {
+    compressible: false
+  },
+  "audio/vnd.sealedmedia.softseal.mpeg": {
+    source: "iana"
+  },
+  "audio/vnd.vmx.cvsd": {
+    source: "iana"
+  },
+  "audio/vnd.wave": {
+    compressible: false
+  },
+  "audio/vorbis": {
+    source: "iana",
+    compressible: false
+  },
+  "audio/vorbis-config": {
+    source: "iana"
+  },
+  "audio/wav": {
+    compressible: false,
+    extensions: [
+      "wav"
+    ]
+  },
+  "audio/wave": {
+    compressible: false,
+    extensions: [
+      "wav"
+    ]
+  },
+  "audio/webm": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "weba"
+    ]
+  },
+  "audio/x-aac": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "aac"
+    ]
+  },
+  "audio/x-aiff": {
+    source: "apache",
+    extensions: [
+      "aif",
+      "aiff",
+      "aifc"
+    ]
+  },
+  "audio/x-caf": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "caf"
+    ]
+  },
+  "audio/x-flac": {
+    source: "apache",
+    extensions: [
+      "flac"
+    ]
+  },
+  "audio/x-m4a": {
+    source: "nginx",
+    extensions: [
+      "m4a"
+    ]
+  },
+  "audio/x-matroska": {
+    source: "apache",
+    extensions: [
+      "mka"
+    ]
+  },
+  "audio/x-mpegurl": {
+    source: "apache",
+    extensions: [
+      "m3u"
+    ]
+  },
+  "audio/x-ms-wax": {
+    source: "apache",
+    extensions: [
+      "wax"
+    ]
+  },
+  "audio/x-ms-wma": {
+    source: "apache",
+    extensions: [
+      "wma"
+    ]
+  },
+  "audio/x-pn-realaudio": {
+    source: "apache",
+    extensions: [
+      "ram",
+      "ra"
+    ]
+  },
+  "audio/x-pn-realaudio-plugin": {
+    source: "apache",
+    extensions: [
+      "rmp"
+    ]
+  },
+  "audio/x-realaudio": {
+    source: "nginx",
+    extensions: [
+      "ra"
+    ]
+  },
+  "audio/x-tta": {
+    source: "apache"
+  },
+  "audio/x-wav": {
+    source: "apache",
+    extensions: [
+      "wav"
+    ]
+  },
+  "audio/xm": {
+    source: "apache",
+    extensions: [
+      "xm"
+    ]
+  },
+  "chemical/x-cdx": {
+    source: "apache",
+    extensions: [
+      "cdx"
+    ]
+  },
+  "chemical/x-cif": {
+    source: "apache",
+    extensions: [
+      "cif"
+    ]
+  },
+  "chemical/x-cmdf": {
+    source: "apache",
+    extensions: [
+      "cmdf"
+    ]
+  },
+  "chemical/x-cml": {
+    source: "apache",
+    extensions: [
+      "cml"
+    ]
+  },
+  "chemical/x-csml": {
+    source: "apache",
+    extensions: [
+      "csml"
+    ]
+  },
+  "chemical/x-pdb": {
+    source: "apache"
+  },
+  "chemical/x-xyz": {
+    source: "apache",
+    extensions: [
+      "xyz"
+    ]
+  },
+  "font/collection": {
+    source: "iana",
+    extensions: [
+      "ttc"
+    ]
+  },
+  "font/otf": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "otf"
+    ]
+  },
+  "font/sfnt": {
+    source: "iana"
+  },
+  "font/ttf": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ttf"
+    ]
+  },
+  "font/woff": {
+    source: "iana",
+    extensions: [
+      "woff"
+    ]
+  },
+  "font/woff2": {
+    source: "iana",
+    extensions: [
+      "woff2"
+    ]
+  },
+  "image/aces": {
+    source: "iana",
+    extensions: [
+      "exr"
+    ]
+  },
+  "image/apng": {
+    compressible: false,
+    extensions: [
+      "apng"
+    ]
+  },
+  "image/avci": {
+    source: "iana",
+    extensions: [
+      "avci"
+    ]
+  },
+  "image/avcs": {
+    source: "iana",
+    extensions: [
+      "avcs"
+    ]
+  },
+  "image/avif": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "avif"
+    ]
+  },
+  "image/bmp": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "bmp"
+    ]
+  },
+  "image/cgm": {
+    source: "iana",
+    extensions: [
+      "cgm"
+    ]
+  },
+  "image/dicom-rle": {
+    source: "iana",
+    extensions: [
+      "drle"
+    ]
+  },
+  "image/emf": {
+    source: "iana",
+    extensions: [
+      "emf"
+    ]
+  },
+  "image/fits": {
+    source: "iana",
+    extensions: [
+      "fits"
+    ]
+  },
+  "image/g3fax": {
+    source: "iana",
+    extensions: [
+      "g3"
+    ]
+  },
+  "image/gif": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "gif"
+    ]
+  },
+  "image/heic": {
+    source: "iana",
+    extensions: [
+      "heic"
+    ]
+  },
+  "image/heic-sequence": {
+    source: "iana",
+    extensions: [
+      "heics"
+    ]
+  },
+  "image/heif": {
+    source: "iana",
+    extensions: [
+      "heif"
+    ]
+  },
+  "image/heif-sequence": {
+    source: "iana",
+    extensions: [
+      "heifs"
+    ]
+  },
+  "image/hej2k": {
+    source: "iana",
+    extensions: [
+      "hej2"
+    ]
+  },
+  "image/hsj2": {
+    source: "iana",
+    extensions: [
+      "hsj2"
+    ]
+  },
+  "image/ief": {
+    source: "iana",
+    extensions: [
+      "ief"
+    ]
+  },
+  "image/jls": {
+    source: "iana",
+    extensions: [
+      "jls"
+    ]
+  },
+  "image/jp2": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "jp2",
+      "jpg2"
+    ]
+  },
+  "image/jpeg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "jpeg",
+      "jpg",
+      "jpe"
+    ]
+  },
+  "image/jph": {
+    source: "iana",
+    extensions: [
+      "jph"
+    ]
+  },
+  "image/jphc": {
+    source: "iana",
+    extensions: [
+      "jhc"
+    ]
+  },
+  "image/jpm": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "jpm"
+    ]
+  },
+  "image/jpx": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "jpx",
+      "jpf"
+    ]
+  },
+  "image/jxr": {
+    source: "iana",
+    extensions: [
+      "jxr"
+    ]
+  },
+  "image/jxra": {
+    source: "iana",
+    extensions: [
+      "jxra"
+    ]
+  },
+  "image/jxrs": {
+    source: "iana",
+    extensions: [
+      "jxrs"
+    ]
+  },
+  "image/jxs": {
+    source: "iana",
+    extensions: [
+      "jxs"
+    ]
+  },
+  "image/jxsc": {
+    source: "iana",
+    extensions: [
+      "jxsc"
+    ]
+  },
+  "image/jxsi": {
+    source: "iana",
+    extensions: [
+      "jxsi"
+    ]
+  },
+  "image/jxss": {
+    source: "iana",
+    extensions: [
+      "jxss"
+    ]
+  },
+  "image/ktx": {
+    source: "iana",
+    extensions: [
+      "ktx"
+    ]
+  },
+  "image/ktx2": {
+    source: "iana",
+    extensions: [
+      "ktx2"
+    ]
+  },
+  "image/naplps": {
+    source: "iana"
+  },
+  "image/pjpeg": {
+    compressible: false
+  },
+  "image/png": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "png"
+    ]
+  },
+  "image/prs.btif": {
+    source: "iana",
+    extensions: [
+      "btif"
+    ]
+  },
+  "image/prs.pti": {
+    source: "iana",
+    extensions: [
+      "pti"
+    ]
+  },
+  "image/pwg-raster": {
+    source: "iana"
+  },
+  "image/sgi": {
+    source: "apache",
+    extensions: [
+      "sgi"
+    ]
+  },
+  "image/svg+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "svg",
+      "svgz"
+    ]
+  },
+  "image/t38": {
+    source: "iana",
+    extensions: [
+      "t38"
+    ]
+  },
+  "image/tiff": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "tif",
+      "tiff"
+    ]
+  },
+  "image/tiff-fx": {
+    source: "iana",
+    extensions: [
+      "tfx"
+    ]
+  },
+  "image/vnd.adobe.photoshop": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "psd"
+    ]
+  },
+  "image/vnd.airzip.accelerator.azv": {
+    source: "iana",
+    extensions: [
+      "azv"
+    ]
+  },
+  "image/vnd.cns.inf2": {
+    source: "iana"
+  },
+  "image/vnd.dece.graphic": {
+    source: "iana",
+    extensions: [
+      "uvi",
+      "uvvi",
+      "uvg",
+      "uvvg"
+    ]
+  },
+  "image/vnd.djvu": {
+    source: "iana",
+    extensions: [
+      "djvu",
+      "djv"
+    ]
+  },
+  "image/vnd.dvb.subtitle": {
+    source: "iana",
+    extensions: [
+      "sub"
+    ]
+  },
+  "image/vnd.dwg": {
+    source: "iana",
+    extensions: [
+      "dwg"
+    ]
+  },
+  "image/vnd.dxf": {
+    source: "iana",
+    extensions: [
+      "dxf"
+    ]
+  },
+  "image/vnd.fastbidsheet": {
+    source: "iana",
+    extensions: [
+      "fbs"
+    ]
+  },
+  "image/vnd.fpx": {
+    source: "iana",
+    extensions: [
+      "fpx"
+    ]
+  },
+  "image/vnd.fst": {
+    source: "iana",
+    extensions: [
+      "fst"
+    ]
+  },
+  "image/vnd.fujixerox.edmics-mmr": {
+    source: "iana",
+    extensions: [
+      "mmr"
+    ]
+  },
+  "image/vnd.fujixerox.edmics-rlc": {
+    source: "iana",
+    extensions: [
+      "rlc"
+    ]
+  },
+  "image/vnd.globalgraphics.pgb": {
+    source: "iana"
+  },
+  "image/vnd.microsoft.icon": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "ico"
+    ]
+  },
+  "image/vnd.mix": {
+    source: "iana"
+  },
+  "image/vnd.mozilla.apng": {
+    source: "iana"
+  },
+  "image/vnd.ms-dds": {
+    compressible: true,
+    extensions: [
+      "dds"
+    ]
+  },
+  "image/vnd.ms-modi": {
+    source: "iana",
+    extensions: [
+      "mdi"
+    ]
+  },
+  "image/vnd.ms-photo": {
+    source: "apache",
+    extensions: [
+      "wdp"
+    ]
+  },
+  "image/vnd.net-fpx": {
+    source: "iana",
+    extensions: [
+      "npx"
+    ]
+  },
+  "image/vnd.pco.b16": {
+    source: "iana",
+    extensions: [
+      "b16"
+    ]
+  },
+  "image/vnd.radiance": {
+    source: "iana"
+  },
+  "image/vnd.sealed.png": {
+    source: "iana"
+  },
+  "image/vnd.sealedmedia.softseal.gif": {
+    source: "iana"
+  },
+  "image/vnd.sealedmedia.softseal.jpg": {
+    source: "iana"
+  },
+  "image/vnd.svf": {
+    source: "iana"
+  },
+  "image/vnd.tencent.tap": {
+    source: "iana",
+    extensions: [
+      "tap"
+    ]
+  },
+  "image/vnd.valve.source.texture": {
+    source: "iana",
+    extensions: [
+      "vtf"
+    ]
+  },
+  "image/vnd.wap.wbmp": {
+    source: "iana",
+    extensions: [
+      "wbmp"
+    ]
+  },
+  "image/vnd.xiff": {
+    source: "iana",
+    extensions: [
+      "xif"
+    ]
+  },
+  "image/vnd.zbrush.pcx": {
+    source: "iana",
+    extensions: [
+      "pcx"
+    ]
+  },
+  "image/webp": {
+    source: "apache",
+    extensions: [
+      "webp"
+    ]
+  },
+  "image/wmf": {
+    source: "iana",
+    extensions: [
+      "wmf"
+    ]
+  },
+  "image/x-3ds": {
+    source: "apache",
+    extensions: [
+      "3ds"
+    ]
+  },
+  "image/x-cmu-raster": {
+    source: "apache",
+    extensions: [
+      "ras"
+    ]
+  },
+  "image/x-cmx": {
+    source: "apache",
+    extensions: [
+      "cmx"
+    ]
+  },
+  "image/x-freehand": {
+    source: "apache",
+    extensions: [
+      "fh",
+      "fhc",
+      "fh4",
+      "fh5",
+      "fh7"
+    ]
+  },
+  "image/x-icon": {
+    source: "apache",
+    compressible: true,
+    extensions: [
+      "ico"
+    ]
+  },
+  "image/x-jng": {
+    source: "nginx",
+    extensions: [
+      "jng"
+    ]
+  },
+  "image/x-mrsid-image": {
+    source: "apache",
+    extensions: [
+      "sid"
+    ]
+  },
+  "image/x-ms-bmp": {
+    source: "nginx",
+    compressible: true,
+    extensions: [
+      "bmp"
+    ]
+  },
+  "image/x-pcx": {
+    source: "apache",
+    extensions: [
+      "pcx"
+    ]
+  },
+  "image/x-pict": {
+    source: "apache",
+    extensions: [
+      "pic",
+      "pct"
+    ]
+  },
+  "image/x-portable-anymap": {
+    source: "apache",
+    extensions: [
+      "pnm"
+    ]
+  },
+  "image/x-portable-bitmap": {
+    source: "apache",
+    extensions: [
+      "pbm"
+    ]
+  },
+  "image/x-portable-graymap": {
+    source: "apache",
+    extensions: [
+      "pgm"
+    ]
+  },
+  "image/x-portable-pixmap": {
+    source: "apache",
+    extensions: [
+      "ppm"
+    ]
+  },
+  "image/x-rgb": {
+    source: "apache",
+    extensions: [
+      "rgb"
+    ]
+  },
+  "image/x-tga": {
+    source: "apache",
+    extensions: [
+      "tga"
+    ]
+  },
+  "image/x-xbitmap": {
+    source: "apache",
+    extensions: [
+      "xbm"
+    ]
+  },
+  "image/x-xcf": {
+    compressible: false
+  },
+  "image/x-xpixmap": {
+    source: "apache",
+    extensions: [
+      "xpm"
+    ]
+  },
+  "image/x-xwindowdump": {
+    source: "apache",
+    extensions: [
+      "xwd"
+    ]
+  },
+  "message/cpim": {
+    source: "iana"
+  },
+  "message/delivery-status": {
+    source: "iana"
+  },
+  "message/disposition-notification": {
+    source: "iana",
+    extensions: [
+      "disposition-notification"
+    ]
+  },
+  "message/external-body": {
+    source: "iana"
+  },
+  "message/feedback-report": {
+    source: "iana"
+  },
+  "message/global": {
+    source: "iana",
+    extensions: [
+      "u8msg"
+    ]
+  },
+  "message/global-delivery-status": {
+    source: "iana",
+    extensions: [
+      "u8dsn"
+    ]
+  },
+  "message/global-disposition-notification": {
+    source: "iana",
+    extensions: [
+      "u8mdn"
+    ]
+  },
+  "message/global-headers": {
+    source: "iana",
+    extensions: [
+      "u8hdr"
+    ]
+  },
+  "message/http": {
+    source: "iana",
+    compressible: false
+  },
+  "message/imdn+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "message/news": {
+    source: "iana"
+  },
+  "message/partial": {
+    source: "iana",
+    compressible: false
+  },
+  "message/rfc822": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "eml",
+      "mime"
+    ]
+  },
+  "message/s-http": {
+    source: "iana"
+  },
+  "message/sip": {
+    source: "iana"
+  },
+  "message/sipfrag": {
+    source: "iana"
+  },
+  "message/tracking-status": {
+    source: "iana"
+  },
+  "message/vnd.si.simp": {
+    source: "iana"
+  },
+  "message/vnd.wfa.wsc": {
+    source: "iana",
+    extensions: [
+      "wsc"
+    ]
+  },
+  "model/3mf": {
+    source: "iana",
+    extensions: [
+      "3mf"
+    ]
+  },
+  "model/e57": {
+    source: "iana"
+  },
+  "model/gltf+json": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "gltf"
+    ]
+  },
+  "model/gltf-binary": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "glb"
+    ]
+  },
+  "model/iges": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "igs",
+      "iges"
+    ]
+  },
+  "model/mesh": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "msh",
+      "mesh",
+      "silo"
+    ]
+  },
+  "model/mtl": {
+    source: "iana",
+    extensions: [
+      "mtl"
+    ]
+  },
+  "model/obj": {
+    source: "iana",
+    extensions: [
+      "obj"
+    ]
+  },
+  "model/step": {
+    source: "iana"
+  },
+  "model/step+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "stpx"
+    ]
+  },
+  "model/step+zip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "stpz"
+    ]
+  },
+  "model/step-xml+zip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "stpxz"
+    ]
+  },
+  "model/stl": {
+    source: "iana",
+    extensions: [
+      "stl"
+    ]
+  },
+  "model/vnd.collada+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "dae"
+    ]
+  },
+  "model/vnd.dwf": {
+    source: "iana",
+    extensions: [
+      "dwf"
+    ]
+  },
+  "model/vnd.flatland.3dml": {
+    source: "iana"
+  },
+  "model/vnd.gdl": {
+    source: "iana",
+    extensions: [
+      "gdl"
+    ]
+  },
+  "model/vnd.gs-gdl": {
+    source: "apache"
+  },
+  "model/vnd.gs.gdl": {
+    source: "iana"
+  },
+  "model/vnd.gtw": {
+    source: "iana",
+    extensions: [
+      "gtw"
+    ]
+  },
+  "model/vnd.moml+xml": {
+    source: "iana",
+    compressible: true
+  },
+  "model/vnd.mts": {
+    source: "iana",
+    extensions: [
+      "mts"
+    ]
+  },
+  "model/vnd.opengex": {
+    source: "iana",
+    extensions: [
+      "ogex"
+    ]
+  },
+  "model/vnd.parasolid.transmit.binary": {
+    source: "iana",
+    extensions: [
+      "x_b"
+    ]
+  },
+  "model/vnd.parasolid.transmit.text": {
+    source: "iana",
+    extensions: [
+      "x_t"
+    ]
+  },
+  "model/vnd.pytha.pyox": {
+    source: "iana"
+  },
+  "model/vnd.rosette.annotated-data-model": {
+    source: "iana"
+  },
+  "model/vnd.sap.vds": {
+    source: "iana",
+    extensions: [
+      "vds"
+    ]
+  },
+  "model/vnd.usdz+zip": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "usdz"
+    ]
+  },
+  "model/vnd.valve.source.compiled-map": {
+    source: "iana",
+    extensions: [
+      "bsp"
+    ]
+  },
+  "model/vnd.vtu": {
+    source: "iana",
+    extensions: [
+      "vtu"
+    ]
+  },
+  "model/vrml": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "wrl",
+      "vrml"
+    ]
+  },
+  "model/x3d+binary": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "x3db",
+      "x3dbz"
+    ]
+  },
+  "model/x3d+fastinfoset": {
+    source: "iana",
+    extensions: [
+      "x3db"
+    ]
+  },
+  "model/x3d+vrml": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "x3dv",
+      "x3dvz"
+    ]
+  },
+  "model/x3d+xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "x3d",
+      "x3dz"
+    ]
+  },
+  "model/x3d-vrml": {
+    source: "iana",
+    extensions: [
+      "x3dv"
+    ]
+  },
+  "multipart/alternative": {
+    source: "iana",
+    compressible: false
+  },
+  "multipart/appledouble": {
+    source: "iana"
+  },
+  "multipart/byteranges": {
+    source: "iana"
+  },
+  "multipart/digest": {
+    source: "iana"
+  },
+  "multipart/encrypted": {
+    source: "iana",
+    compressible: false
+  },
+  "multipart/form-data": {
+    source: "iana",
+    compressible: false
+  },
+  "multipart/header-set": {
+    source: "iana"
+  },
+  "multipart/mixed": {
+    source: "iana"
+  },
+  "multipart/multilingual": {
+    source: "iana"
+  },
+  "multipart/parallel": {
+    source: "iana"
+  },
+  "multipart/related": {
+    source: "iana",
+    compressible: false
+  },
+  "multipart/report": {
+    source: "iana"
+  },
+  "multipart/signed": {
+    source: "iana",
+    compressible: false
+  },
+  "multipart/vnd.bint.med-plus": {
+    source: "iana"
+  },
+  "multipart/voice-message": {
+    source: "iana"
+  },
+  "multipart/x-mixed-replace": {
+    source: "iana"
+  },
+  "text/1d-interleaved-parityfec": {
+    source: "iana"
+  },
+  "text/cache-manifest": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "appcache",
+      "manifest"
+    ]
+  },
+  "text/calendar": {
+    source: "iana",
+    extensions: [
+      "ics",
+      "ifb"
+    ]
+  },
+  "text/calender": {
+    compressible: true
+  },
+  "text/cmd": {
+    compressible: true
+  },
+  "text/coffeescript": {
+    extensions: [
+      "coffee",
+      "litcoffee"
+    ]
+  },
+  "text/cql": {
+    source: "iana"
+  },
+  "text/cql-expression": {
+    source: "iana"
+  },
+  "text/cql-identifier": {
+    source: "iana"
+  },
+  "text/css": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "css"
+    ]
+  },
+  "text/csv": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "csv"
+    ]
+  },
+  "text/csv-schema": {
+    source: "iana"
+  },
+  "text/directory": {
+    source: "iana"
+  },
+  "text/dns": {
+    source: "iana"
+  },
+  "text/ecmascript": {
+    source: "iana"
+  },
+  "text/encaprtp": {
+    source: "iana"
+  },
+  "text/enriched": {
+    source: "iana"
+  },
+  "text/fhirpath": {
+    source: "iana"
+  },
+  "text/flexfec": {
+    source: "iana"
+  },
+  "text/fwdred": {
+    source: "iana"
+  },
+  "text/gff3": {
+    source: "iana"
+  },
+  "text/grammar-ref-list": {
+    source: "iana"
+  },
+  "text/html": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "html",
+      "htm",
+      "shtml"
+    ]
+  },
+  "text/jade": {
+    extensions: [
+      "jade"
+    ]
+  },
+  "text/javascript": {
+    source: "iana",
+    compressible: true
+  },
+  "text/jcr-cnd": {
+    source: "iana"
+  },
+  "text/jsx": {
+    compressible: true,
+    extensions: [
+      "jsx"
+    ]
+  },
+  "text/less": {
+    compressible: true,
+    extensions: [
+      "less"
+    ]
+  },
+  "text/markdown": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "markdown",
+      "md"
+    ]
+  },
+  "text/mathml": {
+    source: "nginx",
+    extensions: [
+      "mml"
+    ]
+  },
+  "text/mdx": {
+    compressible: true,
+    extensions: [
+      "mdx"
+    ]
+  },
+  "text/mizar": {
+    source: "iana"
+  },
+  "text/n3": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "n3"
+    ]
+  },
+  "text/parameters": {
+    source: "iana",
+    charset: "UTF-8"
+  },
+  "text/parityfec": {
+    source: "iana"
+  },
+  "text/plain": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "txt",
+      "text",
+      "conf",
+      "def",
+      "list",
+      "log",
+      "in",
+      "ini"
+    ]
+  },
+  "text/provenance-notation": {
+    source: "iana",
+    charset: "UTF-8"
+  },
+  "text/prs.fallenstein.rst": {
+    source: "iana"
+  },
+  "text/prs.lines.tag": {
+    source: "iana",
+    extensions: [
+      "dsc"
+    ]
+  },
+  "text/prs.prop.logic": {
+    source: "iana"
+  },
+  "text/raptorfec": {
+    source: "iana"
+  },
+  "text/red": {
+    source: "iana"
+  },
+  "text/rfc822-headers": {
+    source: "iana"
+  },
+  "text/richtext": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rtx"
+    ]
+  },
+  "text/rtf": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "rtf"
+    ]
+  },
+  "text/rtp-enc-aescm128": {
+    source: "iana"
+  },
+  "text/rtploopback": {
+    source: "iana"
+  },
+  "text/rtx": {
+    source: "iana"
+  },
+  "text/sgml": {
+    source: "iana",
+    extensions: [
+      "sgml",
+      "sgm"
+    ]
+  },
+  "text/shaclc": {
+    source: "iana"
+  },
+  "text/shex": {
+    source: "iana",
+    extensions: [
+      "shex"
+    ]
+  },
+  "text/slim": {
+    extensions: [
+      "slim",
+      "slm"
+    ]
+  },
+  "text/spdx": {
+    source: "iana",
+    extensions: [
+      "spdx"
+    ]
+  },
+  "text/strings": {
+    source: "iana"
+  },
+  "text/stylus": {
+    extensions: [
+      "stylus",
+      "styl"
+    ]
+  },
+  "text/t140": {
+    source: "iana"
+  },
+  "text/tab-separated-values": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "tsv"
+    ]
+  },
+  "text/troff": {
+    source: "iana",
+    extensions: [
+      "t",
+      "tr",
+      "roff",
+      "man",
+      "me",
+      "ms"
+    ]
+  },
+  "text/turtle": {
+    source: "iana",
+    charset: "UTF-8",
+    extensions: [
+      "ttl"
+    ]
+  },
+  "text/ulpfec": {
+    source: "iana"
+  },
+  "text/uri-list": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "uri",
+      "uris",
+      "urls"
+    ]
+  },
+  "text/vcard": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "vcard"
+    ]
+  },
+  "text/vnd.a": {
+    source: "iana"
+  },
+  "text/vnd.abc": {
+    source: "iana"
+  },
+  "text/vnd.ascii-art": {
+    source: "iana"
+  },
+  "text/vnd.curl": {
+    source: "iana",
+    extensions: [
+      "curl"
+    ]
+  },
+  "text/vnd.curl.dcurl": {
+    source: "apache",
+    extensions: [
+      "dcurl"
+    ]
+  },
+  "text/vnd.curl.mcurl": {
+    source: "apache",
+    extensions: [
+      "mcurl"
+    ]
+  },
+  "text/vnd.curl.scurl": {
+    source: "apache",
+    extensions: [
+      "scurl"
+    ]
+  },
+  "text/vnd.debian.copyright": {
+    source: "iana",
+    charset: "UTF-8"
+  },
+  "text/vnd.dmclientscript": {
+    source: "iana"
+  },
+  "text/vnd.dvb.subtitle": {
+    source: "iana",
+    extensions: [
+      "sub"
+    ]
+  },
+  "text/vnd.esmertec.theme-descriptor": {
+    source: "iana",
+    charset: "UTF-8"
+  },
+  "text/vnd.familysearch.gedcom": {
+    source: "iana",
+    extensions: [
+      "ged"
+    ]
+  },
+  "text/vnd.ficlab.flt": {
+    source: "iana"
+  },
+  "text/vnd.fly": {
+    source: "iana",
+    extensions: [
+      "fly"
+    ]
+  },
+  "text/vnd.fmi.flexstor": {
+    source: "iana",
+    extensions: [
+      "flx"
+    ]
+  },
+  "text/vnd.gml": {
+    source: "iana"
+  },
+  "text/vnd.graphviz": {
+    source: "iana",
+    extensions: [
+      "gv"
+    ]
+  },
+  "text/vnd.hans": {
+    source: "iana"
+  },
+  "text/vnd.hgl": {
+    source: "iana"
+  },
+  "text/vnd.in3d.3dml": {
+    source: "iana",
+    extensions: [
+      "3dml"
+    ]
+  },
+  "text/vnd.in3d.spot": {
+    source: "iana",
+    extensions: [
+      "spot"
+    ]
+  },
+  "text/vnd.iptc.newsml": {
+    source: "iana"
+  },
+  "text/vnd.iptc.nitf": {
+    source: "iana"
+  },
+  "text/vnd.latex-z": {
+    source: "iana"
+  },
+  "text/vnd.motorola.reflex": {
+    source: "iana"
+  },
+  "text/vnd.ms-mediapackage": {
+    source: "iana"
+  },
+  "text/vnd.net2phone.commcenter.command": {
+    source: "iana"
+  },
+  "text/vnd.radisys.msml-basic-layout": {
+    source: "iana"
+  },
+  "text/vnd.senx.warpscript": {
+    source: "iana"
+  },
+  "text/vnd.si.uricatalogue": {
+    source: "iana"
+  },
+  "text/vnd.sosi": {
+    source: "iana"
+  },
+  "text/vnd.sun.j2me.app-descriptor": {
+    source: "iana",
+    charset: "UTF-8",
+    extensions: [
+      "jad"
+    ]
+  },
+  "text/vnd.trolltech.linguist": {
+    source: "iana",
+    charset: "UTF-8"
+  },
+  "text/vnd.wap.si": {
+    source: "iana"
+  },
+  "text/vnd.wap.sl": {
+    source: "iana"
+  },
+  "text/vnd.wap.wml": {
+    source: "iana",
+    extensions: [
+      "wml"
+    ]
+  },
+  "text/vnd.wap.wmlscript": {
+    source: "iana",
+    extensions: [
+      "wmls"
+    ]
+  },
+  "text/vtt": {
+    source: "iana",
+    charset: "UTF-8",
+    compressible: true,
+    extensions: [
+      "vtt"
+    ]
+  },
+  "text/x-asm": {
+    source: "apache",
+    extensions: [
+      "s",
+      "asm"
+    ]
+  },
+  "text/x-c": {
+    source: "apache",
+    extensions: [
+      "c",
+      "cc",
+      "cxx",
+      "cpp",
+      "h",
+      "hh",
+      "dic"
+    ]
+  },
+  "text/x-component": {
+    source: "nginx",
+    extensions: [
+      "htc"
+    ]
+  },
+  "text/x-fortran": {
+    source: "apache",
+    extensions: [
+      "f",
+      "for",
+      "f77",
+      "f90"
+    ]
+  },
+  "text/x-gwt-rpc": {
+    compressible: true
+  },
+  "text/x-handlebars-template": {
+    extensions: [
+      "hbs"
+    ]
+  },
+  "text/x-java-source": {
+    source: "apache",
+    extensions: [
+      "java"
+    ]
+  },
+  "text/x-jquery-tmpl": {
+    compressible: true
+  },
+  "text/x-lua": {
+    extensions: [
+      "lua"
+    ]
+  },
+  "text/x-markdown": {
+    compressible: true,
+    extensions: [
+      "mkd"
+    ]
+  },
+  "text/x-nfo": {
+    source: "apache",
+    extensions: [
+      "nfo"
+    ]
+  },
+  "text/x-opml": {
+    source: "apache",
+    extensions: [
+      "opml"
+    ]
+  },
+  "text/x-org": {
+    compressible: true,
+    extensions: [
+      "org"
+    ]
+  },
+  "text/x-pascal": {
+    source: "apache",
+    extensions: [
+      "p",
+      "pas"
+    ]
+  },
+  "text/x-processing": {
+    compressible: true,
+    extensions: [
+      "pde"
+    ]
+  },
+  "text/x-sass": {
+    extensions: [
+      "sass"
+    ]
+  },
+  "text/x-scss": {
+    extensions: [
+      "scss"
+    ]
+  },
+  "text/x-setext": {
+    source: "apache",
+    extensions: [
+      "etx"
+    ]
+  },
+  "text/x-sfv": {
+    source: "apache",
+    extensions: [
+      "sfv"
+    ]
+  },
+  "text/x-suse-ymp": {
+    compressible: true,
+    extensions: [
+      "ymp"
+    ]
+  },
+  "text/x-uuencode": {
+    source: "apache",
+    extensions: [
+      "uu"
+    ]
+  },
+  "text/x-vcalendar": {
+    source: "apache",
+    extensions: [
+      "vcs"
+    ]
+  },
+  "text/x-vcard": {
+    source: "apache",
+    extensions: [
+      "vcf"
+    ]
+  },
+  "text/xml": {
+    source: "iana",
+    compressible: true,
+    extensions: [
+      "xml"
+    ]
+  },
+  "text/xml-external-parsed-entity": {
+    source: "iana"
+  },
+  "text/yaml": {
+    compressible: true,
+    extensions: [
+      "yaml",
+      "yml"
+    ]
+  },
+  "video/1d-interleaved-parityfec": {
+    source: "iana"
+  },
+  "video/3gpp": {
+    source: "iana",
+    extensions: [
+      "3gp",
+      "3gpp"
+    ]
+  },
+  "video/3gpp-tt": {
+    source: "iana"
+  },
+  "video/3gpp2": {
+    source: "iana",
+    extensions: [
+      "3g2"
+    ]
+  },
+  "video/av1": {
+    source: "iana"
+  },
+  "video/bmpeg": {
+    source: "iana"
+  },
+  "video/bt656": {
+    source: "iana"
+  },
+  "video/celb": {
+    source: "iana"
+  },
+  "video/dv": {
+    source: "iana"
+  },
+  "video/encaprtp": {
+    source: "iana"
+  },
+  "video/ffv1": {
+    source: "iana"
+  },
+  "video/flexfec": {
+    source: "iana"
+  },
+  "video/h261": {
+    source: "iana",
+    extensions: [
+      "h261"
+    ]
+  },
+  "video/h263": {
+    source: "iana",
+    extensions: [
+      "h263"
+    ]
+  },
+  "video/h263-1998": {
+    source: "iana"
+  },
+  "video/h263-2000": {
+    source: "iana"
+  },
+  "video/h264": {
+    source: "iana",
+    extensions: [
+      "h264"
+    ]
+  },
+  "video/h264-rcdo": {
+    source: "iana"
+  },
+  "video/h264-svc": {
+    source: "iana"
+  },
+  "video/h265": {
+    source: "iana"
+  },
+  "video/iso.segment": {
+    source: "iana",
+    extensions: [
+      "m4s"
+    ]
+  },
+  "video/jpeg": {
+    source: "iana",
+    extensions: [
+      "jpgv"
+    ]
+  },
+  "video/jpeg2000": {
+    source: "iana"
+  },
+  "video/jpm": {
+    source: "apache",
+    extensions: [
+      "jpm",
+      "jpgm"
+    ]
+  },
+  "video/jxsv": {
+    source: "iana"
+  },
+  "video/mj2": {
+    source: "iana",
+    extensions: [
+      "mj2",
+      "mjp2"
+    ]
+  },
+  "video/mp1s": {
+    source: "iana"
+  },
+  "video/mp2p": {
+    source: "iana"
+  },
+  "video/mp2t": {
+    source: "iana",
+    extensions: [
+      "ts"
+    ]
+  },
+  "video/mp4": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "mp4",
+      "mp4v",
+      "mpg4"
+    ]
+  },
+  "video/mp4v-es": {
+    source: "iana"
+  },
+  "video/mpeg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "mpeg",
+      "mpg",
+      "mpe",
+      "m1v",
+      "m2v"
+    ]
+  },
+  "video/mpeg4-generic": {
+    source: "iana"
+  },
+  "video/mpv": {
+    source: "iana"
+  },
+  "video/nv": {
+    source: "iana"
+  },
+  "video/ogg": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "ogv"
+    ]
+  },
+  "video/parityfec": {
+    source: "iana"
+  },
+  "video/pointer": {
+    source: "iana"
+  },
+  "video/quicktime": {
+    source: "iana",
+    compressible: false,
+    extensions: [
+      "qt",
+      "mov"
+    ]
+  },
+  "video/raptorfec": {
+    source: "iana"
+  },
+  "video/raw": {
+    source: "iana"
+  },
+  "video/rtp-enc-aescm128": {
+    source: "iana"
+  },
+  "video/rtploopback": {
+    source: "iana"
+  },
+  "video/rtx": {
+    source: "iana"
+  },
+  "video/scip": {
+    source: "iana"
+  },
+  "video/smpte291": {
+    source: "iana"
+  },
+  "video/smpte292m": {
+    source: "iana"
+  },
+  "video/ulpfec": {
+    source: "iana"
+  },
+  "video/vc1": {
+    source: "iana"
+  },
+  "video/vc2": {
+    source: "iana"
+  },
+  "video/vnd.cctv": {
+    source: "iana"
+  },
+  "video/vnd.dece.hd": {
+    source: "iana",
+    extensions: [
+      "uvh",
+      "uvvh"
+    ]
+  },
+  "video/vnd.dece.mobile": {
+    source: "iana",
+    extensions: [
+      "uvm",
+      "uvvm"
+    ]
+  },
+  "video/vnd.dece.mp4": {
+    source: "iana"
+  },
+  "video/vnd.dece.pd": {
+    source: "iana",
+    extensions: [
+      "uvp",
+      "uvvp"
+    ]
+  },
+  "video/vnd.dece.sd": {
+    source: "iana",
+    extensions: [
+      "uvs",
+      "uvvs"
+    ]
+  },
+  "video/vnd.dece.video": {
+    source: "iana",
+    extensions: [
+      "uvv",
+      "uvvv"
+    ]
+  },
+  "video/vnd.directv.mpeg": {
+    source: "iana"
+  },
+  "video/vnd.directv.mpeg-tts": {
+    source: "iana"
+  },
+  "video/vnd.dlna.mpeg-tts": {
+    source: "iana"
+  },
+  "video/vnd.dvb.file": {
+    source: "iana",
+    extensions: [
+      "dvb"
+    ]
+  },
+  "video/vnd.fvt": {
+    source: "iana",
+    extensions: [
+      "fvt"
+    ]
+  },
+  "video/vnd.hns.video": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.1dparityfec-1010": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.1dparityfec-2005": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.2dparityfec-1010": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.2dparityfec-2005": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.ttsavc": {
+    source: "iana"
+  },
+  "video/vnd.iptvforum.ttsmpeg2": {
+    source: "iana"
+  },
+  "video/vnd.motorola.video": {
+    source: "iana"
+  },
+  "video/vnd.motorola.videop": {
+    source: "iana"
+  },
+  "video/vnd.mpegurl": {
+    source: "iana",
+    extensions: [
+      "mxu",
+      "m4u"
+    ]
+  },
+  "video/vnd.ms-playready.media.pyv": {
+    source: "iana",
+    extensions: [
+      "pyv"
+    ]
+  },
+  "video/vnd.nokia.interleaved-multimedia": {
+    source: "iana"
+  },
+  "video/vnd.nokia.mp4vr": {
+    source: "iana"
+  },
+  "video/vnd.nokia.videovoip": {
+    source: "iana"
+  },
+  "video/vnd.objectvideo": {
+    source: "iana"
+  },
+  "video/vnd.radgamettools.bink": {
+    source: "iana"
+  },
+  "video/vnd.radgamettools.smacker": {
+    source: "iana"
+  },
+  "video/vnd.sealed.mpeg1": {
+    source: "iana"
+  },
+  "video/vnd.sealed.mpeg4": {
+    source: "iana"
+  },
+  "video/vnd.sealed.swf": {
+    source: "iana"
+  },
+  "video/vnd.sealedmedia.softseal.mov": {
+    source: "iana"
+  },
+  "video/vnd.uvvu.mp4": {
+    source: "iana",
+    extensions: [
+      "uvu",
+      "uvvu"
+    ]
+  },
+  "video/vnd.vivo": {
+    source: "iana",
+    extensions: [
+      "viv"
+    ]
+  },
+  "video/vnd.youtube.yt": {
+    source: "iana"
+  },
+  "video/vp8": {
+    source: "iana"
+  },
+  "video/vp9": {
+    source: "iana"
+  },
+  "video/webm": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "webm"
+    ]
+  },
+  "video/x-f4v": {
+    source: "apache",
+    extensions: [
+      "f4v"
+    ]
+  },
+  "video/x-fli": {
+    source: "apache",
+    extensions: [
+      "fli"
+    ]
+  },
+  "video/x-flv": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "flv"
+    ]
+  },
+  "video/x-m4v": {
+    source: "apache",
+    extensions: [
+      "m4v"
+    ]
+  },
+  "video/x-matroska": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "mkv",
+      "mk3d",
+      "mks"
+    ]
+  },
+  "video/x-mng": {
+    source: "apache",
+    extensions: [
+      "mng"
+    ]
+  },
+  "video/x-ms-asf": {
+    source: "apache",
+    extensions: [
+      "asf",
+      "asx"
+    ]
+  },
+  "video/x-ms-vob": {
+    source: "apache",
+    extensions: [
+      "vob"
+    ]
+  },
+  "video/x-ms-wm": {
+    source: "apache",
+    extensions: [
+      "wm"
+    ]
+  },
+  "video/x-ms-wmv": {
+    source: "apache",
+    compressible: false,
+    extensions: [
+      "wmv"
+    ]
+  },
+  "video/x-ms-wmx": {
+    source: "apache",
+    extensions: [
+      "wmx"
+    ]
+  },
+  "video/x-ms-wvx": {
+    source: "apache",
+    extensions: [
+      "wvx"
+    ]
+  },
+  "video/x-msvideo": {
+    source: "apache",
+    extensions: [
+      "avi"
+    ]
+  },
+  "video/x-sgi-movie": {
+    source: "apache",
+    extensions: [
+      "movie"
+    ]
+  },
+  "video/x-smv": {
+    source: "apache",
+    extensions: [
+      "smv"
+    ]
+  },
+  "x-conference/x-cooltalk": {
+    source: "apache",
+    extensions: [
+      "ice"
+    ]
+  },
+  "x-shader/x-fragment": {
+    compressible: true
+  },
+  "x-shader/x-vertex": {
+    compressible: true
+  }
+};
+/*!
+ * mime-db
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015-2022 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+var mimeDb = require$$0;
+/*!
+ * mime-types
+ * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+(function(exports) {
+  var db = mimeDb;
+  var extname = require$$1$1.extname;
+  var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
+  var TEXT_TYPE_REGEXP = /^text\//i;
+  exports.charset = charset;
+  exports.charsets = { lookup: charset };
+  exports.contentType = contentType;
+  exports.extension = extension;
+  exports.extensions = /* @__PURE__ */ Object.create(null);
+  exports.lookup = lookup;
+  exports.types = /* @__PURE__ */ Object.create(null);
+  populateMaps(exports.extensions, exports.types);
+  function charset(type) {
+    if (!type || typeof type !== "string") {
+      return false;
+    }
+    var match = EXTRACT_TYPE_REGEXP.exec(type);
+    var mime2 = match && db[match[1].toLowerCase()];
+    if (mime2 && mime2.charset) {
+      return mime2.charset;
+    }
+    if (match && TEXT_TYPE_REGEXP.test(match[1])) {
+      return "UTF-8";
+    }
+    return false;
+  }
+  function contentType(str) {
+    if (!str || typeof str !== "string") {
+      return false;
+    }
+    var mime2 = str.indexOf("/") === -1 ? exports.lookup(str) : str;
+    if (!mime2) {
+      return false;
+    }
+    if (mime2.indexOf("charset") === -1) {
+      var charset2 = exports.charset(mime2);
+      if (charset2) mime2 += "; charset=" + charset2.toLowerCase();
+    }
+    return mime2;
+  }
+  function extension(type) {
+    if (!type || typeof type !== "string") {
+      return false;
+    }
+    var match = EXTRACT_TYPE_REGEXP.exec(type);
+    var exts = match && exports.extensions[match[1].toLowerCase()];
+    if (!exts || !exts.length) {
+      return false;
+    }
+    return exts[0];
+  }
+  function lookup(path2) {
+    if (!path2 || typeof path2 !== "string") {
+      return false;
+    }
+    var extension2 = extname("x." + path2).toLowerCase().substr(1);
+    if (!extension2) {
+      return false;
+    }
+    return exports.types[extension2] || false;
+  }
+  function populateMaps(extensions, types) {
+    var preference = ["nginx", "apache", void 0, "iana"];
+    Object.keys(db).forEach(function forEachMimeType(type) {
+      var mime2 = db[type];
+      var exts = mime2.extensions;
+      if (!exts || !exts.length) {
+        return;
+      }
+      extensions[type] = exts;
+      for (var i = 0; i < exts.length; i++) {
+        var extension2 = exts[i];
+        if (types[extension2]) {
+          var from = preference.indexOf(db[types[extension2]].source);
+          var to = preference.indexOf(mime2.source);
+          if (types[extension2] !== "application/octet-stream" && (from > to || from === to && types[extension2].substr(0, 12) === "application/")) {
+            continue;
+          }
+        }
+        types[extension2] = type;
+      }
     });
   }
-  /**
-   * Create a Duration from DurationLike.
-   *
-   * @param {Object | number | Duration} durationLike
-   * One of:
-   * - object with keys like 'years' and 'hours'.
-   * - number representing milliseconds
-   * - Duration instance
-   * @return {Duration}
-   */
-  static fromDurationLike(durationLike) {
-    if (isNumber(durationLike)) {
-      return Duration.fromMillis(durationLike);
-    } else if (Duration.isDuration(durationLike)) {
-      return durationLike;
-    } else if (typeof durationLike === "object") {
-      return Duration.fromObject(durationLike);
-    } else {
-      throw new InvalidArgumentError(`Unknown duration argument ${durationLike} of type ${typeof durationLike}`);
-    }
+})(mimeTypes);
+var defer_1 = defer$1;
+function defer$1(fn) {
+  var nextTick = typeof setImmediate == "function" ? setImmediate : typeof process == "object" && typeof process.nextTick == "function" ? process.nextTick : null;
+  if (nextTick) {
+    nextTick(fn);
+  } else {
+    setTimeout(fn, 0);
   }
-  /**
-   * Create a Duration from an ISO 8601 duration string.
-   * @param {string} text - text to parse
-   * @param {Object} opts - options for parsing
-   * @param {string} [opts.locale='en-US'] - the locale to use
-   * @param {string} opts.numberingSystem - the numbering system to use
-   * @param {string} [opts.conversionAccuracy='casual'] - the preset conversion system to use
-   * @param {string} [opts.matrix=Object] - the preset conversion system to use
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Durations
-   * @example Duration.fromISO('P3Y6M1W4DT12H30M5S').toObject() //=> { years: 3, months: 6, weeks: 1, days: 4, hours: 12, minutes: 30, seconds: 5 }
-   * @example Duration.fromISO('PT23H').toObject() //=> { hours: 23 }
-   * @example Duration.fromISO('P5Y3M').toObject() //=> { years: 5, months: 3 }
-   * @return {Duration}
-   */
-  static fromISO(text, opts) {
-    const [parsed] = parseISODuration(text);
-    if (parsed) {
-      return Duration.fromObject(parsed, opts);
+}
+var defer = defer_1;
+var async_1 = async$2;
+function async$2(callback) {
+  var isAsync = false;
+  defer(function() {
+    isAsync = true;
+  });
+  return function async_callback(err, result) {
+    if (isAsync) {
+      callback(err, result);
     } else {
-      return Duration.invalid("unparsable", `the input "${text}" can't be parsed as ISO 8601`);
-    }
-  }
-  /**
-   * Create a Duration from an ISO 8601 time string.
-   * @param {string} text - text to parse
-   * @param {Object} opts - options for parsing
-   * @param {string} [opts.locale='en-US'] - the locale to use
-   * @param {string} opts.numberingSystem - the numbering system to use
-   * @param {string} [opts.conversionAccuracy='casual'] - the preset conversion system to use
-   * @param {string} [opts.matrix=Object] - the conversion system to use
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Times
-   * @example Duration.fromISOTime('11:22:33.444').toObject() //=> { hours: 11, minutes: 22, seconds: 33, milliseconds: 444 }
-   * @example Duration.fromISOTime('11:00').toObject() //=> { hours: 11, minutes: 0, seconds: 0 }
-   * @example Duration.fromISOTime('T11:00').toObject() //=> { hours: 11, minutes: 0, seconds: 0 }
-   * @example Duration.fromISOTime('1100').toObject() //=> { hours: 11, minutes: 0, seconds: 0 }
-   * @example Duration.fromISOTime('T1100').toObject() //=> { hours: 11, minutes: 0, seconds: 0 }
-   * @return {Duration}
-   */
-  static fromISOTime(text, opts) {
-    const [parsed] = parseISOTimeOnly(text);
-    if (parsed) {
-      return Duration.fromObject(parsed, opts);
-    } else {
-      return Duration.invalid("unparsable", `the input "${text}" can't be parsed as ISO 8601`);
-    }
-  }
-  /**
-   * Create an invalid Duration.
-   * @param {string} reason - simple string of why this datetime is invalid. Should not contain parameters or anything else data-dependent
-   * @param {string} [explanation=null] - longer explanation, may include parameters and other useful debugging information
-   * @return {Duration}
-   */
-  static invalid(reason, explanation = null) {
-    if (!reason) {
-      throw new InvalidArgumentError("need to specify a reason the Duration is invalid");
-    }
-    const invalid = reason instanceof Invalid ? reason : new Invalid(reason, explanation);
-    if (Settings.throwOnInvalid) {
-      throw new InvalidDurationError(invalid);
-    } else {
-      return new Duration({
-        invalid
+      defer(function nextTick_callback() {
+        callback(err, result);
       });
     }
+  };
+}
+var abort_1 = abort$2;
+function abort$2(state2) {
+  Object.keys(state2.jobs).forEach(clean.bind(state2));
+  state2.jobs = {};
+}
+function clean(key) {
+  if (typeof this.jobs[key] == "function") {
+    this.jobs[key]();
   }
-  /**
-   * @private
-   */
-  static normalizeUnit(unit) {
-    const normalized = {
-      year: "years",
-      years: "years",
-      quarter: "quarters",
-      quarters: "quarters",
-      month: "months",
-      months: "months",
-      week: "weeks",
-      weeks: "weeks",
-      day: "days",
-      days: "days",
-      hour: "hours",
-      hours: "hours",
-      minute: "minutes",
-      minutes: "minutes",
-      second: "seconds",
-      seconds: "seconds",
-      millisecond: "milliseconds",
-      milliseconds: "milliseconds"
-    }[unit ? unit.toLowerCase() : unit];
-    if (!normalized) throw new InvalidUnitError(unit);
-    return normalized;
-  }
-  /**
-   * Check if an object is a Duration. Works across context boundaries
-   * @param {object} o
-   * @return {boolean}
-   */
-  static isDuration(o) {
-    return o && o.isLuxonDuration || false;
-  }
-  /**
-   * Get  the locale of a Duration, such 'en-GB'
-   * @type {string}
-   */
-  get locale() {
-    return this.isValid ? this.loc.locale : null;
-  }
-  /**
-   * Get the numbering system of a Duration, such 'beng'. The numbering system is used when formatting the Duration
-   *
-   * @type {string}
-   */
-  get numberingSystem() {
-    return this.isValid ? this.loc.numberingSystem : null;
-  }
-  /**
-   * Returns a string representation of this Duration formatted according to the specified format string. You may use these tokens:
-   * * `S` for milliseconds
-   * * `s` for seconds
-   * * `m` for minutes
-   * * `h` for hours
-   * * `d` for days
-   * * `w` for weeks
-   * * `M` for months
-   * * `y` for years
-   * Notes:
-   * * Add padding by repeating the token, e.g. "yy" pads the years to two digits, "hhhh" pads the hours out to four digits
-   * * Tokens can be escaped by wrapping with single quotes.
-   * * The duration will be converted to the set of units in the format string using {@link Duration#shiftTo} and the Durations's conversion accuracy setting.
-   * @param {string} fmt - the format string
-   * @param {Object} opts - options
-   * @param {boolean} [opts.floor=true] - floor numerical values
-   * @example Duration.fromObject({ years: 1, days: 6, seconds: 2 }).toFormat("y d s") //=> "1 6 2"
-   * @example Duration.fromObject({ years: 1, days: 6, seconds: 2 }).toFormat("yy dd sss") //=> "01 06 002"
-   * @example Duration.fromObject({ years: 1, days: 6, seconds: 2 }).toFormat("M S") //=> "12 518402000"
-   * @return {string}
-   */
-  toFormat(fmt, opts = {}) {
-    const fmtOpts = {
-      ...opts,
-      floor: opts.round !== false && opts.floor !== false
-    };
-    return this.isValid ? Formatter.create(this.loc, fmtOpts).formatDurationFromString(this, fmt) : INVALID$2;
-  }
-  /**
-   * Returns a string representation of a Duration with all units included.
-   * To modify its behavior, use `listStyle` and any Intl.NumberFormat option, though `unitDisplay` is especially relevant.
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options
-   * @param {Object} opts - Formatting options. Accepts the same keys as the options parameter of the native `Intl.NumberFormat` constructor, as well as `listStyle`.
-   * @param {string} [opts.listStyle='narrow'] - How to format the merged list. Corresponds to the `style` property of the options parameter of the native `Intl.ListFormat` constructor.
-   * @example
-   * ```js
-   * var dur = Duration.fromObject({ days: 1, hours: 5, minutes: 6 })
-   * dur.toHuman() //=> '1 day, 5 hours, 6 minutes'
-   * dur.toHuman({ listStyle: "long" }) //=> '1 day, 5 hours, and 6 minutes'
-   * dur.toHuman({ unitDisplay: "short" }) //=> '1 day, 5 hr, 6 min'
-   * ```
-   */
-  toHuman(opts = {}) {
-    if (!this.isValid) return INVALID$2;
-    const l2 = orderedUnits$1.map((unit) => {
-      const val = this.values[unit];
-      if (isUndefined(val)) {
-        return null;
-      }
-      return this.loc.numberFormatter({
-        style: "unit",
-        unitDisplay: "long",
-        ...opts,
-        unit: unit.slice(0, -1)
-      }).format(val);
-    }).filter((n2) => n2);
-    return this.loc.listFormatter({
-      type: "conjunction",
-      style: opts.listStyle || "narrow",
-      ...opts
-    }).format(l2);
-  }
-  /**
-   * Returns a JavaScript object with this Duration's values.
-   * @example Duration.fromObject({ years: 1, days: 6, seconds: 2 }).toObject() //=> { years: 1, days: 6, seconds: 2 }
-   * @return {Object}
-   */
-  toObject() {
-    if (!this.isValid) return {};
-    return {
-      ...this.values
-    };
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this Duration.
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Durations
-   * @example Duration.fromObject({ years: 3, seconds: 45 }).toISO() //=> 'P3YT45S'
-   * @example Duration.fromObject({ months: 4, seconds: 45 }).toISO() //=> 'P4MT45S'
-   * @example Duration.fromObject({ months: 5 }).toISO() //=> 'P5M'
-   * @example Duration.fromObject({ minutes: 5 }).toISO() //=> 'PT5M'
-   * @example Duration.fromObject({ milliseconds: 6 }).toISO() //=> 'PT0.006S'
-   * @return {string}
-   */
-  toISO() {
-    if (!this.isValid) return null;
-    let s2 = "P";
-    if (this.years !== 0) s2 += this.years + "Y";
-    if (this.months !== 0 || this.quarters !== 0) s2 += this.months + this.quarters * 3 + "M";
-    if (this.weeks !== 0) s2 += this.weeks + "W";
-    if (this.days !== 0) s2 += this.days + "D";
-    if (this.hours !== 0 || this.minutes !== 0 || this.seconds !== 0 || this.milliseconds !== 0) s2 += "T";
-    if (this.hours !== 0) s2 += this.hours + "H";
-    if (this.minutes !== 0) s2 += this.minutes + "M";
-    if (this.seconds !== 0 || this.milliseconds !== 0)
-      s2 += roundTo(this.seconds + this.milliseconds / 1e3, 3) + "S";
-    if (s2 === "P") s2 += "T0S";
-    return s2;
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this Duration, formatted as a time of day.
-   * Note that this will return null if the duration is invalid, negative, or equal to or greater than 24 hours.
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Times
-   * @param {Object} opts - options
-   * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
-   * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
-   * @param {boolean} [opts.includePrefix=false] - include the `T` prefix
-   * @param {string} [opts.format='extended'] - choose between the basic and extended format
-   * @example Duration.fromObject({ hours: 11 }).toISOTime() //=> '11:00:00.000'
-   * @example Duration.fromObject({ hours: 11 }).toISOTime({ suppressMilliseconds: true }) //=> '11:00:00'
-   * @example Duration.fromObject({ hours: 11 }).toISOTime({ suppressSeconds: true }) //=> '11:00'
-   * @example Duration.fromObject({ hours: 11 }).toISOTime({ includePrefix: true }) //=> 'T11:00:00.000'
-   * @example Duration.fromObject({ hours: 11 }).toISOTime({ format: 'basic' }) //=> '110000.000'
-   * @return {string}
-   */
-  toISOTime(opts = {}) {
-    if (!this.isValid) return null;
-    const millis = this.toMillis();
-    if (millis < 0 || millis >= 864e5) return null;
-    opts = {
-      suppressMilliseconds: false,
-      suppressSeconds: false,
-      includePrefix: false,
-      format: "extended",
-      ...opts,
-      includeOffset: false
-    };
-    const dateTime = DateTime.fromMillis(millis, {
-      zone: "UTC"
-    });
-    return dateTime.toISOTime(opts);
-  }
-  /**
-   * Returns an ISO 8601 representation of this Duration appropriate for use in JSON.
-   * @return {string}
-   */
-  toJSON() {
-    return this.toISO();
-  }
-  /**
-   * Returns an ISO 8601 representation of this Duration appropriate for use in debugging.
-   * @return {string}
-   */
-  toString() {
-    return this.toISO();
-  }
-  /**
-   * Returns a string representation of this Duration appropriate for the REPL.
-   * @return {string}
-   */
-  [Symbol.for("nodejs.util.inspect.custom")]() {
-    if (this.isValid) {
-      return `Duration { values: ${JSON.stringify(this.values)} }`;
+}
+var async$1 = async_1, abort$1 = abort_1;
+var iterate_1 = iterate$2;
+function iterate$2(list, iterator, state2, callback) {
+  var key = state2["keyedList"] ? state2["keyedList"][state2.index] : state2.index;
+  state2.jobs[key] = runJob(iterator, key, list[key], function(error, output) {
+    if (!(key in state2.jobs)) {
+      return;
+    }
+    delete state2.jobs[key];
+    if (error) {
+      abort$1(state2);
     } else {
-      return `Duration { Invalid, reason: ${this.invalidReason} }`;
+      state2.results[key] = output;
     }
+    callback(error, state2.results);
+  });
+}
+function runJob(iterator, key, item, callback) {
+  var aborter;
+  if (iterator.length == 2) {
+    aborter = iterator(item, async$1(callback));
+  } else {
+    aborter = iterator(item, key, async$1(callback));
   }
-  /**
-   * Returns an milliseconds value of this Duration.
-   * @return {number}
-   */
-  toMillis() {
-    if (!this.isValid) return NaN;
-    return durationToMillis(this.matrix, this.values);
-  }
-  /**
-   * Returns an milliseconds value of this Duration. Alias of {@link toMillis}
-   * @return {number}
-   */
-  valueOf() {
-    return this.toMillis();
-  }
-  /**
-   * Make this Duration longer by the specified amount. Return a newly-constructed Duration.
-   * @param {Duration|Object|number} duration - The amount to add. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
-   * @return {Duration}
-   */
-  plus(duration) {
-    if (!this.isValid) return this;
-    const dur = Duration.fromDurationLike(duration), result = {};
-    for (const k of orderedUnits$1) {
-      if (hasOwnProperty(dur.values, k) || hasOwnProperty(this.values, k)) {
-        result[k] = dur.get(k) + this.get(k);
-      }
-    }
-    return clone$1(this, {
-      values: result
-    }, true);
-  }
-  /**
-   * Make this Duration shorter by the specified amount. Return a newly-constructed Duration.
-   * @param {Duration|Object|number} duration - The amount to subtract. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
-   * @return {Duration}
-   */
-  minus(duration) {
-    if (!this.isValid) return this;
-    const dur = Duration.fromDurationLike(duration);
-    return this.plus(dur.negate());
-  }
-  /**
-   * Scale this Duration by the specified amount. Return a newly-constructed Duration.
-   * @param {function} fn - The function to apply to each unit. Arity is 1 or 2: the value of the unit and, optionally, the unit name. Must return a number.
-   * @example Duration.fromObject({ hours: 1, minutes: 30 }).mapUnits(x => x * 2) //=> { hours: 2, minutes: 60 }
-   * @example Duration.fromObject({ hours: 1, minutes: 30 }).mapUnits((x, u) => u === "hours" ? x * 2 : x) //=> { hours: 2, minutes: 30 }
-   * @return {Duration}
-   */
-  mapUnits(fn) {
-    if (!this.isValid) return this;
-    const result = {};
-    for (const k of Object.keys(this.values)) {
-      result[k] = asNumber(fn(this.values[k], k));
-    }
-    return clone$1(this, {
-      values: result
-    }, true);
-  }
-  /**
-   * Get the value of unit.
-   * @param {string} unit - a unit such as 'minute' or 'day'
-   * @example Duration.fromObject({years: 2, days: 3}).get('years') //=> 2
-   * @example Duration.fromObject({years: 2, days: 3}).get('months') //=> 0
-   * @example Duration.fromObject({years: 2, days: 3}).get('days') //=> 3
-   * @return {number}
-   */
-  get(unit) {
-    return this[Duration.normalizeUnit(unit)];
-  }
-  /**
-   * "Set" the values of specified units. Return a newly-constructed Duration.
-   * @param {Object} values - a mapping of units to numbers
-   * @example dur.set({ years: 2017 })
-   * @example dur.set({ hours: 8, minutes: 30 })
-   * @return {Duration}
-   */
-  set(values) {
-    if (!this.isValid) return this;
-    const mixed = {
-      ...this.values,
-      ...normalizeObject(values, Duration.normalizeUnit)
-    };
-    return clone$1(this, {
-      values: mixed
+  return aborter;
+}
+var state_1 = state;
+function state(list, sortMethod) {
+  var isNamedList = !Array.isArray(list), initState2 = {
+    index: 0,
+    keyedList: isNamedList || sortMethod ? Object.keys(list) : null,
+    jobs: {},
+    results: isNamedList ? {} : [],
+    size: isNamedList ? Object.keys(list).length : list.length
+  };
+  if (sortMethod) {
+    initState2.keyedList.sort(isNamedList ? sortMethod : function(a, b) {
+      return sortMethod(list[a], list[b]);
     });
   }
-  /**
-   * "Set" the locale and/or numberingSystem.  Returns a newly-constructed Duration.
-   * @example dur.reconfigure({ locale: 'en-GB' })
-   * @return {Duration}
-   */
-  reconfigure({
-    locale,
-    numberingSystem,
-    conversionAccuracy,
-    matrix
-  } = {}) {
-    const loc = this.loc.clone({
-      locale,
-      numberingSystem
+  return initState2;
+}
+var abort = abort_1, async = async_1;
+var terminator_1 = terminator$2;
+function terminator$2(callback) {
+  if (!Object.keys(this.jobs).length) {
+    return;
+  }
+  this.index = this.size;
+  abort(this);
+  async(callback)(null, this.results);
+}
+var iterate$1 = iterate_1, initState$1 = state_1, terminator$1 = terminator_1;
+var parallel_1 = parallel;
+function parallel(list, iterator, callback) {
+  var state2 = initState$1(list);
+  while (state2.index < (state2["keyedList"] || list).length) {
+    iterate$1(list, iterator, state2, function(error, result) {
+      if (error) {
+        callback(error, result);
+        return;
+      }
+      if (Object.keys(state2.jobs).length === 0) {
+        callback(null, state2.results);
+        return;
+      }
     });
-    const opts = {
-      loc,
-      matrix,
-      conversionAccuracy
-    };
-    return clone$1(this, opts);
+    state2.index++;
   }
-  /**
-   * Return the length of the duration in the specified unit.
-   * @param {string} unit - a unit such as 'minutes' or 'days'
-   * @example Duration.fromObject({years: 1}).as('days') //=> 365
-   * @example Duration.fromObject({years: 1}).as('months') //=> 12
-   * @example Duration.fromObject({hours: 60}).as('days') //=> 2.5
-   * @return {number}
-   */
-  as(unit) {
-    return this.isValid ? this.shiftTo(unit).get(unit) : NaN;
-  }
-  /**
-   * Reduce this Duration to its canonical representation in its current units.
-   * Assuming the overall value of the Duration is positive, this means:
-   * - excessive values for lower-order units are converted to higher-order units (if possible, see first and second example)
-   * - negative lower-order units are converted to higher order units (there must be such a higher order unit, otherwise
-   *   the overall value would be negative, see third example)
-   * - fractional values for higher-order units are converted to lower-order units (if possible, see fourth example)
-   *
-   * If the overall value is negative, the result of this method is equivalent to `this.negate().normalize().negate()`.
-   * @example Duration.fromObject({ years: 2, days: 5000 }).normalize().toObject() //=> { years: 15, days: 255 }
-   * @example Duration.fromObject({ days: 5000 }).normalize().toObject() //=> { days: 5000 }
-   * @example Duration.fromObject({ hours: 12, minutes: -45 }).normalize().toObject() //=> { hours: 11, minutes: 15 }
-   * @example Duration.fromObject({ years: 2.5, days: 0, hours: 0 }).normalize().toObject() //=> { years: 2, days: 182, hours: 12 }
-   * @return {Duration}
-   */
-  normalize() {
-    if (!this.isValid) return this;
-    const vals = this.toObject();
-    normalizeValues(this.matrix, vals);
-    return clone$1(this, {
-      values: vals
-    }, true);
-  }
-  /**
-   * Rescale units to its largest representation
-   * @example Duration.fromObject({ milliseconds: 90000 }).rescale().toObject() //=> { minutes: 1, seconds: 30 }
-   * @return {Duration}
-   */
-  rescale() {
-    if (!this.isValid) return this;
-    const vals = removeZeroes(this.normalize().shiftToAll().toObject());
-    return clone$1(this, {
-      values: vals
-    }, true);
-  }
-  /**
-   * Convert this Duration into its representation in a different set of units.
-   * @example Duration.fromObject({ hours: 1, seconds: 30 }).shiftTo('minutes', 'milliseconds').toObject() //=> { minutes: 60, milliseconds: 30000 }
-   * @return {Duration}
-   */
-  shiftTo(...units) {
-    if (!this.isValid) return this;
-    if (units.length === 0) {
-      return this;
+  return terminator$1.bind(state2, callback);
+}
+var serialOrdered$2 = { exports: {} };
+var iterate = iterate_1, initState = state_1, terminator = terminator_1;
+serialOrdered$2.exports = serialOrdered$1;
+serialOrdered$2.exports.ascending = ascending;
+serialOrdered$2.exports.descending = descending;
+function serialOrdered$1(list, iterator, sortMethod, callback) {
+  var state2 = initState(list, sortMethod);
+  iterate(list, iterator, state2, function iteratorHandler(error, result) {
+    if (error) {
+      callback(error, result);
+      return;
     }
-    units = units.map((u) => Duration.normalizeUnit(u));
-    const built = {}, accumulated = {}, vals = this.toObject();
-    let lastUnit;
-    for (const k of orderedUnits$1) {
-      if (units.indexOf(k) >= 0) {
-        lastUnit = k;
-        let own = 0;
-        for (const ak in accumulated) {
-          own += this.matrix[ak][k] * accumulated[ak];
-          accumulated[ak] = 0;
+    state2.index++;
+    if (state2.index < (state2["keyedList"] || list).length) {
+      iterate(list, iterator, state2, iteratorHandler);
+      return;
+    }
+    callback(null, state2.results);
+  });
+  return terminator.bind(state2, callback);
+}
+function ascending(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+function descending(a, b) {
+  return -1 * ascending(a, b);
+}
+var serialOrderedExports = serialOrdered$2.exports;
+var serialOrdered = serialOrderedExports;
+var serial_1 = serial;
+function serial(list, iterator, callback) {
+  return serialOrdered(list, iterator, null, callback);
+}
+var asynckit$1 = {
+  parallel: parallel_1,
+  serial: serial_1,
+  serialOrdered: serialOrderedExports
+};
+var populate$1 = function(dst, src2) {
+  Object.keys(src2).forEach(function(prop) {
+    dst[prop] = dst[prop] || src2[prop];
+  });
+  return dst;
+};
+var CombinedStream = combined_stream;
+var util = require$$1;
+var path = require$$1$1;
+var http$1 = require$$3;
+var https$1 = require$$4;
+var parseUrl$2 = require$$0$1.parse;
+var fs = require$$6;
+var Stream = stream.Stream;
+var mime = mimeTypes;
+var asynckit = asynckit$1;
+var populate = populate$1;
+var form_data = FormData$1;
+util.inherits(FormData$1, CombinedStream);
+function FormData$1(options) {
+  if (!(this instanceof FormData$1)) {
+    return new FormData$1(options);
+  }
+  this._overheadLength = 0;
+  this._valueLength = 0;
+  this._valuesToMeasure = [];
+  CombinedStream.call(this);
+  options = options || {};
+  for (var option in options) {
+    this[option] = options[option];
+  }
+}
+FormData$1.LINE_BREAK = "\r\n";
+FormData$1.DEFAULT_CONTENT_TYPE = "application/octet-stream";
+FormData$1.prototype.append = function(field, value, options) {
+  options = options || {};
+  if (typeof options == "string") {
+    options = { filename: options };
+  }
+  var append2 = CombinedStream.prototype.append.bind(this);
+  if (typeof value == "number") {
+    value = "" + value;
+  }
+  if (Array.isArray(value)) {
+    this._error(new Error("Arrays are not supported."));
+    return;
+  }
+  var header = this._multiPartHeader(field, value, options);
+  var footer = this._multiPartFooter();
+  append2(header);
+  append2(value);
+  append2(footer);
+  this._trackLength(header, value, options);
+};
+FormData$1.prototype._trackLength = function(header, value, options) {
+  var valueLength = 0;
+  if (options.knownLength != null) {
+    valueLength += +options.knownLength;
+  } else if (Buffer.isBuffer(value)) {
+    valueLength = value.length;
+  } else if (typeof value === "string") {
+    valueLength = Buffer.byteLength(value);
+  }
+  this._valueLength += valueLength;
+  this._overheadLength += Buffer.byteLength(header) + FormData$1.LINE_BREAK.length;
+  if (!value || !value.path && !(value.readable && value.hasOwnProperty("httpVersion")) && !(value instanceof Stream)) {
+    return;
+  }
+  if (!options.knownLength) {
+    this._valuesToMeasure.push(value);
+  }
+};
+FormData$1.prototype._lengthRetriever = function(value, callback) {
+  if (value.hasOwnProperty("fd")) {
+    if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
+      callback(null, value.end + 1 - (value.start ? value.start : 0));
+    } else {
+      fs.stat(value.path, function(err, stat) {
+        var fileSize;
+        if (err) {
+          callback(err);
+          return;
         }
-        if (isNumber(vals[k])) {
-          own += vals[k];
-        }
-        const i = Math.trunc(own);
-        built[k] = i;
-        accumulated[k] = (own * 1e3 - i * 1e3) / 1e3;
-      } else if (isNumber(vals[k])) {
-        accumulated[k] = vals[k];
+        fileSize = stat.size - (value.start ? value.start : 0);
+        callback(null, fileSize);
+      });
+    }
+  } else if (value.hasOwnProperty("httpVersion")) {
+    callback(null, +value.headers["content-length"]);
+  } else if (value.hasOwnProperty("httpModule")) {
+    value.on("response", function(response) {
+      value.pause();
+      callback(null, +response.headers["content-length"]);
+    });
+    value.resume();
+  } else {
+    callback("Unknown stream");
+  }
+};
+FormData$1.prototype._multiPartHeader = function(field, value, options) {
+  if (typeof options.header == "string") {
+    return options.header;
+  }
+  var contentDisposition = this._getContentDisposition(value, options);
+  var contentType = this._getContentType(value, options);
+  var contents = "";
+  var headers = {
+    // add custom disposition as third element or keep it two elements if not
+    "Content-Disposition": ["form-data", 'name="' + field + '"'].concat(contentDisposition || []),
+    // if no content type. allow it to be empty array
+    "Content-Type": [].concat(contentType || [])
+  };
+  if (typeof options.header == "object") {
+    populate(headers, options.header);
+  }
+  var header;
+  for (var prop in headers) {
+    if (!headers.hasOwnProperty(prop)) continue;
+    header = headers[prop];
+    if (header == null) {
+      continue;
+    }
+    if (!Array.isArray(header)) {
+      header = [header];
+    }
+    if (header.length) {
+      contents += prop + ": " + header.join("; ") + FormData$1.LINE_BREAK;
+    }
+  }
+  return "--" + this.getBoundary() + FormData$1.LINE_BREAK + contents + FormData$1.LINE_BREAK;
+};
+FormData$1.prototype._getContentDisposition = function(value, options) {
+  var filename, contentDisposition;
+  if (typeof options.filepath === "string") {
+    filename = path.normalize(options.filepath).replace(/\\/g, "/");
+  } else if (options.filename || value.name || value.path) {
+    filename = path.basename(options.filename || value.name || value.path);
+  } else if (value.readable && value.hasOwnProperty("httpVersion")) {
+    filename = path.basename(value.client._httpMessage.path || "");
+  }
+  if (filename) {
+    contentDisposition = 'filename="' + filename + '"';
+  }
+  return contentDisposition;
+};
+FormData$1.prototype._getContentType = function(value, options) {
+  var contentType = options.contentType;
+  if (!contentType && value.name) {
+    contentType = mime.lookup(value.name);
+  }
+  if (!contentType && value.path) {
+    contentType = mime.lookup(value.path);
+  }
+  if (!contentType && value.readable && value.hasOwnProperty("httpVersion")) {
+    contentType = value.headers["content-type"];
+  }
+  if (!contentType && (options.filepath || options.filename)) {
+    contentType = mime.lookup(options.filepath || options.filename);
+  }
+  if (!contentType && typeof value == "object") {
+    contentType = FormData$1.DEFAULT_CONTENT_TYPE;
+  }
+  return contentType;
+};
+FormData$1.prototype._multiPartFooter = function() {
+  return (function(next) {
+    var footer = FormData$1.LINE_BREAK;
+    var lastPart = this._streams.length === 0;
+    if (lastPart) {
+      footer += this._lastBoundary();
+    }
+    next(footer);
+  }).bind(this);
+};
+FormData$1.prototype._lastBoundary = function() {
+  return "--" + this.getBoundary() + "--" + FormData$1.LINE_BREAK;
+};
+FormData$1.prototype.getHeaders = function(userHeaders) {
+  var header;
+  var formHeaders = {
+    "content-type": "multipart/form-data; boundary=" + this.getBoundary()
+  };
+  for (header in userHeaders) {
+    if (userHeaders.hasOwnProperty(header)) {
+      formHeaders[header.toLowerCase()] = userHeaders[header];
+    }
+  }
+  return formHeaders;
+};
+FormData$1.prototype.setBoundary = function(boundary) {
+  this._boundary = boundary;
+};
+FormData$1.prototype.getBoundary = function() {
+  if (!this._boundary) {
+    this._generateBoundary();
+  }
+  return this._boundary;
+};
+FormData$1.prototype.getBuffer = function() {
+  var dataBuffer = new Buffer.alloc(0);
+  var boundary = this.getBoundary();
+  for (var i = 0, len = this._streams.length; i < len; i++) {
+    if (typeof this._streams[i] !== "function") {
+      if (Buffer.isBuffer(this._streams[i])) {
+        dataBuffer = Buffer.concat([dataBuffer, this._streams[i]]);
+      } else {
+        dataBuffer = Buffer.concat([dataBuffer, Buffer.from(this._streams[i])]);
+      }
+      if (typeof this._streams[i] !== "string" || this._streams[i].substring(2, boundary.length + 2) !== boundary) {
+        dataBuffer = Buffer.concat([dataBuffer, Buffer.from(FormData$1.LINE_BREAK)]);
       }
     }
-    for (const key in accumulated) {
-      if (accumulated[key] !== 0) {
-        built[lastUnit] += key === lastUnit ? accumulated[key] : accumulated[key] / this.matrix[lastUnit][key];
-      }
+  }
+  return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
+};
+FormData$1.prototype._generateBoundary = function() {
+  var boundary = "--------------------------";
+  for (var i = 0; i < 24; i++) {
+    boundary += Math.floor(Math.random() * 10).toString(16);
+  }
+  this._boundary = boundary;
+};
+FormData$1.prototype.getLengthSync = function() {
+  var knownLength = this._overheadLength + this._valueLength;
+  if (this._streams.length) {
+    knownLength += this._lastBoundary().length;
+  }
+  if (!this.hasKnownLength()) {
+    this._error(new Error("Cannot calculate proper length in synchronous way."));
+  }
+  return knownLength;
+};
+FormData$1.prototype.hasKnownLength = function() {
+  var hasKnownLength = true;
+  if (this._valuesToMeasure.length) {
+    hasKnownLength = false;
+  }
+  return hasKnownLength;
+};
+FormData$1.prototype.getLength = function(cb) {
+  var knownLength = this._overheadLength + this._valueLength;
+  if (this._streams.length) {
+    knownLength += this._lastBoundary().length;
+  }
+  if (!this._valuesToMeasure.length) {
+    process.nextTick(cb.bind(this, null, knownLength));
+    return;
+  }
+  asynckit.parallel(this._valuesToMeasure, this._lengthRetriever, function(err, values) {
+    if (err) {
+      cb(err);
+      return;
     }
-    normalizeValues(this.matrix, built);
-    return clone$1(this, {
-      values: built
-    }, true);
-  }
-  /**
-   * Shift this Duration to all available units.
-   * Same as shiftTo("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds")
-   * @return {Duration}
-   */
-  shiftToAll() {
-    if (!this.isValid) return this;
-    return this.shiftTo("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds");
-  }
-  /**
-   * Return the negative of this Duration.
-   * @example Duration.fromObject({ hours: 1, seconds: 30 }).negate().toObject() //=> { hours: -1, seconds: -30 }
-   * @return {Duration}
-   */
-  negate() {
-    if (!this.isValid) return this;
-    const negated = {};
-    for (const k of Object.keys(this.values)) {
-      negated[k] = this.values[k] === 0 ? 0 : -this.values[k];
+    values.forEach(function(length) {
+      knownLength += length;
+    });
+    cb(null, knownLength);
+  });
+};
+FormData$1.prototype.submit = function(params, cb) {
+  var request, options, defaults2 = { method: "post" };
+  if (typeof params == "string") {
+    params = parseUrl$2(params);
+    options = populate({
+      port: params.port,
+      path: params.pathname,
+      host: params.hostname,
+      protocol: params.protocol
+    }, defaults2);
+  } else {
+    options = populate(params, defaults2);
+    if (!options.port) {
+      options.port = options.protocol == "https:" ? 443 : 80;
     }
-    return clone$1(this, {
-      values: negated
-    }, true);
   }
-  /**
-   * Get the years.
-   * @type {number}
-   */
-  get years() {
-    return this.isValid ? this.values.years || 0 : NaN;
+  options.headers = this.getHeaders(params.headers);
+  if (options.protocol == "https:") {
+    request = https$1.request(options);
+  } else {
+    request = http$1.request(options);
   }
-  /**
-   * Get the quarters.
-   * @type {number}
-   */
-  get quarters() {
-    return this.isValid ? this.values.quarters || 0 : NaN;
-  }
-  /**
-   * Get the months.
-   * @type {number}
-   */
-  get months() {
-    return this.isValid ? this.values.months || 0 : NaN;
-  }
-  /**
-   * Get the weeks
-   * @type {number}
-   */
-  get weeks() {
-    return this.isValid ? this.values.weeks || 0 : NaN;
-  }
-  /**
-   * Get the days.
-   * @type {number}
-   */
-  get days() {
-    return this.isValid ? this.values.days || 0 : NaN;
-  }
-  /**
-   * Get the hours.
-   * @type {number}
-   */
-  get hours() {
-    return this.isValid ? this.values.hours || 0 : NaN;
-  }
-  /**
-   * Get the minutes.
-   * @type {number}
-   */
-  get minutes() {
-    return this.isValid ? this.values.minutes || 0 : NaN;
-  }
-  /**
-   * Get the seconds.
-   * @return {number}
-   */
-  get seconds() {
-    return this.isValid ? this.values.seconds || 0 : NaN;
-  }
-  /**
-   * Get the milliseconds.
-   * @return {number}
-   */
-  get milliseconds() {
-    return this.isValid ? this.values.milliseconds || 0 : NaN;
-  }
-  /**
-   * Returns whether the Duration is invalid. Invalid durations are returned by diff operations
-   * on invalid DateTimes or Intervals.
-   * @return {boolean}
-   */
-  get isValid() {
-    return this.invalid === null;
-  }
-  /**
-   * Returns an error code if this Duration became invalid, or null if the Duration is valid
-   * @return {string}
-   */
-  get invalidReason() {
-    return this.invalid ? this.invalid.reason : null;
-  }
-  /**
-   * Returns an explanation of why this Duration became invalid, or null if the Duration is valid
-   * @type {string}
-   */
-  get invalidExplanation() {
-    return this.invalid ? this.invalid.explanation : null;
-  }
-  /**
-   * Equality check
-   * Two Durations are equal iff they have the same units and the same values for each unit.
-   * @param {Duration} other
-   * @return {boolean}
-   */
-  equals(other) {
-    if (!this.isValid || !other.isValid) {
-      return false;
+  this.getLength((function(err, length) {
+    if (err && err !== "Unknown stream") {
+      this._error(err);
+      return;
     }
-    if (!this.loc.equals(other.loc)) {
-      return false;
+    if (length) {
+      request.setHeader("Content-Length", length);
     }
-    function eq2(v1, v2) {
-      if (v1 === void 0 || v1 === 0) return v2 === void 0 || v2 === 0;
-      return v1 === v2;
+    this.pipe(request);
+    if (cb) {
+      var onResponse;
+      var callback = function(error, responce) {
+        request.removeListener("error", callback);
+        request.removeListener("response", onResponse);
+        return cb.call(this, error, responce);
+      };
+      onResponse = callback.bind(this, null);
+      request.on("error", callback);
+      request.on("response", onResponse);
     }
-    for (const u of orderedUnits$1) {
-      if (!eq2(this.values[u], other.values[u])) {
+  }).bind(this));
+  return request;
+};
+FormData$1.prototype._error = function(err) {
+  if (!this.error) {
+    this.error = err;
+    this.pause();
+    this.emit("error", err);
+  }
+};
+FormData$1.prototype.toString = function() {
+  return "[object FormData]";
+};
+const FormData$2 = /* @__PURE__ */ getDefaultExportFromCjs(form_data);
+function isVisitable(thing) {
+  return utils$1.isPlainObject(thing) || utils$1.isArray(thing);
+}
+function removeBrackets(key) {
+  return utils$1.endsWith(key, "[]") ? key.slice(0, -2) : key;
+}
+function renderKey(path2, key, dots) {
+  if (!path2) return key;
+  return path2.concat(key).map(function each(token, i) {
+    token = removeBrackets(token);
+    return !dots && i ? "[" + token + "]" : token;
+  }).join(dots ? "." : "");
+}
+function isFlatArray(arr) {
+  return utils$1.isArray(arr) && !arr.some(isVisitable);
+}
+const predicates = utils$1.toFlatObject(utils$1, {}, null, function filter(prop) {
+  return /^is[A-Z]/.test(prop);
+});
+function toFormData(obj, formData, options) {
+  if (!utils$1.isObject(obj)) {
+    throw new TypeError("target must be an object");
+  }
+  formData = formData || new (FormData$2 || FormData)();
+  options = utils$1.toFlatObject(options, {
+    metaTokens: true,
+    dots: false,
+    indexes: false
+  }, false, function defined(option, source) {
+    return !utils$1.isUndefined(source[option]);
+  });
+  const metaTokens = options.metaTokens;
+  const visitor = options.visitor || defaultVisitor;
+  const dots = options.dots;
+  const indexes = options.indexes;
+  const _Blob = options.Blob || typeof Blob !== "undefined" && Blob;
+  const useBlob = _Blob && utils$1.isSpecCompliantForm(formData);
+  if (!utils$1.isFunction(visitor)) {
+    throw new TypeError("visitor must be a function");
+  }
+  function convertValue(value) {
+    if (value === null) return "";
+    if (utils$1.isDate(value)) {
+      return value.toISOString();
+    }
+    if (!useBlob && utils$1.isBlob(value)) {
+      throw new AxiosError("Blob is not supported. Use a Buffer instead.");
+    }
+    if (utils$1.isArrayBuffer(value) || utils$1.isTypedArray(value)) {
+      return useBlob && typeof Blob === "function" ? new Blob([value]) : Buffer.from(value);
+    }
+    return value;
+  }
+  function defaultVisitor(value, key, path2) {
+    let arr = value;
+    if (value && !path2 && typeof value === "object") {
+      if (utils$1.endsWith(key, "{}")) {
+        key = metaTokens ? key : key.slice(0, -2);
+        value = JSON.stringify(value);
+      } else if (utils$1.isArray(value) && isFlatArray(value) || (utils$1.isFileList(value) || utils$1.endsWith(key, "[]")) && (arr = utils$1.toArray(value))) {
+        key = removeBrackets(key);
+        arr.forEach(function each(el, index) {
+          !(utils$1.isUndefined(el) || el === null) && formData.append(
+            // eslint-disable-next-line no-nested-ternary
+            indexes === true ? renderKey([key], index, dots) : indexes === null ? key : key + "[]",
+            convertValue(el)
+          );
+        });
         return false;
       }
     }
-    return true;
-  }
-}
-const INVALID$1 = "Invalid Interval";
-function validateStartEnd(start, end) {
-  if (!start || !start.isValid) {
-    return Interval.invalid("missing or invalid start");
-  } else if (!end || !end.isValid) {
-    return Interval.invalid("missing or invalid end");
-  } else if (end < start) {
-    return Interval.invalid("end before start", `The end of an interval must be after its start, but you had start=${start.toISO()} and end=${end.toISO()}`);
-  } else {
-    return null;
-  }
-}
-class Interval {
-  /**
-   * @private
-   */
-  constructor(config) {
-    this.s = config.start;
-    this.e = config.end;
-    this.invalid = config.invalid || null;
-    this.isLuxonInterval = true;
-  }
-  /**
-   * Create an invalid Interval.
-   * @param {string} reason - simple string of why this Interval is invalid. Should not contain parameters or anything else data-dependent
-   * @param {string} [explanation=null] - longer explanation, may include parameters and other useful debugging information
-   * @return {Interval}
-   */
-  static invalid(reason, explanation = null) {
-    if (!reason) {
-      throw new InvalidArgumentError("need to specify a reason the Interval is invalid");
+    if (isVisitable(value)) {
+      return true;
     }
-    const invalid = reason instanceof Invalid ? reason : new Invalid(reason, explanation);
-    if (Settings.throwOnInvalid) {
-      throw new InvalidIntervalError(invalid);
-    } else {
-      return new Interval({
-        invalid
-      });
+    formData.append(renderKey(path2, key, dots), convertValue(value));
+    return false;
+  }
+  const stack = [];
+  const exposedHelpers = Object.assign(predicates, {
+    defaultVisitor,
+    convertValue,
+    isVisitable
+  });
+  function build(value, path2) {
+    if (utils$1.isUndefined(value)) return;
+    if (stack.indexOf(value) !== -1) {
+      throw Error("Circular reference detected in " + path2.join("."));
     }
-  }
-  /**
-   * Create an Interval from a start DateTime and an end DateTime. Inclusive of the start but not the end.
-   * @param {DateTime|Date|Object} start
-   * @param {DateTime|Date|Object} end
-   * @return {Interval}
-   */
-  static fromDateTimes(start, end) {
-    const builtStart = friendlyDateTime(start), builtEnd = friendlyDateTime(end);
-    const validateError = validateStartEnd(builtStart, builtEnd);
-    if (validateError == null) {
-      return new Interval({
-        start: builtStart,
-        end: builtEnd
-      });
-    } else {
-      return validateError;
-    }
-  }
-  /**
-   * Create an Interval from a start DateTime and a Duration to extend to.
-   * @param {DateTime|Date|Object} start
-   * @param {Duration|Object|number} duration - the length of the Interval.
-   * @return {Interval}
-   */
-  static after(start, duration) {
-    const dur = Duration.fromDurationLike(duration), dt = friendlyDateTime(start);
-    return Interval.fromDateTimes(dt, dt.plus(dur));
-  }
-  /**
-   * Create an Interval from an end DateTime and a Duration to extend backwards to.
-   * @param {DateTime|Date|Object} end
-   * @param {Duration|Object|number} duration - the length of the Interval.
-   * @return {Interval}
-   */
-  static before(end, duration) {
-    const dur = Duration.fromDurationLike(duration), dt = friendlyDateTime(end);
-    return Interval.fromDateTimes(dt.minus(dur), dt);
-  }
-  /**
-   * Create an Interval from an ISO 8601 string.
-   * Accepts `<start>/<end>`, `<start>/<duration>`, and `<duration>/<end>` formats.
-   * @param {string} text - the ISO string to parse
-   * @param {Object} [opts] - options to pass {@link DateTime#fromISO} and optionally {@link Duration#fromISO}
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
-   * @return {Interval}
-   */
-  static fromISO(text, opts) {
-    const [s2, e] = (text || "").split("/", 2);
-    if (s2 && e) {
-      let start, startIsValid;
-      try {
-        start = DateTime.fromISO(s2, opts);
-        startIsValid = start.isValid;
-      } catch (e2) {
-        startIsValid = false;
+    stack.push(value);
+    utils$1.forEach(value, function each(el, key) {
+      const result = !(utils$1.isUndefined(el) || el === null) && visitor.call(
+        formData,
+        el,
+        utils$1.isString(key) ? key.trim() : key,
+        path2,
+        exposedHelpers
+      );
+      if (result === true) {
+        build(el, path2 ? path2.concat(key) : [key]);
       }
-      let end, endIsValid;
-      try {
-        end = DateTime.fromISO(e, opts);
-        endIsValid = end.isValid;
-      } catch (e2) {
-        endIsValid = false;
-      }
-      if (startIsValid && endIsValid) {
-        return Interval.fromDateTimes(start, end);
-      }
-      if (startIsValid) {
-        const dur = Duration.fromISO(e, opts);
-        if (dur.isValid) {
-          return Interval.after(start, dur);
-        }
-      } else if (endIsValid) {
-        const dur = Duration.fromISO(s2, opts);
-        if (dur.isValid) {
-          return Interval.before(end, dur);
-        }
-      }
-    }
-    return Interval.invalid("unparsable", `the input "${text}" can't be parsed as ISO 8601`);
-  }
-  /**
-   * Check if an object is an Interval. Works across context boundaries
-   * @param {object} o
-   * @return {boolean}
-   */
-  static isInterval(o) {
-    return o && o.isLuxonInterval || false;
-  }
-  /**
-   * Returns the start of the Interval
-   * @type {DateTime}
-   */
-  get start() {
-    return this.isValid ? this.s : null;
-  }
-  /**
-   * Returns the end of the Interval
-   * @type {DateTime}
-   */
-  get end() {
-    return this.isValid ? this.e : null;
-  }
-  /**
-   * Returns whether this Interval's end is at least its start, meaning that the Interval isn't 'backwards'.
-   * @type {boolean}
-   */
-  get isValid() {
-    return this.invalidReason === null;
-  }
-  /**
-   * Returns an error code if this Interval is invalid, or null if the Interval is valid
-   * @type {string}
-   */
-  get invalidReason() {
-    return this.invalid ? this.invalid.reason : null;
-  }
-  /**
-   * Returns an explanation of why this Interval became invalid, or null if the Interval is valid
-   * @type {string}
-   */
-  get invalidExplanation() {
-    return this.invalid ? this.invalid.explanation : null;
-  }
-  /**
-   * Returns the length of the Interval in the specified unit.
-   * @param {string} unit - the unit (such as 'hours' or 'days') to return the length in.
-   * @return {number}
-   */
-  length(unit = "milliseconds") {
-    return this.isValid ? this.toDuration(...[unit]).get(unit) : NaN;
-  }
-  /**
-   * Returns the count of minutes, hours, days, months, or years included in the Interval, even in part.
-   * Unlike {@link Interval#length} this counts sections of the calendar, not periods of time, e.g. specifying 'day'
-   * asks 'what dates are included in this interval?', not 'how many days long is this interval?'
-   * @param {string} [unit='milliseconds'] - the unit of time to count.
-   * @param {Object} opts - options
-   * @param {boolean} [opts.useLocaleWeeks=false] - If true, use weeks based on the locale, i.e. use the locale-dependent start of the week; this operation will always use the locale of the start DateTime
-   * @return {number}
-   */
-  count(unit = "milliseconds", opts) {
-    if (!this.isValid) return NaN;
-    const start = this.start.startOf(unit, opts);
-    let end;
-    if (opts != null && opts.useLocaleWeeks) {
-      end = this.end.reconfigure({
-        locale: start.locale
-      });
-    } else {
-      end = this.end;
-    }
-    end = end.startOf(unit, opts);
-    return Math.floor(end.diff(start, unit).get(unit)) + (end.valueOf() !== this.end.valueOf());
-  }
-  /**
-   * Returns whether this Interval's start and end are both in the same unit of time
-   * @param {string} unit - the unit of time to check sameness on
-   * @return {boolean}
-   */
-  hasSame(unit) {
-    return this.isValid ? this.isEmpty() || this.e.minus(1).hasSame(this.s, unit) : false;
-  }
-  /**
-   * Return whether this Interval has the same start and end DateTimes.
-   * @return {boolean}
-   */
-  isEmpty() {
-    return this.s.valueOf() === this.e.valueOf();
-  }
-  /**
-   * Return whether this Interval's start is after the specified DateTime.
-   * @param {DateTime} dateTime
-   * @return {boolean}
-   */
-  isAfter(dateTime) {
-    if (!this.isValid) return false;
-    return this.s > dateTime;
-  }
-  /**
-   * Return whether this Interval's end is before the specified DateTime.
-   * @param {DateTime} dateTime
-   * @return {boolean}
-   */
-  isBefore(dateTime) {
-    if (!this.isValid) return false;
-    return this.e <= dateTime;
-  }
-  /**
-   * Return whether this Interval contains the specified DateTime.
-   * @param {DateTime} dateTime
-   * @return {boolean}
-   */
-  contains(dateTime) {
-    if (!this.isValid) return false;
-    return this.s <= dateTime && this.e > dateTime;
-  }
-  /**
-   * "Sets" the start and/or end dates. Returns a newly-constructed Interval.
-   * @param {Object} values - the values to set
-   * @param {DateTime} values.start - the starting DateTime
-   * @param {DateTime} values.end - the ending DateTime
-   * @return {Interval}
-   */
-  set({
-    start,
-    end
-  } = {}) {
-    if (!this.isValid) return this;
-    return Interval.fromDateTimes(start || this.s, end || this.e);
-  }
-  /**
-   * Split this Interval at each of the specified DateTimes
-   * @param {...DateTime} dateTimes - the unit of time to count.
-   * @return {Array}
-   */
-  splitAt(...dateTimes) {
-    if (!this.isValid) return [];
-    const sorted2 = dateTimes.map(friendlyDateTime).filter((d) => this.contains(d)).sort((a, b) => a.toMillis() - b.toMillis()), results = [];
-    let {
-      s: s2
-    } = this, i = 0;
-    while (s2 < this.e) {
-      const added = sorted2[i] || this.e, next2 = +added > +this.e ? this.e : added;
-      results.push(Interval.fromDateTimes(s2, next2));
-      s2 = next2;
-      i += 1;
-    }
-    return results;
-  }
-  /**
-   * Split this Interval into smaller Intervals, each of the specified length.
-   * Left over time is grouped into a smaller interval
-   * @param {Duration|Object|number} duration - The length of each resulting interval.
-   * @return {Array}
-   */
-  splitBy(duration) {
-    const dur = Duration.fromDurationLike(duration);
-    if (!this.isValid || !dur.isValid || dur.as("milliseconds") === 0) {
-      return [];
-    }
-    let {
-      s: s2
-    } = this, idx = 1, next2;
-    const results = [];
-    while (s2 < this.e) {
-      const added = this.start.plus(dur.mapUnits((x) => x * idx));
-      next2 = +added > +this.e ? this.e : added;
-      results.push(Interval.fromDateTimes(s2, next2));
-      s2 = next2;
-      idx += 1;
-    }
-    return results;
-  }
-  /**
-   * Split this Interval into the specified number of smaller intervals.
-   * @param {number} numberOfParts - The number of Intervals to divide the Interval into.
-   * @return {Array}
-   */
-  divideEqually(numberOfParts) {
-    if (!this.isValid) return [];
-    return this.splitBy(this.length() / numberOfParts).slice(0, numberOfParts);
-  }
-  /**
-   * Return whether this Interval overlaps with the specified Interval
-   * @param {Interval} other
-   * @return {boolean}
-   */
-  overlaps(other) {
-    return this.e > other.s && this.s < other.e;
-  }
-  /**
-   * Return whether this Interval's end is adjacent to the specified Interval's start.
-   * @param {Interval} other
-   * @return {boolean}
-   */
-  abutsStart(other) {
-    if (!this.isValid) return false;
-    return +this.e === +other.s;
-  }
-  /**
-   * Return whether this Interval's start is adjacent to the specified Interval's end.
-   * @param {Interval} other
-   * @return {boolean}
-   */
-  abutsEnd(other) {
-    if (!this.isValid) return false;
-    return +other.e === +this.s;
-  }
-  /**
-   * Returns true if this Interval fully contains the specified Interval, specifically if the intersect (of this Interval and the other Interval) is equal to the other Interval; false otherwise.
-   * @param {Interval} other
-   * @return {boolean}
-   */
-  engulfs(other) {
-    if (!this.isValid) return false;
-    return this.s <= other.s && this.e >= other.e;
-  }
-  /**
-   * Return whether this Interval has the same start and end as the specified Interval.
-   * @param {Interval} other
-   * @return {boolean}
-   */
-  equals(other) {
-    if (!this.isValid || !other.isValid) {
-      return false;
-    }
-    return this.s.equals(other.s) && this.e.equals(other.e);
-  }
-  /**
-   * Return an Interval representing the intersection of this Interval and the specified Interval.
-   * Specifically, the resulting Interval has the maximum start time and the minimum end time of the two Intervals.
-   * Returns null if the intersection is empty, meaning, the intervals don't intersect.
-   * @param {Interval} other
-   * @return {Interval}
-   */
-  intersection(other) {
-    if (!this.isValid) return this;
-    const s2 = this.s > other.s ? this.s : other.s, e = this.e < other.e ? this.e : other.e;
-    if (s2 >= e) {
-      return null;
-    } else {
-      return Interval.fromDateTimes(s2, e);
-    }
-  }
-  /**
-   * Return an Interval representing the union of this Interval and the specified Interval.
-   * Specifically, the resulting Interval has the minimum start time and the maximum end time of the two Intervals.
-   * @param {Interval} other
-   * @return {Interval}
-   */
-  union(other) {
-    if (!this.isValid) return this;
-    const s2 = this.s < other.s ? this.s : other.s, e = this.e > other.e ? this.e : other.e;
-    return Interval.fromDateTimes(s2, e);
-  }
-  /**
-   * Merge an array of Intervals into a equivalent minimal set of Intervals.
-   * Combines overlapping and adjacent Intervals.
-   * @param {Array} intervals
-   * @return {Array}
-   */
-  static merge(intervals) {
-    const [found, final] = intervals.sort((a, b) => a.s - b.s).reduce(([sofar, current], item) => {
-      if (!current) {
-        return [sofar, item];
-      } else if (current.overlaps(item) || current.abutsStart(item)) {
-        return [sofar, current.union(item)];
-      } else {
-        return [sofar.concat([current]), item];
-      }
-    }, [[], null]);
-    if (final) {
-      found.push(final);
-    }
-    return found;
-  }
-  /**
-   * Return an array of Intervals representing the spans of time that only appear in one of the specified Intervals.
-   * @param {Array} intervals
-   * @return {Array}
-   */
-  static xor(intervals) {
-    let start = null, currentCount = 0;
-    const results = [], ends = intervals.map((i) => [{
-      time: i.s,
-      type: "s"
-    }, {
-      time: i.e,
-      type: "e"
-    }]), flattened = Array.prototype.concat(...ends), arr = flattened.sort((a, b) => a.time - b.time);
-    for (const i of arr) {
-      currentCount += i.type === "s" ? 1 : -1;
-      if (currentCount === 1) {
-        start = i.time;
-      } else {
-        if (start && +start !== +i.time) {
-          results.push(Interval.fromDateTimes(start, i.time));
-        }
-        start = null;
-      }
-    }
-    return Interval.merge(results);
-  }
-  /**
-   * Return an Interval representing the span of time in this Interval that doesn't overlap with any of the specified Intervals.
-   * @param {...Interval} intervals
-   * @return {Array}
-   */
-  difference(...intervals) {
-    return Interval.xor([this].concat(intervals)).map((i) => this.intersection(i)).filter((i) => i && !i.isEmpty());
-  }
-  /**
-   * Returns a string representation of this Interval appropriate for debugging.
-   * @return {string}
-   */
-  toString() {
-    if (!this.isValid) return INVALID$1;
-    return `[${this.s.toISO()} – ${this.e.toISO()})`;
-  }
-  /**
-   * Returns a string representation of this Interval appropriate for the REPL.
-   * @return {string}
-   */
-  [Symbol.for("nodejs.util.inspect.custom")]() {
-    if (this.isValid) {
-      return `Interval { start: ${this.s.toISO()}, end: ${this.e.toISO()} }`;
-    } else {
-      return `Interval { Invalid, reason: ${this.invalidReason} }`;
-    }
-  }
-  /**
-   * Returns a localized string representing this Interval. Accepts the same options as the
-   * Intl.DateTimeFormat constructor and any presets defined by Luxon, such as
-   * {@link DateTime.DATE_FULL} or {@link DateTime.TIME_SIMPLE}. The exact behavior of this method
-   * is browser-specific, but in general it will return an appropriate representation of the
-   * Interval in the assigned locale. Defaults to the system's locale if no locale has been
-   * specified.
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
-   * @param {Object} [formatOpts=DateTime.DATE_SHORT] - Either a DateTime preset or
-   * Intl.DateTimeFormat constructor options.
-   * @param {Object} opts - Options to override the configuration of the start DateTime.
-   * @example Interval.fromISO('2022-11-07T09:00Z/2022-11-08T09:00Z').toLocaleString(); //=> 11/7/2022 – 11/8/2022
-   * @example Interval.fromISO('2022-11-07T09:00Z/2022-11-08T09:00Z').toLocaleString(DateTime.DATE_FULL); //=> November 7 – 8, 2022
-   * @example Interval.fromISO('2022-11-07T09:00Z/2022-11-08T09:00Z').toLocaleString(DateTime.DATE_FULL, { locale: 'fr-FR' }); //=> 7–8 novembre 2022
-   * @example Interval.fromISO('2022-11-07T17:00Z/2022-11-07T19:00Z').toLocaleString(DateTime.TIME_SIMPLE); //=> 6:00 – 8:00 PM
-   * @example Interval.fromISO('2022-11-07T17:00Z/2022-11-07T19:00Z').toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }); //=> Mon, Nov 07, 6:00 – 8:00 p
-   * @return {string}
-   */
-  toLocaleString(formatOpts = DATE_SHORT, opts = {}) {
-    return this.isValid ? Formatter.create(this.s.loc.clone(opts), formatOpts).formatInterval(this) : INVALID$1;
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this Interval.
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
-   * @param {Object} opts - The same options as {@link DateTime#toISO}
-   * @return {string}
-   */
-  toISO(opts) {
-    if (!this.isValid) return INVALID$1;
-    return `${this.s.toISO(opts)}/${this.e.toISO(opts)}`;
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of date of this Interval.
-   * The time components are ignored.
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
-   * @return {string}
-   */
-  toISODate() {
-    if (!this.isValid) return INVALID$1;
-    return `${this.s.toISODate()}/${this.e.toISODate()}`;
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of time of this Interval.
-   * The date components are ignored.
-   * @see https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
-   * @param {Object} opts - The same options as {@link DateTime#toISO}
-   * @return {string}
-   */
-  toISOTime(opts) {
-    if (!this.isValid) return INVALID$1;
-    return `${this.s.toISOTime(opts)}/${this.e.toISOTime(opts)}`;
-  }
-  /**
-   * Returns a string representation of this Interval formatted according to the specified format
-   * string. **You may not want this.** See {@link Interval#toLocaleString} for a more flexible
-   * formatting tool.
-   * @param {string} dateFormat - The format string. This string formats the start and end time.
-   * See {@link DateTime#toFormat} for details.
-   * @param {Object} opts - Options.
-   * @param {string} [opts.separator =  ' – '] - A separator to place between the start and end
-   * representations.
-   * @return {string}
-   */
-  toFormat(dateFormat, {
-    separator = " – "
-  } = {}) {
-    if (!this.isValid) return INVALID$1;
-    return `${this.s.toFormat(dateFormat)}${separator}${this.e.toFormat(dateFormat)}`;
-  }
-  /**
-   * Return a Duration representing the time spanned by this interval.
-   * @param {string|string[]} [unit=['milliseconds']] - the unit or units (such as 'hours' or 'days') to include in the duration.
-   * @param {Object} opts - options that affect the creation of the Duration
-   * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-   * @example Interval.fromDateTimes(dt1, dt2).toDuration().toObject() //=> { milliseconds: 88489257 }
-   * @example Interval.fromDateTimes(dt1, dt2).toDuration('days').toObject() //=> { days: 1.0241812152777778 }
-   * @example Interval.fromDateTimes(dt1, dt2).toDuration(['hours', 'minutes']).toObject() //=> { hours: 24, minutes: 34.82095 }
-   * @example Interval.fromDateTimes(dt1, dt2).toDuration(['hours', 'minutes', 'seconds']).toObject() //=> { hours: 24, minutes: 34, seconds: 49.257 }
-   * @example Interval.fromDateTimes(dt1, dt2).toDuration('seconds').toObject() //=> { seconds: 88489.257 }
-   * @return {Duration}
-   */
-  toDuration(unit, opts) {
-    if (!this.isValid) {
-      return Duration.invalid(this.invalidReason);
-    }
-    return this.e.diff(this.s, unit, opts);
-  }
-  /**
-   * Run mapFn on the interval start and end, returning a new Interval from the resulting DateTimes
-   * @param {function} mapFn
-   * @return {Interval}
-   * @example Interval.fromDateTimes(dt1, dt2).mapEndpoints(endpoint => endpoint.toUTC())
-   * @example Interval.fromDateTimes(dt1, dt2).mapEndpoints(endpoint => endpoint.plus({ hours: 2 }))
-   */
-  mapEndpoints(mapFn) {
-    return Interval.fromDateTimes(mapFn(this.s), mapFn(this.e));
-  }
-}
-class Info {
-  /**
-   * Return whether the specified zone contains a DST.
-   * @param {string|Zone} [zone='local'] - Zone to check. Defaults to the environment's local zone.
-   * @return {boolean}
-   */
-  static hasDST(zone = Settings.defaultZone) {
-    const proto = DateTime.now().setZone(zone).set({
-      month: 12
     });
-    return !zone.isUniversal && proto.offset !== proto.set({
-      month: 6
-    }).offset;
+    stack.pop();
   }
-  /**
-   * Return whether the specified zone is a valid IANA specifier.
-   * @param {string} zone - Zone to check
-   * @return {boolean}
-   */
-  static isValidIANAZone(zone) {
-    return IANAZone.isValidZone(zone);
+  if (!utils$1.isObject(obj)) {
+    throw new TypeError("data must be an object");
   }
-  /**
-   * Converts the input into a {@link Zone} instance.
-   *
-   * * If `input` is already a Zone instance, it is returned unchanged.
-   * * If `input` is a string containing a valid time zone name, a Zone instance
-   *   with that name is returned.
-   * * If `input` is a string that doesn't refer to a known time zone, a Zone
-   *   instance with {@link Zone#isValid} == false is returned.
-   * * If `input is a number, a Zone instance with the specified fixed offset
-   *   in minutes is returned.
-   * * If `input` is `null` or `undefined`, the default zone is returned.
-   * @param {string|Zone|number} [input] - the value to be converted
-   * @return {Zone}
-   */
-  static normalizeZone(input) {
-    return normalizeZone(input, Settings.defaultZone);
+  build(obj);
+  return formData;
+}
+function encode$1(str) {
+  const charMap = {
+    "!": "%21",
+    "'": "%27",
+    "(": "%28",
+    ")": "%29",
+    "~": "%7E",
+    "%20": "+",
+    "%00": "\0"
+  };
+  return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, function replacer(match) {
+    return charMap[match];
+  });
+}
+function AxiosURLSearchParams(params, options) {
+  this._pairs = [];
+  params && toFormData(params, this, options);
+}
+const prototype = AxiosURLSearchParams.prototype;
+prototype.append = function append(name, value) {
+  this._pairs.push([name, value]);
+};
+prototype.toString = function toString(encoder) {
+  const _encode = encoder ? function(value) {
+    return encoder.call(this, value, encode$1);
+  } : encode$1;
+  return this._pairs.map(function each(pair) {
+    return _encode(pair[0]) + "=" + _encode(pair[1]);
+  }, "").join("&");
+};
+function encode(val) {
+  return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
+}
+function buildURL(url2, params, options) {
+  if (!params) {
+    return url2;
   }
-  /**
-   * Get the weekday on which the week starts according to the given locale.
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @returns {number} the start of the week, 1 for Monday through 7 for Sunday
-   */
-  static getStartOfWeek({
-    locale = null,
-    locObj = null
-  } = {}) {
-    return (locObj || Locale.create(locale)).getStartOfWeek();
-  }
-  /**
-   * Get the minimum number of days necessary in a week before it is considered part of the next year according
-   * to the given locale.
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @returns {number}
-   */
-  static getMinimumDaysInFirstWeek({
-    locale = null,
-    locObj = null
-  } = {}) {
-    return (locObj || Locale.create(locale)).getMinDaysInFirstWeek();
-  }
-  /**
-   * Get the weekdays, which are considered the weekend according to the given locale
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @returns {number[]} an array of weekdays, 1 for Monday through 7 for Sunday
-   */
-  static getWeekendWeekdays({
-    locale = null,
-    locObj = null
-  } = {}) {
-    return (locObj || Locale.create(locale)).getWeekendDays().slice();
-  }
-  /**
-   * Return an array of standalone month names.
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
-   * @param {string} [length='long'] - the length of the month representation, such as "numeric", "2-digit", "narrow", "short", "long"
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.numberingSystem=null] - the numbering system
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @param {string} [opts.outputCalendar='gregory'] - the calendar
-   * @example Info.months()[0] //=> 'January'
-   * @example Info.months('short')[0] //=> 'Jan'
-   * @example Info.months('numeric')[0] //=> '1'
-   * @example Info.months('short', { locale: 'fr-CA' } )[0] //=> 'janv.'
-   * @example Info.months('numeric', { locale: 'ar' })[0] //=> '١'
-   * @example Info.months('long', { outputCalendar: 'islamic' })[0] //=> 'Rabiʻ I'
-   * @return {Array}
-   */
-  static months(length = "long", {
-    locale = null,
-    numberingSystem = null,
-    locObj = null,
-    outputCalendar = "gregory"
-  } = {}) {
-    return (locObj || Locale.create(locale, numberingSystem, outputCalendar)).months(length);
-  }
-  /**
-   * Return an array of format month names.
-   * Format months differ from standalone months in that they're meant to appear next to the day of the month. In some languages, that
-   * changes the string.
-   * See {@link Info#months}
-   * @param {string} [length='long'] - the length of the month representation, such as "numeric", "2-digit", "narrow", "short", "long"
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.numberingSystem=null] - the numbering system
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @param {string} [opts.outputCalendar='gregory'] - the calendar
-   * @return {Array}
-   */
-  static monthsFormat(length = "long", {
-    locale = null,
-    numberingSystem = null,
-    locObj = null,
-    outputCalendar = "gregory"
-  } = {}) {
-    return (locObj || Locale.create(locale, numberingSystem, outputCalendar)).months(length, true);
-  }
-  /**
-   * Return an array of standalone week names.
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
-   * @param {string} [length='long'] - the length of the weekday representation, such as "narrow", "short", "long".
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @param {string} [opts.numberingSystem=null] - the numbering system
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @example Info.weekdays()[0] //=> 'Monday'
-   * @example Info.weekdays('short')[0] //=> 'Mon'
-   * @example Info.weekdays('short', { locale: 'fr-CA' })[0] //=> 'lun.'
-   * @example Info.weekdays('short', { locale: 'ar' })[0] //=> 'الاثنين'
-   * @return {Array}
-   */
-  static weekdays(length = "long", {
-    locale = null,
-    numberingSystem = null,
-    locObj = null
-  } = {}) {
-    return (locObj || Locale.create(locale, numberingSystem, null)).weekdays(length);
-  }
-  /**
-   * Return an array of format week names.
-   * Format weekdays differ from standalone weekdays in that they're meant to appear next to more date information. In some languages, that
-   * changes the string.
-   * See {@link Info#weekdays}
-   * @param {string} [length='long'] - the length of the month representation, such as "narrow", "short", "long".
-   * @param {Object} opts - options
-   * @param {string} [opts.locale=null] - the locale code
-   * @param {string} [opts.numberingSystem=null] - the numbering system
-   * @param {string} [opts.locObj=null] - an existing locale object to use
-   * @return {Array}
-   */
-  static weekdaysFormat(length = "long", {
-    locale = null,
-    numberingSystem = null,
-    locObj = null
-  } = {}) {
-    return (locObj || Locale.create(locale, numberingSystem, null)).weekdays(length, true);
-  }
-  /**
-   * Return an array of meridiems.
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @example Info.meridiems() //=> [ 'AM', 'PM' ]
-   * @example Info.meridiems({ locale: 'my' }) //=> [ 'နံနက်', 'ညနေ' ]
-   * @return {Array}
-   */
-  static meridiems({
-    locale = null
-  } = {}) {
-    return Locale.create(locale).meridiems();
-  }
-  /**
-   * Return an array of eras, such as ['BC', 'AD']. The locale can be specified, but the calendar system is always Gregorian.
-   * @param {string} [length='short'] - the length of the era representation, such as "short" or "long".
-   * @param {Object} opts - options
-   * @param {string} [opts.locale] - the locale code
-   * @example Info.eras() //=> [ 'BC', 'AD' ]
-   * @example Info.eras('long') //=> [ 'Before Christ', 'Anno Domini' ]
-   * @example Info.eras('long', { locale: 'fr' }) //=> [ 'avant Jésus-Christ', 'après Jésus-Christ' ]
-   * @return {Array}
-   */
-  static eras(length = "short", {
-    locale = null
-  } = {}) {
-    return Locale.create(locale, null, "gregory").eras(length);
-  }
-  /**
-   * Return the set of available features in this environment.
-   * Some features of Luxon are not available in all environments. For example, on older browsers, relative time formatting support is not available. Use this function to figure out if that's the case.
-   * Keys:
-   * * `relative`: whether this environment supports relative time formatting
-   * * `localeWeek`: whether this environment supports different weekdays for the start of the week based on the locale
-   * @example Info.features() //=> { relative: false, localeWeek: true }
-   * @return {Object}
-   */
-  static features() {
-    return {
-      relative: hasRelative(),
-      localeWeek: hasLocaleWeekInfo()
+  const _encode = options && options.encode || encode;
+  if (utils$1.isFunction(options)) {
+    options = {
+      serialize: options
     };
   }
+  const serializeFn = options && options.serialize;
+  let serializedParams;
+  if (serializeFn) {
+    serializedParams = serializeFn(params, options);
+  } else {
+    serializedParams = utils$1.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams(params, options).toString(_encode);
+  }
+  if (serializedParams) {
+    const hashmarkIndex = url2.indexOf("#");
+    if (hashmarkIndex !== -1) {
+      url2 = url2.slice(0, hashmarkIndex);
+    }
+    url2 += (url2.indexOf("?") === -1 ? "?" : "&") + serializedParams;
+  }
+  return url2;
 }
-function dayDiff(earlier, later) {
-  const utcDayStart = (dt) => dt.toUTC(0, {
-    keepLocalTime: true
-  }).startOf("day").valueOf(), ms = utcDayStart(later) - utcDayStart(earlier);
-  return Math.floor(Duration.fromMillis(ms).as("days"));
+class InterceptorManager {
+  constructor() {
+    this.handlers = [];
+  }
+  /**
+   * Add a new interceptor to the stack
+   *
+   * @param {Function} fulfilled The function to handle `then` for a `Promise`
+   * @param {Function} rejected The function to handle `reject` for a `Promise`
+   *
+   * @return {Number} An ID used to remove interceptor later
+   */
+  use(fulfilled, rejected, options) {
+    this.handlers.push({
+      fulfilled,
+      rejected,
+      synchronous: options ? options.synchronous : false,
+      runWhen: options ? options.runWhen : null
+    });
+    return this.handlers.length - 1;
+  }
+  /**
+   * Remove an interceptor from the stack
+   *
+   * @param {Number} id The ID that was returned by `use`
+   *
+   * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+   */
+  eject(id) {
+    if (this.handlers[id]) {
+      this.handlers[id] = null;
+    }
+  }
+  /**
+   * Clear all interceptors from the stack
+   *
+   * @returns {void}
+   */
+  clear() {
+    if (this.handlers) {
+      this.handlers = [];
+    }
+  }
+  /**
+   * Iterate over all the registered interceptors
+   *
+   * This method is particularly useful for skipping over any
+   * interceptors that may have become `null` calling `eject`.
+   *
+   * @param {Function} fn The function to call for each interceptor
+   *
+   * @returns {void}
+   */
+  forEach(fn) {
+    utils$1.forEach(this.handlers, function forEachHandler(h) {
+      if (h !== null) {
+        fn(h);
+      }
+    });
+  }
 }
-function highOrderDiffs(cursor, later, units) {
-  const differs = [["years", (a, b) => b.year - a.year], ["quarters", (a, b) => b.quarter - a.quarter + (b.year - a.year) * 4], ["months", (a, b) => b.month - a.month + (b.year - a.year) * 12], ["weeks", (a, b) => {
-    const days = dayDiff(a, b);
-    return (days - days % 7) / 7;
-  }], ["days", dayDiff]];
-  const results = {};
-  const earlier = cursor;
-  let lowestOrder, highWater;
-  for (const [unit, differ] of differs) {
-    if (units.indexOf(unit) >= 0) {
-      lowestOrder = unit;
-      results[unit] = differ(cursor, later);
-      highWater = earlier.plus(results);
-      if (highWater > later) {
-        results[unit]--;
-        cursor = earlier.plus(results);
-        if (cursor > later) {
-          highWater = cursor;
-          results[unit]--;
-          cursor = earlier.plus(results);
-        }
+const transitionalDefaults = {
+  silentJSONParsing: true,
+  forcedJSONParsing: true,
+  clarifyTimeoutError: false
+};
+const URLSearchParams = require$$0$1.URLSearchParams;
+const platform$1 = {
+  isNode: true,
+  classes: {
+    URLSearchParams,
+    FormData: FormData$2,
+    Blob: typeof Blob !== "undefined" && Blob || null
+  },
+  protocols: ["http", "https", "file", "data"]
+};
+const hasBrowserEnv = typeof window !== "undefined" && typeof document !== "undefined";
+const _navigator = typeof navigator === "object" && navigator || void 0;
+const hasStandardBrowserEnv = hasBrowserEnv && (!_navigator || ["ReactNative", "NativeScript", "NS"].indexOf(_navigator.product) < 0);
+const hasStandardBrowserWebWorkerEnv = (() => {
+  return typeof WorkerGlobalScope !== "undefined" && // eslint-disable-next-line no-undef
+  self instanceof WorkerGlobalScope && typeof self.importScripts === "function";
+})();
+const origin = hasBrowserEnv && window.location.href || "http://localhost";
+const utils = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  hasBrowserEnv,
+  hasStandardBrowserEnv,
+  hasStandardBrowserWebWorkerEnv,
+  navigator: _navigator,
+  origin
+}, Symbol.toStringTag, { value: "Module" }));
+const platform = {
+  ...utils,
+  ...platform$1
+};
+function toURLEncodedForm(data, options) {
+  return toFormData(data, new platform.classes.URLSearchParams(), Object.assign({
+    visitor: function(value, key, path2, helpers) {
+      if (platform.isNode && utils$1.isBuffer(value)) {
+        this.append(key, value.toString("base64"));
+        return false;
+      }
+      return helpers.defaultVisitor.apply(this, arguments);
+    }
+  }, options));
+}
+function parsePropPath(name) {
+  return utils$1.matchAll(/\w+|\[(\w*)]/g, name).map((match) => {
+    return match[0] === "[]" ? "" : match[1] || match[0];
+  });
+}
+function arrayToObject(arr) {
+  const obj = {};
+  const keys = Object.keys(arr);
+  let i;
+  const len = keys.length;
+  let key;
+  for (i = 0; i < len; i++) {
+    key = keys[i];
+    obj[key] = arr[key];
+  }
+  return obj;
+}
+function formDataToJSON(formData) {
+  function buildPath(path2, value, target, index) {
+    let name = path2[index++];
+    if (name === "__proto__") return true;
+    const isNumericKey = Number.isFinite(+name);
+    const isLast = index >= path2.length;
+    name = !name && utils$1.isArray(target) ? target.length : name;
+    if (isLast) {
+      if (utils$1.hasOwnProp(target, name)) {
+        target[name] = [target[name], value];
       } else {
-        cursor = highWater;
+        target[name] = value;
+      }
+      return !isNumericKey;
+    }
+    if (!target[name] || !utils$1.isObject(target[name])) {
+      target[name] = [];
+    }
+    const result = buildPath(path2, value, target[name], index);
+    if (result && utils$1.isArray(target[name])) {
+      target[name] = arrayToObject(target[name]);
+    }
+    return !isNumericKey;
+  }
+  if (utils$1.isFormData(formData) && utils$1.isFunction(formData.entries)) {
+    const obj = {};
+    utils$1.forEachEntry(formData, (name, value) => {
+      buildPath(parsePropPath(name), value, obj, 0);
+    });
+    return obj;
+  }
+  return null;
+}
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils$1.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils$1.trim(rawValue);
+    } catch (e) {
+      if (e.name !== "SyntaxError") {
+        throw e;
       }
     }
   }
-  return [cursor, results, highWater, lowestOrder];
+  return (0, JSON.stringify)(rawValue);
 }
-function diff(earlier, later, units, opts) {
-  let [cursor, results, highWater, lowestOrder] = highOrderDiffs(earlier, later, units);
-  const remainingMillis = later - cursor;
-  const lowerOrderUnits = units.filter((u) => ["hours", "minutes", "seconds", "milliseconds"].indexOf(u) >= 0);
-  if (lowerOrderUnits.length === 0) {
-    if (highWater < later) {
-      highWater = cursor.plus({
-        [lowestOrder]: 1
-      });
+const defaults = {
+  transitional: transitionalDefaults,
+  adapter: ["xhr", "http", "fetch"],
+  transformRequest: [function transformRequest(data, headers) {
+    const contentType = headers.getContentType() || "";
+    const hasJSONContentType = contentType.indexOf("application/json") > -1;
+    const isObjectPayload = utils$1.isObject(data);
+    if (isObjectPayload && utils$1.isHTMLForm(data)) {
+      data = new FormData(data);
     }
-    if (highWater !== cursor) {
-      results[lowestOrder] = (results[lowestOrder] || 0) + remainingMillis / (highWater - cursor);
+    const isFormData2 = utils$1.isFormData(data);
+    if (isFormData2) {
+      return hasJSONContentType ? JSON.stringify(formDataToJSON(data)) : data;
     }
-  }
-  const duration = Duration.fromObject(results, opts);
-  if (lowerOrderUnits.length > 0) {
-    return Duration.fromMillis(remainingMillis, opts).shiftTo(...lowerOrderUnits).plus(duration);
-  } else {
-    return duration;
-  }
-}
-const MISSING_FTP = "missing Intl.DateTimeFormat.formatToParts support";
-function intUnit(regex, post = (i) => i) {
-  return {
-    regex,
-    deser: ([s2]) => post(parseDigits(s2))
-  };
-}
-const NBSP = String.fromCharCode(160);
-const spaceOrNBSP = `[ ${NBSP}]`;
-const spaceOrNBSPRegExp = new RegExp(spaceOrNBSP, "g");
-function fixListRegex(s2) {
-  return s2.replace(/\./g, "\\.?").replace(spaceOrNBSPRegExp, spaceOrNBSP);
-}
-function stripInsensitivities(s2) {
-  return s2.replace(/\./g, "").replace(spaceOrNBSPRegExp, " ").toLowerCase();
-}
-function oneOf(strings, startIndex) {
-  if (strings === null) {
-    return null;
-  } else {
-    return {
-      regex: RegExp(strings.map(fixListRegex).join("|")),
-      deser: ([s2]) => strings.findIndex((i) => stripInsensitivities(s2) === stripInsensitivities(i)) + startIndex
-    };
-  }
-}
-function offset(regex, groups) {
-  return {
-    regex,
-    deser: ([, h, m]) => signedOffset(h, m),
-    groups
-  };
-}
-function simple(regex) {
-  return {
-    regex,
-    deser: ([s2]) => s2
-  };
-}
-function escapeToken(value) {
-  return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
-}
-function unitForToken(token, loc) {
-  const one = digitRegex(loc), two = digitRegex(loc, "{2}"), three = digitRegex(loc, "{3}"), four = digitRegex(loc, "{4}"), six = digitRegex(loc, "{6}"), oneOrTwo = digitRegex(loc, "{1,2}"), oneToThree = digitRegex(loc, "{1,3}"), oneToSix = digitRegex(loc, "{1,6}"), oneToNine = digitRegex(loc, "{1,9}"), twoToFour = digitRegex(loc, "{2,4}"), fourToSix = digitRegex(loc, "{4,6}"), literal = (t) => ({
-    regex: RegExp(escapeToken(t.val)),
-    deser: ([s2]) => s2,
-    literal: true
-  }), unitate = (t) => {
-    if (token.literal) {
-      return literal(t);
+    if (utils$1.isArrayBuffer(data) || utils$1.isBuffer(data) || utils$1.isStream(data) || utils$1.isFile(data) || utils$1.isBlob(data) || utils$1.isReadableStream(data)) {
+      return data;
     }
-    switch (t.val) {
-      case "G":
-        return oneOf(loc.eras("short"), 0);
-      case "GG":
-        return oneOf(loc.eras("long"), 0);
-      case "y":
-        return intUnit(oneToSix);
-      case "yy":
-        return intUnit(twoToFour, untruncateYear);
-      case "yyyy":
-        return intUnit(four);
-      case "yyyyy":
-        return intUnit(fourToSix);
-      case "yyyyyy":
-        return intUnit(six);
-      case "M":
-        return intUnit(oneOrTwo);
-      case "MM":
-        return intUnit(two);
-      case "MMM":
-        return oneOf(loc.months("short", true), 1);
-      case "MMMM":
-        return oneOf(loc.months("long", true), 1);
-      case "L":
-        return intUnit(oneOrTwo);
-      case "LL":
-        return intUnit(two);
-      case "LLL":
-        return oneOf(loc.months("short", false), 1);
-      case "LLLL":
-        return oneOf(loc.months("long", false), 1);
-      case "d":
-        return intUnit(oneOrTwo);
-      case "dd":
-        return intUnit(two);
-      case "o":
-        return intUnit(oneToThree);
-      case "ooo":
-        return intUnit(three);
-      case "HH":
-        return intUnit(two);
-      case "H":
-        return intUnit(oneOrTwo);
-      case "hh":
-        return intUnit(two);
-      case "h":
-        return intUnit(oneOrTwo);
-      case "mm":
-        return intUnit(two);
-      case "m":
-        return intUnit(oneOrTwo);
-      case "q":
-        return intUnit(oneOrTwo);
-      case "qq":
-        return intUnit(two);
-      case "s":
-        return intUnit(oneOrTwo);
-      case "ss":
-        return intUnit(two);
-      case "S":
-        return intUnit(oneToThree);
-      case "SSS":
-        return intUnit(three);
-      case "u":
-        return simple(oneToNine);
-      case "uu":
-        return simple(oneOrTwo);
-      case "uuu":
-        return intUnit(one);
-      case "a":
-        return oneOf(loc.meridiems(), 0);
-      case "kkkk":
-        return intUnit(four);
-      case "kk":
-        return intUnit(twoToFour, untruncateYear);
-      case "W":
-        return intUnit(oneOrTwo);
-      case "WW":
-        return intUnit(two);
-      case "E":
-      case "c":
-        return intUnit(one);
-      case "EEE":
-        return oneOf(loc.weekdays("short", false), 1);
-      case "EEEE":
-        return oneOf(loc.weekdays("long", false), 1);
-      case "ccc":
-        return oneOf(loc.weekdays("short", true), 1);
-      case "cccc":
-        return oneOf(loc.weekdays("long", true), 1);
-      case "Z":
-      case "ZZ":
-        return offset(new RegExp(`([+-]${oneOrTwo.source})(?::(${two.source}))?`), 2);
-      case "ZZZ":
-        return offset(new RegExp(`([+-]${oneOrTwo.source})(${two.source})?`), 2);
-      case "z":
-        return simple(/[a-z_+-/]{1,256}?/i);
-      case " ":
-        return simple(/[^\S\n\r]/);
-      default:
-        return literal(t);
+    if (utils$1.isArrayBufferView(data)) {
+      return data.buffer;
     }
-  };
-  const unit = unitate(token) || {
-    invalidReason: MISSING_FTP
-  };
-  unit.token = token;
-  return unit;
-}
-const partTypeStyleToTokenVal = {
-  year: {
-    "2-digit": "yy",
-    numeric: "yyyyy"
+    if (utils$1.isURLSearchParams(data)) {
+      headers.setContentType("application/x-www-form-urlencoded;charset=utf-8", false);
+      return data.toString();
+    }
+    let isFileList2;
+    if (isObjectPayload) {
+      if (contentType.indexOf("application/x-www-form-urlencoded") > -1) {
+        return toURLEncodedForm(data, this.formSerializer).toString();
+      }
+      if ((isFileList2 = utils$1.isFileList(data)) || contentType.indexOf("multipart/form-data") > -1) {
+        const _FormData = this.env && this.env.FormData;
+        return toFormData(
+          isFileList2 ? { "files[]": data } : data,
+          _FormData && new _FormData(),
+          this.formSerializer
+        );
+      }
+    }
+    if (isObjectPayload || hasJSONContentType) {
+      headers.setContentType("application/json", false);
+      return stringifySafely(data);
+    }
+    return data;
+  }],
+  transformResponse: [function transformResponse(data) {
+    const transitional2 = this.transitional || defaults.transitional;
+    const forcedJSONParsing = transitional2 && transitional2.forcedJSONParsing;
+    const JSONRequested = this.responseType === "json";
+    if (utils$1.isResponse(data) || utils$1.isReadableStream(data)) {
+      return data;
+    }
+    if (data && utils$1.isString(data) && (forcedJSONParsing && !this.responseType || JSONRequested)) {
+      const silentJSONParsing = transitional2 && transitional2.silentJSONParsing;
+      const strictJSONParsing = !silentJSONParsing && JSONRequested;
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === "SyntaxError") {
+            throw AxiosError.from(e, AxiosError.ERR_BAD_RESPONSE, this, null, this.response);
+          }
+          throw e;
+        }
+      }
+    }
+    return data;
+  }],
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
+  maxContentLength: -1,
+  maxBodyLength: -1,
+  env: {
+    FormData: platform.classes.FormData,
+    Blob: platform.classes.Blob
   },
-  month: {
-    numeric: "M",
-    "2-digit": "MM",
-    short: "MMM",
-    long: "MMMM"
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
   },
-  day: {
-    numeric: "d",
-    "2-digit": "dd"
-  },
-  weekday: {
-    short: "EEE",
-    long: "EEEE"
-  },
-  dayperiod: "a",
-  dayPeriod: "a",
-  hour12: {
-    numeric: "h",
-    "2-digit": "hh"
-  },
-  hour24: {
-    numeric: "H",
-    "2-digit": "HH"
-  },
-  minute: {
-    numeric: "m",
-    "2-digit": "mm"
-  },
-  second: {
-    numeric: "s",
-    "2-digit": "ss"
-  },
-  timeZoneName: {
-    long: "ZZZZZ",
-    short: "ZZZ"
+  headers: {
+    common: {
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": void 0
+    }
   }
 };
-function tokenForPart(part, formatOpts, resolvedOpts) {
-  const {
-    type,
-    value
-  } = part;
-  if (type === "literal") {
-    const isSpace = /^\s+$/.test(value);
-    return {
-      literal: !isSpace,
-      val: isSpace ? " " : value
-    };
-  }
-  const style = formatOpts[type];
-  let actualType = type;
-  if (type === "hour") {
-    if (formatOpts.hour12 != null) {
-      actualType = formatOpts.hour12 ? "hour12" : "hour24";
-    } else if (formatOpts.hourCycle != null) {
-      if (formatOpts.hourCycle === "h11" || formatOpts.hourCycle === "h12") {
-        actualType = "hour12";
+utils$1.forEach(["delete", "get", "head", "post", "put", "patch"], (method) => {
+  defaults.headers[method] = {};
+});
+const ignoreDuplicateOf = utils$1.toObjectSet([
+  "age",
+  "authorization",
+  "content-length",
+  "content-type",
+  "etag",
+  "expires",
+  "from",
+  "host",
+  "if-modified-since",
+  "if-unmodified-since",
+  "last-modified",
+  "location",
+  "max-forwards",
+  "proxy-authorization",
+  "referer",
+  "retry-after",
+  "user-agent"
+]);
+const parseHeaders = (rawHeaders) => {
+  const parsed = {};
+  let key;
+  let val;
+  let i;
+  rawHeaders && rawHeaders.split("\n").forEach(function parser(line) {
+    i = line.indexOf(":");
+    key = line.substring(0, i).trim().toLowerCase();
+    val = line.substring(i + 1).trim();
+    if (!key || parsed[key] && ignoreDuplicateOf[key]) {
+      return;
+    }
+    if (key === "set-cookie") {
+      if (parsed[key]) {
+        parsed[key].push(val);
       } else {
-        actualType = "hour24";
+        parsed[key] = [val];
       }
     } else {
-      actualType = resolvedOpts.hour12 ? "hour12" : "hour24";
+      parsed[key] = parsed[key] ? parsed[key] + ", " + val : val;
     }
-  }
-  let val = partTypeStyleToTokenVal[actualType];
-  if (typeof val === "object") {
-    val = val[style];
-  }
-  if (val) {
-    return {
-      literal: false,
-      val
-    };
-  }
-  return void 0;
+  });
+  return parsed;
+};
+const $internals = Symbol("internals");
+function normalizeHeader(header) {
+  return header && String(header).trim().toLowerCase();
 }
-function buildRegex(units) {
-  const re = units.map((u) => u.regex).reduce((f, r) => `${f}(${r.source})`, "");
-  return [`^${re}$`, units];
+function normalizeValue(value) {
+  if (value === false || value == null) {
+    return value;
+  }
+  return utils$1.isArray(value) ? value.map(normalizeValue) : String(value);
 }
-function match(input, regex, handlers) {
-  const matches = input.match(regex);
-  if (matches) {
-    const all = {};
-    let matchIndex = 1;
-    for (const i in handlers) {
-      if (hasOwnProperty(handlers, i)) {
-        const h = handlers[i], groups = h.groups ? h.groups + 1 : 1;
-        if (!h.literal && h.token) {
-          all[h.token.val[0]] = h.deser(matches.slice(matchIndex, matchIndex + groups));
-        }
-        matchIndex += groups;
-      }
-    }
-    return [matches, all];
-  } else {
-    return [matches, {}];
-  }
-}
-function dateTimeFromMatches(matches) {
-  const toField = (token) => {
-    switch (token) {
-      case "S":
-        return "millisecond";
-      case "s":
-        return "second";
-      case "m":
-        return "minute";
-      case "h":
-      case "H":
-        return "hour";
-      case "d":
-        return "day";
-      case "o":
-        return "ordinal";
-      case "L":
-      case "M":
-        return "month";
-      case "y":
-        return "year";
-      case "E":
-      case "c":
-        return "weekday";
-      case "W":
-        return "weekNumber";
-      case "k":
-        return "weekYear";
-      case "q":
-        return "quarter";
-      default:
-        return null;
-    }
-  };
-  let zone = null;
-  let specificOffset;
-  if (!isUndefined(matches.z)) {
-    zone = IANAZone.create(matches.z);
-  }
-  if (!isUndefined(matches.Z)) {
-    if (!zone) {
-      zone = new FixedOffsetZone(matches.Z);
-    }
-    specificOffset = matches.Z;
-  }
-  if (!isUndefined(matches.q)) {
-    matches.M = (matches.q - 1) * 3 + 1;
-  }
-  if (!isUndefined(matches.h)) {
-    if (matches.h < 12 && matches.a === 1) {
-      matches.h += 12;
-    } else if (matches.h === 12 && matches.a === 0) {
-      matches.h = 0;
-    }
-  }
-  if (matches.G === 0 && matches.y) {
-    matches.y = -matches.y;
-  }
-  if (!isUndefined(matches.u)) {
-    matches.S = parseMillis(matches.u);
-  }
-  const vals = Object.keys(matches).reduce((r, k) => {
-    const f = toField(k);
-    if (f) {
-      r[f] = matches[k];
-    }
-    return r;
-  }, {});
-  return [vals, zone, specificOffset];
-}
-let dummyDateTimeCache = null;
-function getDummyDateTime() {
-  if (!dummyDateTimeCache) {
-    dummyDateTimeCache = DateTime.fromMillis(1555555555555);
-  }
-  return dummyDateTimeCache;
-}
-function maybeExpandMacroToken(token, locale) {
-  if (token.literal) {
-    return token;
-  }
-  const formatOpts = Formatter.macroTokenToFormatOpts(token.val);
-  const tokens = formatOptsToTokens(formatOpts, locale);
-  if (tokens == null || tokens.includes(void 0)) {
-    return token;
+function parseTokens(str) {
+  const tokens = /* @__PURE__ */ Object.create(null);
+  const tokensRE = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
+  let match;
+  while (match = tokensRE.exec(str)) {
+    tokens[match[1]] = match[2];
   }
   return tokens;
 }
-function expandMacroTokens(tokens, locale) {
-  return Array.prototype.concat(...tokens.map((t) => maybeExpandMacroToken(t, locale)));
-}
-class TokenParser {
-  constructor(locale, format) {
-    this.locale = locale;
-    this.format = format;
-    this.tokens = expandMacroTokens(Formatter.parseFormat(format), locale);
-    this.units = this.tokens.map((t) => unitForToken(t, locale));
-    this.disqualifyingUnit = this.units.find((t) => t.invalidReason);
-    if (!this.disqualifyingUnit) {
-      const [regexString, handlers] = buildRegex(this.units);
-      this.regex = RegExp(regexString, "i");
-      this.handlers = handlers;
-    }
+const isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
+function matchHeaderValue(context, value, header, filter2, isHeaderNameFilter) {
+  if (utils$1.isFunction(filter2)) {
+    return filter2.call(this, value, header);
   }
-  explainFromTokens(input) {
-    if (!this.isValid) {
-      return {
-        input,
-        tokens: this.tokens,
-        invalidReason: this.invalidReason
-      };
-    } else {
-      const [rawMatches, matches] = match(input, this.regex, this.handlers), [result, zone, specificOffset] = matches ? dateTimeFromMatches(matches) : [null, null, void 0];
-      if (hasOwnProperty(matches, "a") && hasOwnProperty(matches, "H")) {
-        throw new ConflictingSpecificationError("Can't include meridiem when specifying 24-hour format");
-      }
-      return {
-        input,
-        tokens: this.tokens,
-        regex: this.regex,
-        rawMatches,
-        matches,
-        result,
-        zone,
-        specificOffset
-      };
-    }
+  if (isHeaderNameFilter) {
+    value = header;
   }
-  get isValid() {
-    return !this.disqualifyingUnit;
+  if (!utils$1.isString(value)) return;
+  if (utils$1.isString(filter2)) {
+    return value.indexOf(filter2) !== -1;
   }
-  get invalidReason() {
-    return this.disqualifyingUnit ? this.disqualifyingUnit.invalidReason : null;
+  if (utils$1.isRegExp(filter2)) {
+    return filter2.test(value);
   }
 }
-function explainFromTokens(locale, input, format) {
-  const parser2 = new TokenParser(locale, format);
-  return parser2.explainFromTokens(input);
-}
-function parseFromTokens(locale, input, format) {
-  const {
-    result,
-    zone,
-    specificOffset,
-    invalidReason
-  } = explainFromTokens(locale, input, format);
-  return [result, zone, specificOffset, invalidReason];
-}
-function formatOptsToTokens(formatOpts, locale) {
-  if (!formatOpts) {
-    return null;
-  }
-  const formatter = Formatter.create(locale, formatOpts);
-  const df = formatter.dtFormatter(getDummyDateTime());
-  const parts = df.formatToParts();
-  const resolvedOpts = df.resolvedOptions();
-  return parts.map((p) => tokenForPart(p, formatOpts, resolvedOpts));
-}
-const INVALID = "Invalid DateTime";
-const MAX_DATE = 864e13;
-function unsupportedZone(zone) {
-  return new Invalid("unsupported zone", `the zone "${zone.name}" is not supported`);
-}
-function possiblyCachedWeekData(dt) {
-  if (dt.weekData === null) {
-    dt.weekData = gregorianToWeek(dt.c);
-  }
-  return dt.weekData;
-}
-function possiblyCachedLocalWeekData(dt) {
-  if (dt.localWeekData === null) {
-    dt.localWeekData = gregorianToWeek(dt.c, dt.loc.getMinDaysInFirstWeek(), dt.loc.getStartOfWeek());
-  }
-  return dt.localWeekData;
-}
-function clone(inst, alts) {
-  const current = {
-    ts: inst.ts,
-    zone: inst.zone,
-    c: inst.c,
-    o: inst.o,
-    loc: inst.loc,
-    invalid: inst.invalid
-  };
-  return new DateTime({
-    ...current,
-    ...alts,
-    old: current
+function formatHeader(header) {
+  return header.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (w, char, str) => {
+    return char.toUpperCase() + str;
   });
 }
-function fixOffset(localTS, o, tz) {
-  let utcGuess = localTS - o * 60 * 1e3;
-  const o2 = tz.offset(utcGuess);
-  if (o === o2) {
-    return [utcGuess, o];
-  }
-  utcGuess -= (o2 - o) * 60 * 1e3;
-  const o3 = tz.offset(utcGuess);
-  if (o2 === o3) {
-    return [utcGuess, o2];
-  }
-  return [localTS - Math.min(o2, o3) * 60 * 1e3, Math.max(o2, o3)];
-}
-function tsToObj(ts, offset2) {
-  ts += offset2 * 60 * 1e3;
-  const d = new Date(ts);
-  return {
-    year: d.getUTCFullYear(),
-    month: d.getUTCMonth() + 1,
-    day: d.getUTCDate(),
-    hour: d.getUTCHours(),
-    minute: d.getUTCMinutes(),
-    second: d.getUTCSeconds(),
-    millisecond: d.getUTCMilliseconds()
-  };
-}
-function objToTS(obj, offset2, zone) {
-  return fixOffset(objToLocalTS(obj), offset2, zone);
-}
-function adjustTime(inst, dur) {
-  const oPre = inst.o, year = inst.c.year + Math.trunc(dur.years), month = inst.c.month + Math.trunc(dur.months) + Math.trunc(dur.quarters) * 3, c = {
-    ...inst.c,
-    year,
-    month,
-    day: Math.min(inst.c.day, daysInMonth(year, month)) + Math.trunc(dur.days) + Math.trunc(dur.weeks) * 7
-  }, millisToAdd = Duration.fromObject({
-    years: dur.years - Math.trunc(dur.years),
-    quarters: dur.quarters - Math.trunc(dur.quarters),
-    months: dur.months - Math.trunc(dur.months),
-    weeks: dur.weeks - Math.trunc(dur.weeks),
-    days: dur.days - Math.trunc(dur.days),
-    hours: dur.hours,
-    minutes: dur.minutes,
-    seconds: dur.seconds,
-    milliseconds: dur.milliseconds
-  }).as("milliseconds"), localTS = objToLocalTS(c);
-  let [ts, o] = fixOffset(localTS, oPre, inst.zone);
-  if (millisToAdd !== 0) {
-    ts += millisToAdd;
-    o = inst.zone.offset(ts);
-  }
-  return {
-    ts,
-    o
-  };
-}
-function parseDataToDateTime(parsed, parsedZone, opts, format, text, specificOffset) {
-  const {
-    setZone,
-    zone
-  } = opts;
-  if (parsed && Object.keys(parsed).length !== 0 || parsedZone) {
-    const interpretationZone = parsedZone || zone, inst = DateTime.fromObject(parsed, {
-      ...opts,
-      zone: interpretationZone,
-      specificOffset
+function buildAccessors(obj, header) {
+  const accessorName = utils$1.toCamelCase(" " + header);
+  ["get", "set", "has"].forEach((methodName) => {
+    Object.defineProperty(obj, methodName + accessorName, {
+      value: function(arg1, arg2, arg3) {
+        return this[methodName].call(this, header, arg1, arg2, arg3);
+      },
+      configurable: true
     });
-    return setZone ? inst : inst.setZone(zone);
-  } else {
-    return DateTime.invalid(new Invalid("unparsable", `the input "${text}" can't be parsed as ${format}`));
-  }
-}
-function toTechFormat(dt, format, allowZ = true) {
-  return dt.isValid ? Formatter.create(Locale.create("en-US"), {
-    allowZ,
-    forceSimple: true
-  }).formatDateTimeFromString(dt, format) : null;
-}
-function toISODate(o, extended) {
-  const longFormat = o.c.year > 9999 || o.c.year < 0;
-  let c = "";
-  if (longFormat && o.c.year >= 0) c += "+";
-  c += padStart(o.c.year, longFormat ? 6 : 4);
-  if (extended) {
-    c += "-";
-    c += padStart(o.c.month);
-    c += "-";
-    c += padStart(o.c.day);
-  } else {
-    c += padStart(o.c.month);
-    c += padStart(o.c.day);
-  }
-  return c;
-}
-function toISOTime(o, extended, suppressSeconds, suppressMilliseconds, includeOffset, extendedZone) {
-  let c = padStart(o.c.hour);
-  if (extended) {
-    c += ":";
-    c += padStart(o.c.minute);
-    if (o.c.millisecond !== 0 || o.c.second !== 0 || !suppressSeconds) {
-      c += ":";
-    }
-  } else {
-    c += padStart(o.c.minute);
-  }
-  if (o.c.millisecond !== 0 || o.c.second !== 0 || !suppressSeconds) {
-    c += padStart(o.c.second);
-    if (o.c.millisecond !== 0 || !suppressMilliseconds) {
-      c += ".";
-      c += padStart(o.c.millisecond, 3);
-    }
-  }
-  if (includeOffset) {
-    if (o.isOffsetFixed && o.offset === 0 && !extendedZone) {
-      c += "Z";
-    } else if (o.o < 0) {
-      c += "-";
-      c += padStart(Math.trunc(-o.o / 60));
-      c += ":";
-      c += padStart(Math.trunc(-o.o % 60));
-    } else {
-      c += "+";
-      c += padStart(Math.trunc(o.o / 60));
-      c += ":";
-      c += padStart(Math.trunc(o.o % 60));
-    }
-  }
-  if (extendedZone) {
-    c += "[" + o.zone.ianaName + "]";
-  }
-  return c;
-}
-const defaultUnitValues = {
-  month: 1,
-  day: 1,
-  hour: 0,
-  minute: 0,
-  second: 0,
-  millisecond: 0
-}, defaultWeekUnitValues = {
-  weekNumber: 1,
-  weekday: 1,
-  hour: 0,
-  minute: 0,
-  second: 0,
-  millisecond: 0
-}, defaultOrdinalUnitValues = {
-  ordinal: 1,
-  hour: 0,
-  minute: 0,
-  second: 0,
-  millisecond: 0
-};
-const orderedUnits = ["year", "month", "day", "hour", "minute", "second", "millisecond"], orderedWeekUnits = ["weekYear", "weekNumber", "weekday", "hour", "minute", "second", "millisecond"], orderedOrdinalUnits = ["year", "ordinal", "hour", "minute", "second", "millisecond"];
-function normalizeUnit(unit) {
-  const normalized = {
-    year: "year",
-    years: "year",
-    month: "month",
-    months: "month",
-    day: "day",
-    days: "day",
-    hour: "hour",
-    hours: "hour",
-    minute: "minute",
-    minutes: "minute",
-    quarter: "quarter",
-    quarters: "quarter",
-    second: "second",
-    seconds: "second",
-    millisecond: "millisecond",
-    milliseconds: "millisecond",
-    weekday: "weekday",
-    weekdays: "weekday",
-    weeknumber: "weekNumber",
-    weeksnumber: "weekNumber",
-    weeknumbers: "weekNumber",
-    weekyear: "weekYear",
-    weekyears: "weekYear",
-    ordinal: "ordinal"
-  }[unit.toLowerCase()];
-  if (!normalized) throw new InvalidUnitError(unit);
-  return normalized;
-}
-function normalizeUnitWithLocalWeeks(unit) {
-  switch (unit.toLowerCase()) {
-    case "localweekday":
-    case "localweekdays":
-      return "localWeekday";
-    case "localweeknumber":
-    case "localweeknumbers":
-      return "localWeekNumber";
-    case "localweekyear":
-    case "localweekyears":
-      return "localWeekYear";
-    default:
-      return normalizeUnit(unit);
-  }
-}
-function guessOffsetForZone(zone) {
-  if (!zoneOffsetGuessCache[zone]) {
-    if (zoneOffsetTs === void 0) {
-      zoneOffsetTs = Settings.now();
-    }
-    zoneOffsetGuessCache[zone] = zone.offset(zoneOffsetTs);
-  }
-  return zoneOffsetGuessCache[zone];
-}
-function quickDT(obj, opts) {
-  const zone = normalizeZone(opts.zone, Settings.defaultZone);
-  if (!zone.isValid) {
-    return DateTime.invalid(unsupportedZone(zone));
-  }
-  const loc = Locale.fromObject(opts);
-  let ts, o;
-  if (!isUndefined(obj.year)) {
-    for (const u of orderedUnits) {
-      if (isUndefined(obj[u])) {
-        obj[u] = defaultUnitValues[u];
-      }
-    }
-    const invalid = hasInvalidGregorianData(obj) || hasInvalidTimeData(obj);
-    if (invalid) {
-      return DateTime.invalid(invalid);
-    }
-    const offsetProvis = guessOffsetForZone(zone);
-    [ts, o] = objToTS(obj, offsetProvis, zone);
-  } else {
-    ts = Settings.now();
-  }
-  return new DateTime({
-    ts,
-    zone,
-    loc,
-    o
   });
 }
-function diffRelative(start, end, opts) {
-  const round = isUndefined(opts.round) ? true : opts.round, format = (c, unit) => {
-    c = roundTo(c, round || opts.calendary ? 0 : 2, true);
-    const formatter = end.loc.clone(opts).relFormatter(opts);
-    return formatter.format(c, unit);
-  }, differ = (unit) => {
-    if (opts.calendary) {
-      if (!end.hasSame(start, unit)) {
-        return end.startOf(unit).diff(start.startOf(unit), unit).get(unit);
-      } else return 0;
-    } else {
-      return end.diff(start, unit).get(unit);
-    }
-  };
-  if (opts.unit) {
-    return format(differ(opts.unit), opts.unit);
+class AxiosHeaders {
+  constructor(headers) {
+    headers && this.set(headers);
   }
-  for (const unit of opts.units) {
-    const count = differ(unit);
-    if (Math.abs(count) >= 1) {
-      return format(count, unit);
-    }
-  }
-  return format(start > end ? -0 : 0, opts.units[opts.units.length - 1]);
-}
-function lastOpts(argList) {
-  let opts = {}, args;
-  if (argList.length > 0 && typeof argList[argList.length - 1] === "object") {
-    opts = argList[argList.length - 1];
-    args = Array.from(argList).slice(0, argList.length - 1);
-  } else {
-    args = Array.from(argList);
-  }
-  return [opts, args];
-}
-let zoneOffsetTs;
-let zoneOffsetGuessCache = {};
-class DateTime {
-  /**
-   * @access private
-   */
-  constructor(config) {
-    const zone = config.zone || Settings.defaultZone;
-    let invalid = config.invalid || (Number.isNaN(config.ts) ? new Invalid("invalid input") : null) || (!zone.isValid ? unsupportedZone(zone) : null);
-    this.ts = isUndefined(config.ts) ? Settings.now() : config.ts;
-    let c = null, o = null;
-    if (!invalid) {
-      const unchanged = config.old && config.old.ts === this.ts && config.old.zone.equals(zone);
-      if (unchanged) {
-        [c, o] = [config.old.c, config.old.o];
-      } else {
-        const ot = isNumber(config.o) && !config.old ? config.o : zone.offset(this.ts);
-        c = tsToObj(this.ts, ot);
-        invalid = Number.isNaN(c.year) ? new Invalid("invalid input") : null;
-        c = invalid ? null : c;
-        o = invalid ? null : ot;
+  set(header, valueOrRewrite, rewrite) {
+    const self2 = this;
+    function setHeader(_value, _header, _rewrite) {
+      const lHeader = normalizeHeader(_header);
+      if (!lHeader) {
+        throw new Error("header name must be a non-empty string");
+      }
+      const key = utils$1.findKey(self2, lHeader);
+      if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
+        self2[key || _header] = normalizeValue(_value);
       }
     }
-    this._zone = zone;
-    this.loc = config.loc || Locale.create();
-    this.invalid = invalid;
-    this.weekData = null;
-    this.localWeekData = null;
-    this.c = c;
-    this.o = o;
-    this.isLuxonDateTime = true;
-  }
-  // CONSTRUCT
-  /**
-   * Create a DateTime for the current instant, in the system's time zone.
-   *
-   * Use Settings to override these default values if needed.
-   * @example DateTime.now().toISO() //~> now in the ISO format
-   * @return {DateTime}
-   */
-  static now() {
-    return new DateTime({});
-  }
-  /**
-   * Create a local DateTime
-   * @param {number} [year] - The calendar year. If omitted (as in, call `local()` with no arguments), the current time will be used
-   * @param {number} [month=1] - The month, 1-indexed
-   * @param {number} [day=1] - The day of the month, 1-indexed
-   * @param {number} [hour=0] - The hour of the day, in 24-hour time
-   * @param {number} [minute=0] - The minute of the hour, meaning a number between 0 and 59
-   * @param {number} [second=0] - The second of the minute, meaning a number between 0 and 59
-   * @param {number} [millisecond=0] - The millisecond of the second, meaning a number between 0 and 999
-   * @example DateTime.local()                                  //~> now
-   * @example DateTime.local({ zone: "America/New_York" })      //~> now, in US east coast time
-   * @example DateTime.local(2017)                              //~> 2017-01-01T00:00:00
-   * @example DateTime.local(2017, 3)                           //~> 2017-03-01T00:00:00
-   * @example DateTime.local(2017, 3, 12, { locale: "fr" })     //~> 2017-03-12T00:00:00, with a French locale
-   * @example DateTime.local(2017, 3, 12, 5)                    //~> 2017-03-12T05:00:00
-   * @example DateTime.local(2017, 3, 12, 5, { zone: "utc" })   //~> 2017-03-12T05:00:00, in UTC
-   * @example DateTime.local(2017, 3, 12, 5, 45)                //~> 2017-03-12T05:45:00
-   * @example DateTime.local(2017, 3, 12, 5, 45, 10)            //~> 2017-03-12T05:45:10
-   * @example DateTime.local(2017, 3, 12, 5, 45, 10, 765)       //~> 2017-03-12T05:45:10.765
-   * @return {DateTime}
-   */
-  static local() {
-    const [opts, args] = lastOpts(arguments), [year, month, day, hour, minute, second, millisecond] = args;
-    return quickDT({
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond
-    }, opts);
-  }
-  /**
-   * Create a DateTime in UTC
-   * @param {number} [year] - The calendar year. If omitted (as in, call `utc()` with no arguments), the current time will be used
-   * @param {number} [month=1] - The month, 1-indexed
-   * @param {number} [day=1] - The day of the month
-   * @param {number} [hour=0] - The hour of the day, in 24-hour time
-   * @param {number} [minute=0] - The minute of the hour, meaning a number between 0 and 59
-   * @param {number} [second=0] - The second of the minute, meaning a number between 0 and 59
-   * @param {number} [millisecond=0] - The millisecond of the second, meaning a number between 0 and 999
-   * @param {Object} options - configuration options for the DateTime
-   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
-   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
-   * @param {string} [options.weekSettings] - the week settings to set on the resulting DateTime instance
-   * @example DateTime.utc()                                              //~> now
-   * @example DateTime.utc(2017)                                          //~> 2017-01-01T00:00:00Z
-   * @example DateTime.utc(2017, 3)                                       //~> 2017-03-01T00:00:00Z
-   * @example DateTime.utc(2017, 3, 12)                                   //~> 2017-03-12T00:00:00Z
-   * @example DateTime.utc(2017, 3, 12, 5)                                //~> 2017-03-12T05:00:00Z
-   * @example DateTime.utc(2017, 3, 12, 5, 45)                            //~> 2017-03-12T05:45:00Z
-   * @example DateTime.utc(2017, 3, 12, 5, 45, { locale: "fr" })          //~> 2017-03-12T05:45:00Z with a French locale
-   * @example DateTime.utc(2017, 3, 12, 5, 45, 10)                        //~> 2017-03-12T05:45:10Z
-   * @example DateTime.utc(2017, 3, 12, 5, 45, 10, 765, { locale: "fr" }) //~> 2017-03-12T05:45:10.765Z with a French locale
-   * @return {DateTime}
-   */
-  static utc() {
-    const [opts, args] = lastOpts(arguments), [year, month, day, hour, minute, second, millisecond] = args;
-    opts.zone = FixedOffsetZone.utcInstance;
-    return quickDT({
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond
-    }, opts);
-  }
-  /**
-   * Create a DateTime from a JavaScript Date object. Uses the default zone.
-   * @param {Date} date - a JavaScript Date object
-   * @param {Object} options - configuration options for the DateTime
-   * @param {string|Zone} [options.zone='local'] - the zone to place the DateTime into
-   * @return {DateTime}
-   */
-  static fromJSDate(date2, options = {}) {
-    const ts = isDate(date2) ? date2.valueOf() : NaN;
-    if (Number.isNaN(ts)) {
-      return DateTime.invalid("invalid input");
-    }
-    const zoneToUse = normalizeZone(options.zone, Settings.defaultZone);
-    if (!zoneToUse.isValid) {
-      return DateTime.invalid(unsupportedZone(zoneToUse));
-    }
-    return new DateTime({
-      ts,
-      zone: zoneToUse,
-      loc: Locale.fromObject(options)
-    });
-  }
-  /**
-   * Create a DateTime from a number of milliseconds since the epoch (meaning since 1 January 1970 00:00:00 UTC). Uses the default zone.
-   * @param {number} milliseconds - a number of milliseconds since 1970 UTC
-   * @param {Object} options - configuration options for the DateTime
-   * @param {string|Zone} [options.zone='local'] - the zone to place the DateTime into
-   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} options.weekSettings - the week settings to set on the resulting DateTime instance
-   * @return {DateTime}
-   */
-  static fromMillis(milliseconds, options = {}) {
-    if (!isNumber(milliseconds)) {
-      throw new InvalidArgumentError(`fromMillis requires a numerical input, but received a ${typeof milliseconds} with value ${milliseconds}`);
-    } else if (milliseconds < -MAX_DATE || milliseconds > MAX_DATE) {
-      return DateTime.invalid("Timestamp out of range");
-    } else {
-      return new DateTime({
-        ts: milliseconds,
-        zone: normalizeZone(options.zone, Settings.defaultZone),
-        loc: Locale.fromObject(options)
-      });
-    }
-  }
-  /**
-   * Create a DateTime from a number of seconds since the epoch (meaning since 1 January 1970 00:00:00 UTC). Uses the default zone.
-   * @param {number} seconds - a number of seconds since 1970 UTC
-   * @param {Object} options - configuration options for the DateTime
-   * @param {string|Zone} [options.zone='local'] - the zone to place the DateTime into
-   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} options.weekSettings - the week settings to set on the resulting DateTime instance
-   * @return {DateTime}
-   */
-  static fromSeconds(seconds, options = {}) {
-    if (!isNumber(seconds)) {
-      throw new InvalidArgumentError("fromSeconds requires a numerical input");
-    } else {
-      return new DateTime({
-        ts: seconds * 1e3,
-        zone: normalizeZone(options.zone, Settings.defaultZone),
-        loc: Locale.fromObject(options)
-      });
-    }
-  }
-  /**
-   * Create a DateTime from a JavaScript object with keys like 'year' and 'hour' with reasonable defaults.
-   * @param {Object} obj - the object to create the DateTime from
-   * @param {number} obj.year - a year, such as 1987
-   * @param {number} obj.month - a month, 1-12
-   * @param {number} obj.day - a day of the month, 1-31, depending on the month
-   * @param {number} obj.ordinal - day of the year, 1-365 or 366
-   * @param {number} obj.weekYear - an ISO week year
-   * @param {number} obj.weekNumber - an ISO week number, between 1 and 52 or 53, depending on the year
-   * @param {number} obj.weekday - an ISO weekday, 1-7, where 1 is Monday and 7 is Sunday
-   * @param {number} obj.localWeekYear - a week year, according to the locale
-   * @param {number} obj.localWeekNumber - a week number, between 1 and 52 or 53, depending on the year, according to the locale
-   * @param {number} obj.localWeekday - a weekday, 1-7, where 1 is the first and 7 is the last day of the week, according to the locale
-   * @param {number} obj.hour - hour of the day, 0-23
-   * @param {number} obj.minute - minute of the hour, 0-59
-   * @param {number} obj.second - second of the minute, 0-59
-   * @param {number} obj.millisecond - millisecond of the second, 0-999
-   * @param {Object} opts - options for creating this DateTime
-   * @param {string|Zone} [opts.zone='local'] - interpret the numbers in the context of a particular zone. Can take any value taken as the first argument to setZone()
-   * @param {string} [opts.locale='system\'s locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} opts.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} opts.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} opts.weekSettings - the week settings to set on the resulting DateTime instance
-   * @example DateTime.fromObject({ year: 1982, month: 5, day: 25}).toISODate() //=> '1982-05-25'
-   * @example DateTime.fromObject({ year: 1982 }).toISODate() //=> '1982-01-01'
-   * @example DateTime.fromObject({ hour: 10, minute: 26, second: 6 }) //~> today at 10:26:06
-   * @example DateTime.fromObject({ hour: 10, minute: 26, second: 6 }, { zone: 'utc' }),
-   * @example DateTime.fromObject({ hour: 10, minute: 26, second: 6 }, { zone: 'local' })
-   * @example DateTime.fromObject({ hour: 10, minute: 26, second: 6 }, { zone: 'America/New_York' })
-   * @example DateTime.fromObject({ weekYear: 2016, weekNumber: 2, weekday: 3 }).toISODate() //=> '2016-01-13'
-   * @example DateTime.fromObject({ localWeekYear: 2022, localWeekNumber: 1, localWeekday: 1 }, { locale: "en-US" }).toISODate() //=> '2021-12-26'
-   * @return {DateTime}
-   */
-  static fromObject(obj, opts = {}) {
-    obj = obj || {};
-    const zoneToUse = normalizeZone(opts.zone, Settings.defaultZone);
-    if (!zoneToUse.isValid) {
-      return DateTime.invalid(unsupportedZone(zoneToUse));
-    }
-    const loc = Locale.fromObject(opts);
-    const normalized = normalizeObject(obj, normalizeUnitWithLocalWeeks);
-    const {
-      minDaysInFirstWeek,
-      startOfWeek
-    } = usesLocalWeekValues(normalized, loc);
-    const tsNow = Settings.now(), offsetProvis = !isUndefined(opts.specificOffset) ? opts.specificOffset : zoneToUse.offset(tsNow), containsOrdinal = !isUndefined(normalized.ordinal), containsGregorYear = !isUndefined(normalized.year), containsGregorMD = !isUndefined(normalized.month) || !isUndefined(normalized.day), containsGregor = containsGregorYear || containsGregorMD, definiteWeekDef = normalized.weekYear || normalized.weekNumber;
-    if ((containsGregor || containsOrdinal) && definiteWeekDef) {
-      throw new ConflictingSpecificationError("Can't mix weekYear/weekNumber units with year/month/day or ordinals");
-    }
-    if (containsGregorMD && containsOrdinal) {
-      throw new ConflictingSpecificationError("Can't mix ordinal dates with month/day");
-    }
-    const useWeekData = definiteWeekDef || normalized.weekday && !containsGregor;
-    let units, defaultValues, objNow = tsToObj(tsNow, offsetProvis);
-    if (useWeekData) {
-      units = orderedWeekUnits;
-      defaultValues = defaultWeekUnitValues;
-      objNow = gregorianToWeek(objNow, minDaysInFirstWeek, startOfWeek);
-    } else if (containsOrdinal) {
-      units = orderedOrdinalUnits;
-      defaultValues = defaultOrdinalUnitValues;
-      objNow = gregorianToOrdinal(objNow);
-    } else {
-      units = orderedUnits;
-      defaultValues = defaultUnitValues;
-    }
-    let foundFirst = false;
-    for (const u of units) {
-      const v = normalized[u];
-      if (!isUndefined(v)) {
-        foundFirst = true;
-      } else if (foundFirst) {
-        normalized[u] = defaultValues[u];
-      } else {
-        normalized[u] = objNow[u];
+    const setHeaders = (headers, _rewrite) => utils$1.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
+    if (utils$1.isPlainObject(header) || header instanceof this.constructor) {
+      setHeaders(header, valueOrRewrite);
+    } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
+      setHeaders(parseHeaders(header), valueOrRewrite);
+    } else if (utils$1.isHeaders(header)) {
+      for (const [key, value] of header.entries()) {
+        setHeader(value, key, rewrite);
       }
-    }
-    const higherOrderInvalid = useWeekData ? hasInvalidWeekData(normalized, minDaysInFirstWeek, startOfWeek) : containsOrdinal ? hasInvalidOrdinalData(normalized) : hasInvalidGregorianData(normalized), invalid = higherOrderInvalid || hasInvalidTimeData(normalized);
-    if (invalid) {
-      return DateTime.invalid(invalid);
-    }
-    const gregorian = useWeekData ? weekToGregorian(normalized, minDaysInFirstWeek, startOfWeek) : containsOrdinal ? ordinalToGregorian(normalized) : normalized, [tsFinal, offsetFinal] = objToTS(gregorian, offsetProvis, zoneToUse), inst = new DateTime({
-      ts: tsFinal,
-      zone: zoneToUse,
-      o: offsetFinal,
-      loc
-    });
-    if (normalized.weekday && containsGregor && obj.weekday !== inst.weekday) {
-      return DateTime.invalid("mismatched weekday", `you can't specify both a weekday of ${normalized.weekday} and a date of ${inst.toISO()}`);
-    }
-    if (!inst.isValid) {
-      return DateTime.invalid(inst.invalid);
-    }
-    return inst;
-  }
-  /**
-   * Create a DateTime from an ISO 8601 string
-   * @param {string} text - the ISO string
-   * @param {Object} opts - options to affect the creation
-   * @param {string|Zone} [opts.zone='local'] - use this zone if no offset is specified in the input string itself. Will also convert the time to this zone
-   * @param {boolean} [opts.setZone=false] - override the zone with a fixed-offset zone specified in the string itself, if it specifies one
-   * @param {string} [opts.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} [opts.outputCalendar] - the output calendar to set on the resulting DateTime instance
-   * @param {string} [opts.numberingSystem] - the numbering system to set on the resulting DateTime instance
-   * @param {string} [opts.weekSettings] - the week settings to set on the resulting DateTime instance
-   * @example DateTime.fromISO('2016-05-25T09:08:34.123')
-   * @example DateTime.fromISO('2016-05-25T09:08:34.123+06:00')
-   * @example DateTime.fromISO('2016-05-25T09:08:34.123+06:00', {setZone: true})
-   * @example DateTime.fromISO('2016-05-25T09:08:34.123', {zone: 'utc'})
-   * @example DateTime.fromISO('2016-W05-4')
-   * @return {DateTime}
-   */
-  static fromISO(text, opts = {}) {
-    const [vals, parsedZone] = parseISODate(text);
-    return parseDataToDateTime(vals, parsedZone, opts, "ISO 8601", text);
-  }
-  /**
-   * Create a DateTime from an RFC 2822 string
-   * @param {string} text - the RFC 2822 string
-   * @param {Object} opts - options to affect the creation
-   * @param {string|Zone} [opts.zone='local'] - convert the time to this zone. Since the offset is always specified in the string itself, this has no effect on the interpretation of string, merely the zone the resulting DateTime is expressed in.
-   * @param {boolean} [opts.setZone=false] - override the zone with a fixed-offset zone specified in the string itself, if it specifies one
-   * @param {string} [opts.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} opts.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} opts.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} opts.weekSettings - the week settings to set on the resulting DateTime instance
-   * @example DateTime.fromRFC2822('25 Nov 2016 13:23:12 GMT')
-   * @example DateTime.fromRFC2822('Fri, 25 Nov 2016 13:23:12 +0600')
-   * @example DateTime.fromRFC2822('25 Nov 2016 13:23 Z')
-   * @return {DateTime}
-   */
-  static fromRFC2822(text, opts = {}) {
-    const [vals, parsedZone] = parseRFC2822Date(text);
-    return parseDataToDateTime(vals, parsedZone, opts, "RFC 2822", text);
-  }
-  /**
-   * Create a DateTime from an HTTP header date
-   * @see https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
-   * @param {string} text - the HTTP header date
-   * @param {Object} opts - options to affect the creation
-   * @param {string|Zone} [opts.zone='local'] - convert the time to this zone. Since HTTP dates are always in UTC, this has no effect on the interpretation of string, merely the zone the resulting DateTime is expressed in.
-   * @param {boolean} [opts.setZone=false] - override the zone with the fixed-offset zone specified in the string. For HTTP dates, this is always UTC, so this option is equivalent to setting the `zone` option to 'utc', but this option is included for consistency with similar methods.
-   * @param {string} [opts.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} opts.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} opts.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} opts.weekSettings - the week settings to set on the resulting DateTime instance
-   * @example DateTime.fromHTTP('Sun, 06 Nov 1994 08:49:37 GMT')
-   * @example DateTime.fromHTTP('Sunday, 06-Nov-94 08:49:37 GMT')
-   * @example DateTime.fromHTTP('Sun Nov  6 08:49:37 1994')
-   * @return {DateTime}
-   */
-  static fromHTTP(text, opts = {}) {
-    const [vals, parsedZone] = parseHTTPDate(text);
-    return parseDataToDateTime(vals, parsedZone, opts, "HTTP", opts);
-  }
-  /**
-   * Create a DateTime from an input string and format string.
-   * Defaults to en-US if no locale has been specified, regardless of the system's locale. For a table of tokens and their interpretations, see [here](https://moment.github.io/luxon/#/parsing?id=table-of-tokens).
-   * @param {string} text - the string to parse
-   * @param {string} fmt - the format the string is expected to be in (see the link below for the formats)
-   * @param {Object} opts - options to affect the creation
-   * @param {string|Zone} [opts.zone='local'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
-   * @param {boolean} [opts.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
-   * @param {string} [opts.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} opts.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
-   * @param {string} opts.weekSettings - the week settings to set on the resulting DateTime instance
-   * @param {string} opts.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @return {DateTime}
-   */
-  static fromFormat(text, fmt, opts = {}) {
-    if (isUndefined(text) || isUndefined(fmt)) {
-      throw new InvalidArgumentError("fromFormat requires an input string and a format");
-    }
-    const {
-      locale = null,
-      numberingSystem = null
-    } = opts, localeToUse = Locale.fromOpts({
-      locale,
-      numberingSystem,
-      defaultToEN: true
-    }), [vals, parsedZone, specificOffset, invalid] = parseFromTokens(localeToUse, text, fmt);
-    if (invalid) {
-      return DateTime.invalid(invalid);
     } else {
-      return parseDataToDateTime(vals, parsedZone, opts, `format ${fmt}`, text, specificOffset);
+      header != null && setHeader(valueOrRewrite, header, rewrite);
     }
+    return this;
   }
-  /**
-   * @deprecated use fromFormat instead
-   */
-  static fromString(text, fmt, opts = {}) {
-    return DateTime.fromFormat(text, fmt, opts);
-  }
-  /**
-   * Create a DateTime from a SQL date, time, or datetime
-   * Defaults to en-US if no locale has been specified, regardless of the system's locale
-   * @param {string} text - the string to parse
-   * @param {Object} opts - options to affect the creation
-   * @param {string|Zone} [opts.zone='local'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
-   * @param {boolean} [opts.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
-   * @param {string} [opts.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} opts.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
-   * @param {string} opts.weekSettings - the week settings to set on the resulting DateTime instance
-   * @param {string} opts.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @example DateTime.fromSQL('2017-05-15')
-   * @example DateTime.fromSQL('2017-05-15 09:12:34')
-   * @example DateTime.fromSQL('2017-05-15 09:12:34.342')
-   * @example DateTime.fromSQL('2017-05-15 09:12:34.342+06:00')
-   * @example DateTime.fromSQL('2017-05-15 09:12:34.342 America/Los_Angeles')
-   * @example DateTime.fromSQL('2017-05-15 09:12:34.342 America/Los_Angeles', { setZone: true })
-   * @example DateTime.fromSQL('2017-05-15 09:12:34.342', { zone: 'America/Los_Angeles' })
-   * @example DateTime.fromSQL('09:12:34.342')
-   * @return {DateTime}
-   */
-  static fromSQL(text, opts = {}) {
-    const [vals, parsedZone] = parseSQL(text);
-    return parseDataToDateTime(vals, parsedZone, opts, "SQL", text);
-  }
-  /**
-   * Create an invalid DateTime.
-   * @param {string} reason - simple string of why this DateTime is invalid. Should not contain parameters or anything else data-dependent.
-   * @param {string} [explanation=null] - longer explanation, may include parameters and other useful debugging information
-   * @return {DateTime}
-   */
-  static invalid(reason, explanation = null) {
-    if (!reason) {
-      throw new InvalidArgumentError("need to specify a reason the DateTime is invalid");
-    }
-    const invalid = reason instanceof Invalid ? reason : new Invalid(reason, explanation);
-    if (Settings.throwOnInvalid) {
-      throw new InvalidDateTimeError(invalid);
-    } else {
-      return new DateTime({
-        invalid
-      });
-    }
-  }
-  /**
-   * Check if an object is an instance of DateTime. Works across context boundaries
-   * @param {object} o
-   * @return {boolean}
-   */
-  static isDateTime(o) {
-    return o && o.isLuxonDateTime || false;
-  }
-  /**
-   * Produce the format string for a set of options
-   * @param formatOpts
-   * @param localeOpts
-   * @returns {string}
-   */
-  static parseFormatForOpts(formatOpts, localeOpts = {}) {
-    const tokenList = formatOptsToTokens(formatOpts, Locale.fromObject(localeOpts));
-    return !tokenList ? null : tokenList.map((t) => t ? t.val : null).join("");
-  }
-  /**
-   * Produce the the fully expanded format token for the locale
-   * Does NOT quote characters, so quoted tokens will not round trip correctly
-   * @param fmt
-   * @param localeOpts
-   * @returns {string}
-   */
-  static expandFormat(fmt, localeOpts = {}) {
-    const expanded = expandMacroTokens(Formatter.parseFormat(fmt), Locale.fromObject(localeOpts));
-    return expanded.map((t) => t.val).join("");
-  }
-  static resetCache() {
-    zoneOffsetTs = void 0;
-    zoneOffsetGuessCache = {};
-  }
-  // INFO
-  /**
-   * Get the value of unit.
-   * @param {string} unit - a unit such as 'minute' or 'day'
-   * @example DateTime.local(2017, 7, 4).get('month'); //=> 7
-   * @example DateTime.local(2017, 7, 4).get('day'); //=> 4
-   * @return {number}
-   */
-  get(unit) {
-    return this[unit];
-  }
-  /**
-   * Returns whether the DateTime is valid. Invalid DateTimes occur when:
-   * * The DateTime was created from invalid calendar information, such as the 13th month or February 30
-   * * The DateTime was created by an operation on another invalid date
-   * @type {boolean}
-   */
-  get isValid() {
-    return this.invalid === null;
-  }
-  /**
-   * Returns an error code if this DateTime is invalid, or null if the DateTime is valid
-   * @type {string}
-   */
-  get invalidReason() {
-    return this.invalid ? this.invalid.reason : null;
-  }
-  /**
-   * Returns an explanation of why this DateTime became invalid, or null if the DateTime is valid
-   * @type {string}
-   */
-  get invalidExplanation() {
-    return this.invalid ? this.invalid.explanation : null;
-  }
-  /**
-   * Get the locale of a DateTime, such 'en-GB'. The locale is used when formatting the DateTime
-   *
-   * @type {string}
-   */
-  get locale() {
-    return this.isValid ? this.loc.locale : null;
-  }
-  /**
-   * Get the numbering system of a DateTime, such 'beng'. The numbering system is used when formatting the DateTime
-   *
-   * @type {string}
-   */
-  get numberingSystem() {
-    return this.isValid ? this.loc.numberingSystem : null;
-  }
-  /**
-   * Get the output calendar of a DateTime, such 'islamic'. The output calendar is used when formatting the DateTime
-   *
-   * @type {string}
-   */
-  get outputCalendar() {
-    return this.isValid ? this.loc.outputCalendar : null;
-  }
-  /**
-   * Get the time zone associated with this DateTime.
-   * @type {Zone}
-   */
-  get zone() {
-    return this._zone;
-  }
-  /**
-   * Get the name of the time zone.
-   * @type {string}
-   */
-  get zoneName() {
-    return this.isValid ? this.zone.name : null;
-  }
-  /**
-   * Get the year
-   * @example DateTime.local(2017, 5, 25).year //=> 2017
-   * @type {number}
-   */
-  get year() {
-    return this.isValid ? this.c.year : NaN;
-  }
-  /**
-   * Get the quarter
-   * @example DateTime.local(2017, 5, 25).quarter //=> 2
-   * @type {number}
-   */
-  get quarter() {
-    return this.isValid ? Math.ceil(this.c.month / 3) : NaN;
-  }
-  /**
-   * Get the month (1-12).
-   * @example DateTime.local(2017, 5, 25).month //=> 5
-   * @type {number}
-   */
-  get month() {
-    return this.isValid ? this.c.month : NaN;
-  }
-  /**
-   * Get the day of the month (1-30ish).
-   * @example DateTime.local(2017, 5, 25).day //=> 25
-   * @type {number}
-   */
-  get day() {
-    return this.isValid ? this.c.day : NaN;
-  }
-  /**
-   * Get the hour of the day (0-23).
-   * @example DateTime.local(2017, 5, 25, 9).hour //=> 9
-   * @type {number}
-   */
-  get hour() {
-    return this.isValid ? this.c.hour : NaN;
-  }
-  /**
-   * Get the minute of the hour (0-59).
-   * @example DateTime.local(2017, 5, 25, 9, 30).minute //=> 30
-   * @type {number}
-   */
-  get minute() {
-    return this.isValid ? this.c.minute : NaN;
-  }
-  /**
-   * Get the second of the minute (0-59).
-   * @example DateTime.local(2017, 5, 25, 9, 30, 52).second //=> 52
-   * @type {number}
-   */
-  get second() {
-    return this.isValid ? this.c.second : NaN;
-  }
-  /**
-   * Get the millisecond of the second (0-999).
-   * @example DateTime.local(2017, 5, 25, 9, 30, 52, 654).millisecond //=> 654
-   * @type {number}
-   */
-  get millisecond() {
-    return this.isValid ? this.c.millisecond : NaN;
-  }
-  /**
-   * Get the week year
-   * @see https://en.wikipedia.org/wiki/ISO_week_date
-   * @example DateTime.local(2014, 12, 31).weekYear //=> 2015
-   * @type {number}
-   */
-  get weekYear() {
-    return this.isValid ? possiblyCachedWeekData(this).weekYear : NaN;
-  }
-  /**
-   * Get the week number of the week year (1-52ish).
-   * @see https://en.wikipedia.org/wiki/ISO_week_date
-   * @example DateTime.local(2017, 5, 25).weekNumber //=> 21
-   * @type {number}
-   */
-  get weekNumber() {
-    return this.isValid ? possiblyCachedWeekData(this).weekNumber : NaN;
-  }
-  /**
-   * Get the day of the week.
-   * 1 is Monday and 7 is Sunday
-   * @see https://en.wikipedia.org/wiki/ISO_week_date
-   * @example DateTime.local(2014, 11, 31).weekday //=> 4
-   * @type {number}
-   */
-  get weekday() {
-    return this.isValid ? possiblyCachedWeekData(this).weekday : NaN;
-  }
-  /**
-   * Returns true if this date is on a weekend according to the locale, false otherwise
-   * @returns {boolean}
-   */
-  get isWeekend() {
-    return this.isValid && this.loc.getWeekendDays().includes(this.weekday);
-  }
-  /**
-   * Get the day of the week according to the locale.
-   * 1 is the first day of the week and 7 is the last day of the week.
-   * If the locale assigns Sunday as the first day of the week, then a date which is a Sunday will return 1,
-   * @returns {number}
-   */
-  get localWeekday() {
-    return this.isValid ? possiblyCachedLocalWeekData(this).weekday : NaN;
-  }
-  /**
-   * Get the week number of the week year according to the locale. Different locales assign week numbers differently,
-   * because the week can start on different days of the week (see localWeekday) and because a different number of days
-   * is required for a week to count as the first week of a year.
-   * @returns {number}
-   */
-  get localWeekNumber() {
-    return this.isValid ? possiblyCachedLocalWeekData(this).weekNumber : NaN;
-  }
-  /**
-   * Get the week year according to the locale. Different locales assign week numbers (and therefor week years)
-   * differently, see localWeekNumber.
-   * @returns {number}
-   */
-  get localWeekYear() {
-    return this.isValid ? possiblyCachedLocalWeekData(this).weekYear : NaN;
-  }
-  /**
-   * Get the ordinal (meaning the day of the year)
-   * @example DateTime.local(2017, 5, 25).ordinal //=> 145
-   * @type {number|DateTime}
-   */
-  get ordinal() {
-    return this.isValid ? gregorianToOrdinal(this.c).ordinal : NaN;
-  }
-  /**
-   * Get the human readable short month name, such as 'Oct'.
-   * Defaults to the system's locale if no locale has been specified
-   * @example DateTime.local(2017, 10, 30).monthShort //=> Oct
-   * @type {string}
-   */
-  get monthShort() {
-    return this.isValid ? Info.months("short", {
-      locObj: this.loc
-    })[this.month - 1] : null;
-  }
-  /**
-   * Get the human readable long month name, such as 'October'.
-   * Defaults to the system's locale if no locale has been specified
-   * @example DateTime.local(2017, 10, 30).monthLong //=> October
-   * @type {string}
-   */
-  get monthLong() {
-    return this.isValid ? Info.months("long", {
-      locObj: this.loc
-    })[this.month - 1] : null;
-  }
-  /**
-   * Get the human readable short weekday, such as 'Mon'.
-   * Defaults to the system's locale if no locale has been specified
-   * @example DateTime.local(2017, 10, 30).weekdayShort //=> Mon
-   * @type {string}
-   */
-  get weekdayShort() {
-    return this.isValid ? Info.weekdays("short", {
-      locObj: this.loc
-    })[this.weekday - 1] : null;
-  }
-  /**
-   * Get the human readable long weekday, such as 'Monday'.
-   * Defaults to the system's locale if no locale has been specified
-   * @example DateTime.local(2017, 10, 30).weekdayLong //=> Monday
-   * @type {string}
-   */
-  get weekdayLong() {
-    return this.isValid ? Info.weekdays("long", {
-      locObj: this.loc
-    })[this.weekday - 1] : null;
-  }
-  /**
-   * Get the UTC offset of this DateTime in minutes
-   * @example DateTime.now().offset //=> -240
-   * @example DateTime.utc().offset //=> 0
-   * @type {number}
-   */
-  get offset() {
-    return this.isValid ? +this.o : NaN;
-  }
-  /**
-   * Get the short human name for the zone's current offset, for example "EST" or "EDT".
-   * Defaults to the system's locale if no locale has been specified
-   * @type {string}
-   */
-  get offsetNameShort() {
-    if (this.isValid) {
-      return this.zone.offsetName(this.ts, {
-        format: "short",
-        locale: this.locale
-      });
-    } else {
-      return null;
-    }
-  }
-  /**
-   * Get the long human name for the zone's current offset, for example "Eastern Standard Time" or "Eastern Daylight Time".
-   * Defaults to the system's locale if no locale has been specified
-   * @type {string}
-   */
-  get offsetNameLong() {
-    if (this.isValid) {
-      return this.zone.offsetName(this.ts, {
-        format: "long",
-        locale: this.locale
-      });
-    } else {
-      return null;
-    }
-  }
-  /**
-   * Get whether this zone's offset ever changes, as in a DST.
-   * @type {boolean}
-   */
-  get isOffsetFixed() {
-    return this.isValid ? this.zone.isUniversal : null;
-  }
-  /**
-   * Get whether the DateTime is in a DST.
-   * @type {boolean}
-   */
-  get isInDST() {
-    if (this.isOffsetFixed) {
-      return false;
-    } else {
-      return this.offset > this.set({
-        month: 1,
-        day: 1
-      }).offset || this.offset > this.set({
-        month: 5
-      }).offset;
-    }
-  }
-  /**
-   * Get those DateTimes which have the same local time as this DateTime, but a different offset from UTC
-   * in this DateTime's zone. During DST changes local time can be ambiguous, for example
-   * `2023-10-29T02:30:00` in `Europe/Berlin` can have offset `+01:00` or `+02:00`.
-   * This method will return both possible DateTimes if this DateTime's local time is ambiguous.
-   * @returns {DateTime[]}
-   */
-  getPossibleOffsets() {
-    if (!this.isValid || this.isOffsetFixed) {
-      return [this];
-    }
-    const dayMs = 864e5;
-    const minuteMs = 6e4;
-    const localTS = objToLocalTS(this.c);
-    const oEarlier = this.zone.offset(localTS - dayMs);
-    const oLater = this.zone.offset(localTS + dayMs);
-    const o1 = this.zone.offset(localTS - oEarlier * minuteMs);
-    const o2 = this.zone.offset(localTS - oLater * minuteMs);
-    if (o1 === o2) {
-      return [this];
-    }
-    const ts1 = localTS - o1 * minuteMs;
-    const ts2 = localTS - o2 * minuteMs;
-    const c1 = tsToObj(ts1, o1);
-    const c2 = tsToObj(ts2, o2);
-    if (c1.hour === c2.hour && c1.minute === c2.minute && c1.second === c2.second && c1.millisecond === c2.millisecond) {
-      return [clone(this, {
-        ts: ts1
-      }), clone(this, {
-        ts: ts2
-      })];
-    }
-    return [this];
-  }
-  /**
-   * Returns true if this DateTime is in a leap year, false otherwise
-   * @example DateTime.local(2016).isInLeapYear //=> true
-   * @example DateTime.local(2013).isInLeapYear //=> false
-   * @type {boolean}
-   */
-  get isInLeapYear() {
-    return isLeapYear(this.year);
-  }
-  /**
-   * Returns the number of days in this DateTime's month
-   * @example DateTime.local(2016, 2).daysInMonth //=> 29
-   * @example DateTime.local(2016, 3).daysInMonth //=> 31
-   * @type {number}
-   */
-  get daysInMonth() {
-    return daysInMonth(this.year, this.month);
-  }
-  /**
-   * Returns the number of days in this DateTime's year
-   * @example DateTime.local(2016).daysInYear //=> 366
-   * @example DateTime.local(2013).daysInYear //=> 365
-   * @type {number}
-   */
-  get daysInYear() {
-    return this.isValid ? daysInYear(this.year) : NaN;
-  }
-  /**
-   * Returns the number of weeks in this DateTime's year
-   * @see https://en.wikipedia.org/wiki/ISO_week_date
-   * @example DateTime.local(2004).weeksInWeekYear //=> 53
-   * @example DateTime.local(2013).weeksInWeekYear //=> 52
-   * @type {number}
-   */
-  get weeksInWeekYear() {
-    return this.isValid ? weeksInWeekYear(this.weekYear) : NaN;
-  }
-  /**
-   * Returns the number of weeks in this DateTime's local week year
-   * @example DateTime.local(2020, 6, {locale: 'en-US'}).weeksInLocalWeekYear //=> 52
-   * @example DateTime.local(2020, 6, {locale: 'de-DE'}).weeksInLocalWeekYear //=> 53
-   * @type {number}
-   */
-  get weeksInLocalWeekYear() {
-    return this.isValid ? weeksInWeekYear(this.localWeekYear, this.loc.getMinDaysInFirstWeek(), this.loc.getStartOfWeek()) : NaN;
-  }
-  /**
-   * Returns the resolved Intl options for this DateTime.
-   * This is useful in understanding the behavior of formatting methods
-   * @param {Object} opts - the same options as toLocaleString
-   * @return {Object}
-   */
-  resolvedLocaleOptions(opts = {}) {
-    const {
-      locale,
-      numberingSystem,
-      calendar
-    } = Formatter.create(this.loc.clone(opts), opts).resolvedOptions(this);
-    return {
-      locale,
-      numberingSystem,
-      outputCalendar: calendar
-    };
-  }
-  // TRANSFORM
-  /**
-   * "Set" the DateTime's zone to UTC. Returns a newly-constructed DateTime.
-   *
-   * Equivalent to {@link DateTime#setZone}('utc')
-   * @param {number} [offset=0] - optionally, an offset from UTC in minutes
-   * @param {Object} [opts={}] - options to pass to `setZone()`
-   * @return {DateTime}
-   */
-  toUTC(offset2 = 0, opts = {}) {
-    return this.setZone(FixedOffsetZone.instance(offset2), opts);
-  }
-  /**
-   * "Set" the DateTime's zone to the host's local zone. Returns a newly-constructed DateTime.
-   *
-   * Equivalent to `setZone('local')`
-   * @return {DateTime}
-   */
-  toLocal() {
-    return this.setZone(Settings.defaultZone);
-  }
-  /**
-   * "Set" the DateTime's zone to specified zone. Returns a newly-constructed DateTime.
-   *
-   * By default, the setter keeps the underlying time the same (as in, the same timestamp), but the new instance will report different local times and consider DSTs when making computations, as with {@link DateTime#plus}. You may wish to use {@link DateTime#toLocal} and {@link DateTime#toUTC} which provide simple convenience wrappers for commonly used zones.
-   * @param {string|Zone} [zone='local'] - a zone identifier. As a string, that can be any IANA zone supported by the host environment, or a fixed-offset name of the form 'UTC+3', or the strings 'local' or 'utc'. You may also supply an instance of a {@link DateTime#Zone} class.
-   * @param {Object} opts - options
-   * @param {boolean} [opts.keepLocalTime=false] - If true, adjust the underlying time so that the local time stays the same, but in the target zone. You should rarely need this.
-   * @return {DateTime}
-   */
-  setZone(zone, {
-    keepLocalTime = false,
-    keepCalendarTime = false
-  } = {}) {
-    zone = normalizeZone(zone, Settings.defaultZone);
-    if (zone.equals(this.zone)) {
-      return this;
-    } else if (!zone.isValid) {
-      return DateTime.invalid(unsupportedZone(zone));
-    } else {
-      let newTS = this.ts;
-      if (keepLocalTime || keepCalendarTime) {
-        const offsetGuess = zone.offset(this.ts);
-        const asObj = this.toObject();
-        [newTS] = objToTS(asObj, offsetGuess, zone);
-      }
-      return clone(this, {
-        ts: newTS,
-        zone
-      });
-    }
-  }
-  /**
-   * "Set" the locale, numberingSystem, or outputCalendar. Returns a newly-constructed DateTime.
-   * @param {Object} properties - the properties to set
-   * @example DateTime.local(2017, 5, 25).reconfigure({ locale: 'en-GB' })
-   * @return {DateTime}
-   */
-  reconfigure({
-    locale,
-    numberingSystem,
-    outputCalendar
-  } = {}) {
-    const loc = this.loc.clone({
-      locale,
-      numberingSystem,
-      outputCalendar
-    });
-    return clone(this, {
-      loc
-    });
-  }
-  /**
-   * "Set" the locale. Returns a newly-constructed DateTime.
-   * Just a convenient alias for reconfigure({ locale })
-   * @example DateTime.local(2017, 5, 25).setLocale('en-GB')
-   * @return {DateTime}
-   */
-  setLocale(locale) {
-    return this.reconfigure({
-      locale
-    });
-  }
-  /**
-   * "Set" the values of specified units. Returns a newly-constructed DateTime.
-   * You can only set units with this method; for "setting" metadata, see {@link DateTime#reconfigure} and {@link DateTime#setZone}.
-   *
-   * This method also supports setting locale-based week units, i.e. `localWeekday`, `localWeekNumber` and `localWeekYear`.
-   * They cannot be mixed with ISO-week units like `weekday`.
-   * @param {Object} values - a mapping of units to numbers
-   * @example dt.set({ year: 2017 })
-   * @example dt.set({ hour: 8, minute: 30 })
-   * @example dt.set({ weekday: 5 })
-   * @example dt.set({ year: 2005, ordinal: 234 })
-   * @return {DateTime}
-   */
-  set(values) {
-    if (!this.isValid) return this;
-    const normalized = normalizeObject(values, normalizeUnitWithLocalWeeks);
-    const {
-      minDaysInFirstWeek,
-      startOfWeek
-    } = usesLocalWeekValues(normalized, this.loc);
-    const settingWeekStuff = !isUndefined(normalized.weekYear) || !isUndefined(normalized.weekNumber) || !isUndefined(normalized.weekday), containsOrdinal = !isUndefined(normalized.ordinal), containsGregorYear = !isUndefined(normalized.year), containsGregorMD = !isUndefined(normalized.month) || !isUndefined(normalized.day), containsGregor = containsGregorYear || containsGregorMD, definiteWeekDef = normalized.weekYear || normalized.weekNumber;
-    if ((containsGregor || containsOrdinal) && definiteWeekDef) {
-      throw new ConflictingSpecificationError("Can't mix weekYear/weekNumber units with year/month/day or ordinals");
-    }
-    if (containsGregorMD && containsOrdinal) {
-      throw new ConflictingSpecificationError("Can't mix ordinal dates with month/day");
-    }
-    let mixed;
-    if (settingWeekStuff) {
-      mixed = weekToGregorian({
-        ...gregorianToWeek(this.c, minDaysInFirstWeek, startOfWeek),
-        ...normalized
-      }, minDaysInFirstWeek, startOfWeek);
-    } else if (!isUndefined(normalized.ordinal)) {
-      mixed = ordinalToGregorian({
-        ...gregorianToOrdinal(this.c),
-        ...normalized
-      });
-    } else {
-      mixed = {
-        ...this.toObject(),
-        ...normalized
-      };
-      if (isUndefined(normalized.day)) {
-        mixed.day = Math.min(daysInMonth(mixed.year, mixed.month), mixed.day);
-      }
-    }
-    const [ts, o] = objToTS(mixed, this.o, this.zone);
-    return clone(this, {
-      ts,
-      o
-    });
-  }
-  /**
-   * Add a period of time to this DateTime and return the resulting DateTime
-   *
-   * Adding hours, minutes, seconds, or milliseconds increases the timestamp by the right number of milliseconds. Adding days, months, or years shifts the calendar, accounting for DSTs and leap years along the way. Thus, `dt.plus({ hours: 24 })` may result in a different time than `dt.plus({ days: 1 })` if there's a DST shift in between.
-   * @param {Duration|Object|number} duration - The amount to add. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
-   * @example DateTime.now().plus(123) //~> in 123 milliseconds
-   * @example DateTime.now().plus({ minutes: 15 }) //~> in 15 minutes
-   * @example DateTime.now().plus({ days: 1 }) //~> this time tomorrow
-   * @example DateTime.now().plus({ days: -1 }) //~> this time yesterday
-   * @example DateTime.now().plus({ hours: 3, minutes: 13 }) //~> in 3 hr, 13 min
-   * @example DateTime.now().plus(Duration.fromObject({ hours: 3, minutes: 13 })) //~> in 3 hr, 13 min
-   * @return {DateTime}
-   */
-  plus(duration) {
-    if (!this.isValid) return this;
-    const dur = Duration.fromDurationLike(duration);
-    return clone(this, adjustTime(this, dur));
-  }
-  /**
-   * Subtract a period of time to this DateTime and return the resulting DateTime
-   * See {@link DateTime#plus}
-   * @param {Duration|Object|number} duration - The amount to subtract. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
-   @return {DateTime}
-   */
-  minus(duration) {
-    if (!this.isValid) return this;
-    const dur = Duration.fromDurationLike(duration).negate();
-    return clone(this, adjustTime(this, dur));
-  }
-  /**
-   * "Set" this DateTime to the beginning of a unit of time.
-   * @param {string} unit - The unit to go to the beginning of. Can be 'year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', or 'millisecond'.
-   * @param {Object} opts - options
-   * @param {boolean} [opts.useLocaleWeeks=false] - If true, use weeks based on the locale, i.e. use the locale-dependent start of the week
-   * @example DateTime.local(2014, 3, 3).startOf('month').toISODate(); //=> '2014-03-01'
-   * @example DateTime.local(2014, 3, 3).startOf('year').toISODate(); //=> '2014-01-01'
-   * @example DateTime.local(2014, 3, 3).startOf('week').toISODate(); //=> '2014-03-03', weeks always start on Mondays
-   * @example DateTime.local(2014, 3, 3, 5, 30).startOf('day').toISOTime(); //=> '00:00.000-05:00'
-   * @example DateTime.local(2014, 3, 3, 5, 30).startOf('hour').toISOTime(); //=> '05:00:00.000-05:00'
-   * @return {DateTime}
-   */
-  startOf(unit, {
-    useLocaleWeeks = false
-  } = {}) {
-    if (!this.isValid) return this;
-    const o = {}, normalizedUnit = Duration.normalizeUnit(unit);
-    switch (normalizedUnit) {
-      case "years":
-        o.month = 1;
-      case "quarters":
-      case "months":
-        o.day = 1;
-      case "weeks":
-      case "days":
-        o.hour = 0;
-      case "hours":
-        o.minute = 0;
-      case "minutes":
-        o.second = 0;
-      case "seconds":
-        o.millisecond = 0;
-        break;
-    }
-    if (normalizedUnit === "weeks") {
-      if (useLocaleWeeks) {
-        const startOfWeek = this.loc.getStartOfWeek();
-        const {
-          weekday
-        } = this;
-        if (weekday < startOfWeek) {
-          o.weekNumber = this.weekNumber - 1;
+  get(header, parser) {
+    header = normalizeHeader(header);
+    if (header) {
+      const key = utils$1.findKey(this, header);
+      if (key) {
+        const value = this[key];
+        if (!parser) {
+          return value;
         }
-        o.weekday = startOfWeek;
-      } else {
-        o.weekday = 1;
+        if (parser === true) {
+          return parseTokens(value);
+        }
+        if (utils$1.isFunction(parser)) {
+          return parser.call(this, value, key);
+        }
+        if (utils$1.isRegExp(parser)) {
+          return parser.exec(value);
+        }
+        throw new TypeError("parser must be boolean|regexp|function");
       }
     }
-    if (normalizedUnit === "quarters") {
-      const q = Math.ceil(this.month / 3);
-      o.month = (q - 1) * 3 + 1;
+  }
+  has(header, matcher) {
+    header = normalizeHeader(header);
+    if (header) {
+      const key = utils$1.findKey(this, header);
+      return !!(key && this[key] !== void 0 && (!matcher || matchHeaderValue(this, this[key], key, matcher)));
     }
-    return this.set(o);
+    return false;
   }
-  /**
-   * "Set" this DateTime to the end (meaning the last millisecond) of a unit of time
-   * @param {string} unit - The unit to go to the end of. Can be 'year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', or 'millisecond'.
-   * @param {Object} opts - options
-   * @param {boolean} [opts.useLocaleWeeks=false] - If true, use weeks based on the locale, i.e. use the locale-dependent start of the week
-   * @example DateTime.local(2014, 3, 3).endOf('month').toISO(); //=> '2014-03-31T23:59:59.999-05:00'
-   * @example DateTime.local(2014, 3, 3).endOf('year').toISO(); //=> '2014-12-31T23:59:59.999-05:00'
-   * @example DateTime.local(2014, 3, 3).endOf('week').toISO(); // => '2014-03-09T23:59:59.999-05:00', weeks start on Mondays
-   * @example DateTime.local(2014, 3, 3, 5, 30).endOf('day').toISO(); //=> '2014-03-03T23:59:59.999-05:00'
-   * @example DateTime.local(2014, 3, 3, 5, 30).endOf('hour').toISO(); //=> '2014-03-03T05:59:59.999-05:00'
-   * @return {DateTime}
-   */
-  endOf(unit, opts) {
-    return this.isValid ? this.plus({
-      [unit]: 1
-    }).startOf(unit, opts).minus(1) : this;
-  }
-  // OUTPUT
-  /**
-   * Returns a string representation of this DateTime formatted according to the specified format string.
-   * **You may not want this.** See {@link DateTime#toLocaleString} for a more flexible formatting tool. For a table of tokens and their interpretations, see [here](https://moment.github.io/luxon/#/formatting?id=table-of-tokens).
-   * Defaults to en-US if no locale has been specified, regardless of the system's locale.
-   * @param {string} fmt - the format string
-   * @param {Object} opts - opts to override the configuration options on this DateTime
-   * @example DateTime.now().toFormat('yyyy LLL dd') //=> '2017 Apr 22'
-   * @example DateTime.now().setLocale('fr').toFormat('yyyy LLL dd') //=> '2017 avr. 22'
-   * @example DateTime.now().toFormat('yyyy LLL dd', { locale: "fr" }) //=> '2017 avr. 22'
-   * @example DateTime.now().toFormat("HH 'hours and' mm 'minutes'") //=> '20 hours and 55 minutes'
-   * @return {string}
-   */
-  toFormat(fmt, opts = {}) {
-    return this.isValid ? Formatter.create(this.loc.redefaultToEN(opts)).formatDateTimeFromString(this, fmt) : INVALID;
-  }
-  /**
-   * Returns a localized string representing this date. Accepts the same options as the Intl.DateTimeFormat constructor and any presets defined by Luxon, such as `DateTime.DATE_FULL` or `DateTime.TIME_SIMPLE`.
-   * The exact behavior of this method is browser-specific, but in general it will return an appropriate representation
-   * of the DateTime in the assigned locale.
-   * Defaults to the system's locale if no locale has been specified
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
-   * @param formatOpts {Object} - Intl.DateTimeFormat constructor options and configuration options
-   * @param {Object} opts - opts to override the configuration options on this DateTime
-   * @example DateTime.now().toLocaleString(); //=> 4/20/2017
-   * @example DateTime.now().setLocale('en-gb').toLocaleString(); //=> '20/04/2017'
-   * @example DateTime.now().toLocaleString(DateTime.DATE_FULL); //=> 'April 20, 2017'
-   * @example DateTime.now().toLocaleString(DateTime.DATE_FULL, { locale: 'fr' }); //=> '28 août 2022'
-   * @example DateTime.now().toLocaleString(DateTime.TIME_SIMPLE); //=> '11:32 AM'
-   * @example DateTime.now().toLocaleString(DateTime.DATETIME_SHORT); //=> '4/20/2017, 11:32 AM'
-   * @example DateTime.now().toLocaleString({ weekday: 'long', month: 'long', day: '2-digit' }); //=> 'Thursday, April 20'
-   * @example DateTime.now().toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }); //=> 'Thu, Apr 20, 11:27 AM'
-   * @example DateTime.now().toLocaleString({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); //=> '11:32'
-   * @return {string}
-   */
-  toLocaleString(formatOpts = DATE_SHORT, opts = {}) {
-    return this.isValid ? Formatter.create(this.loc.clone(opts), formatOpts).formatDateTime(this) : INVALID;
-  }
-  /**
-   * Returns an array of format "parts", meaning individual tokens along with metadata. This is allows callers to post-process individual sections of the formatted output.
-   * Defaults to the system's locale if no locale has been specified
-   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat/formatToParts
-   * @param opts {Object} - Intl.DateTimeFormat constructor options, same as `toLocaleString`.
-   * @example DateTime.now().toLocaleParts(); //=> [
-   *                                   //=>   { type: 'day', value: '25' },
-   *                                   //=>   { type: 'literal', value: '/' },
-   *                                   //=>   { type: 'month', value: '05' },
-   *                                   //=>   { type: 'literal', value: '/' },
-   *                                   //=>   { type: 'year', value: '1982' }
-   *                                   //=> ]
-   */
-  toLocaleParts(opts = {}) {
-    return this.isValid ? Formatter.create(this.loc.clone(opts), opts).formatDateTimeParts(this) : [];
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this DateTime
-   * @param {Object} opts - options
-   * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
-   * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
-   * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-   * @param {boolean} [opts.extendedZone=false] - add the time zone format extension
-   * @param {string} [opts.format='extended'] - choose between the basic and extended format
-   * @example DateTime.utc(1983, 5, 25).toISO() //=> '1982-05-25T00:00:00.000Z'
-   * @example DateTime.now().toISO() //=> '2017-04-22T20:47:05.335-04:00'
-   * @example DateTime.now().toISO({ includeOffset: false }) //=> '2017-04-22T20:47:05.335'
-   * @example DateTime.now().toISO({ format: 'basic' }) //=> '20170422T204705.335-0400'
-   * @return {string}
-   */
-  toISO({
-    format = "extended",
-    suppressSeconds = false,
-    suppressMilliseconds = false,
-    includeOffset = true,
-    extendedZone = false
-  } = {}) {
-    if (!this.isValid) {
-      return null;
-    }
-    const ext = format === "extended";
-    let c = toISODate(this, ext);
-    c += "T";
-    c += toISOTime(this, ext, suppressSeconds, suppressMilliseconds, includeOffset, extendedZone);
-    return c;
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this DateTime's date component
-   * @param {Object} opts - options
-   * @param {string} [opts.format='extended'] - choose between the basic and extended format
-   * @example DateTime.utc(1982, 5, 25).toISODate() //=> '1982-05-25'
-   * @example DateTime.utc(1982, 5, 25).toISODate({ format: 'basic' }) //=> '19820525'
-   * @return {string}
-   */
-  toISODate({
-    format = "extended"
-  } = {}) {
-    if (!this.isValid) {
-      return null;
-    }
-    return toISODate(this, format === "extended");
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this DateTime's week date
-   * @example DateTime.utc(1982, 5, 25).toISOWeekDate() //=> '1982-W21-2'
-   * @return {string}
-   */
-  toISOWeekDate() {
-    return toTechFormat(this, "kkkk-'W'WW-c");
-  }
-  /**
-   * Returns an ISO 8601-compliant string representation of this DateTime's time component
-   * @param {Object} opts - options
-   * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
-   * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
-   * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-   * @param {boolean} [opts.extendedZone=true] - add the time zone format extension
-   * @param {boolean} [opts.includePrefix=false] - include the `T` prefix
-   * @param {string} [opts.format='extended'] - choose between the basic and extended format
-   * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime() //=> '07:34:19.361Z'
-   * @example DateTime.utc().set({ hour: 7, minute: 34, seconds: 0, milliseconds: 0 }).toISOTime({ suppressSeconds: true }) //=> '07:34Z'
-   * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ format: 'basic' }) //=> '073419.361Z'
-   * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ includePrefix: true }) //=> 'T07:34:19.361Z'
-   * @return {string}
-   */
-  toISOTime({
-    suppressMilliseconds = false,
-    suppressSeconds = false,
-    includeOffset = true,
-    includePrefix = false,
-    extendedZone = false,
-    format = "extended"
-  } = {}) {
-    if (!this.isValid) {
-      return null;
-    }
-    let c = includePrefix ? "T" : "";
-    return c + toISOTime(this, format === "extended", suppressSeconds, suppressMilliseconds, includeOffset, extendedZone);
-  }
-  /**
-   * Returns an RFC 2822-compatible string representation of this DateTime
-   * @example DateTime.utc(2014, 7, 13).toRFC2822() //=> 'Sun, 13 Jul 2014 00:00:00 +0000'
-   * @example DateTime.local(2014, 7, 13).toRFC2822() //=> 'Sun, 13 Jul 2014 00:00:00 -0400'
-   * @return {string}
-   */
-  toRFC2822() {
-    return toTechFormat(this, "EEE, dd LLL yyyy HH:mm:ss ZZZ", false);
-  }
-  /**
-   * Returns a string representation of this DateTime appropriate for use in HTTP headers. The output is always expressed in GMT.
-   * Specifically, the string conforms to RFC 1123.
-   * @see https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
-   * @example DateTime.utc(2014, 7, 13).toHTTP() //=> 'Sun, 13 Jul 2014 00:00:00 GMT'
-   * @example DateTime.utc(2014, 7, 13, 19).toHTTP() //=> 'Sun, 13 Jul 2014 19:00:00 GMT'
-   * @return {string}
-   */
-  toHTTP() {
-    return toTechFormat(this.toUTC(), "EEE, dd LLL yyyy HH:mm:ss 'GMT'");
-  }
-  /**
-   * Returns a string representation of this DateTime appropriate for use in SQL Date
-   * @example DateTime.utc(2014, 7, 13).toSQLDate() //=> '2014-07-13'
-   * @return {string}
-   */
-  toSQLDate() {
-    if (!this.isValid) {
-      return null;
-    }
-    return toISODate(this, true);
-  }
-  /**
-   * Returns a string representation of this DateTime appropriate for use in SQL Time
-   * @param {Object} opts - options
-   * @param {boolean} [opts.includeZone=false] - include the zone, such as 'America/New_York'. Overrides includeOffset.
-   * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-   * @param {boolean} [opts.includeOffsetSpace=true] - include the space between the time and the offset, such as '05:15:16.345 -04:00'
-   * @example DateTime.utc().toSQL() //=> '05:15:16.345'
-   * @example DateTime.now().toSQL() //=> '05:15:16.345 -04:00'
-   * @example DateTime.now().toSQL({ includeOffset: false }) //=> '05:15:16.345'
-   * @example DateTime.now().toSQL({ includeZone: false }) //=> '05:15:16.345 America/New_York'
-   * @return {string}
-   */
-  toSQLTime({
-    includeOffset = true,
-    includeZone = false,
-    includeOffsetSpace = true
-  } = {}) {
-    let fmt = "HH:mm:ss.SSS";
-    if (includeZone || includeOffset) {
-      if (includeOffsetSpace) {
-        fmt += " ";
-      }
-      if (includeZone) {
-        fmt += "z";
-      } else if (includeOffset) {
-        fmt += "ZZ";
+  delete(header, matcher) {
+    const self2 = this;
+    let deleted = false;
+    function deleteHeader(_header) {
+      _header = normalizeHeader(_header);
+      if (_header) {
+        const key = utils$1.findKey(self2, _header);
+        if (key && (!matcher || matchHeaderValue(self2, self2[key], key, matcher))) {
+          delete self2[key];
+          deleted = true;
+        }
       }
     }
-    return toTechFormat(this, fmt, true);
-  }
-  /**
-   * Returns a string representation of this DateTime appropriate for use in SQL DateTime
-   * @param {Object} opts - options
-   * @param {boolean} [opts.includeZone=false] - include the zone, such as 'America/New_York'. Overrides includeOffset.
-   * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-   * @param {boolean} [opts.includeOffsetSpace=true] - include the space between the time and the offset, such as '05:15:16.345 -04:00'
-   * @example DateTime.utc(2014, 7, 13).toSQL() //=> '2014-07-13 00:00:00.000 Z'
-   * @example DateTime.local(2014, 7, 13).toSQL() //=> '2014-07-13 00:00:00.000 -04:00'
-   * @example DateTime.local(2014, 7, 13).toSQL({ includeOffset: false }) //=> '2014-07-13 00:00:00.000'
-   * @example DateTime.local(2014, 7, 13).toSQL({ includeZone: true }) //=> '2014-07-13 00:00:00.000 America/New_York'
-   * @return {string}
-   */
-  toSQL(opts = {}) {
-    if (!this.isValid) {
-      return null;
+    if (utils$1.isArray(header)) {
+      header.forEach(deleteHeader);
+    } else {
+      deleteHeader(header);
     }
-    return `${this.toSQLDate()} ${this.toSQLTime(opts)}`;
+    return deleted;
   }
-  /**
-   * Returns a string representation of this DateTime appropriate for debugging
-   * @return {string}
-   */
+  clear(matcher) {
+    const keys = Object.keys(this);
+    let i = keys.length;
+    let deleted = false;
+    while (i--) {
+      const key = keys[i];
+      if (!matcher || matchHeaderValue(this, this[key], key, matcher, true)) {
+        delete this[key];
+        deleted = true;
+      }
+    }
+    return deleted;
+  }
+  normalize(format) {
+    const self2 = this;
+    const headers = {};
+    utils$1.forEach(this, (value, header) => {
+      const key = utils$1.findKey(headers, header);
+      if (key) {
+        self2[key] = normalizeValue(value);
+        delete self2[header];
+        return;
+      }
+      const normalized = format ? formatHeader(header) : String(header).trim();
+      if (normalized !== header) {
+        delete self2[header];
+      }
+      self2[normalized] = normalizeValue(value);
+      headers[normalized] = true;
+    });
+    return this;
+  }
+  concat(...targets) {
+    return this.constructor.concat(this, ...targets);
+  }
+  toJSON(asStrings) {
+    const obj = /* @__PURE__ */ Object.create(null);
+    utils$1.forEach(this, (value, header) => {
+      value != null && value !== false && (obj[header] = asStrings && utils$1.isArray(value) ? value.join(", ") : value);
+    });
+    return obj;
+  }
+  [Symbol.iterator]() {
+    return Object.entries(this.toJSON())[Symbol.iterator]();
+  }
   toString() {
-    return this.isValid ? this.toISO() : INVALID;
+    return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
   }
-  /**
-   * Returns a string representation of this DateTime appropriate for the REPL.
-   * @return {string}
-   */
-  [Symbol.for("nodejs.util.inspect.custom")]() {
-    if (this.isValid) {
-      return `DateTime { ts: ${this.toISO()}, zone: ${this.zone.name}, locale: ${this.locale} }`;
-    } else {
-      return `DateTime { Invalid, reason: ${this.invalidReason} }`;
-    }
+  get [Symbol.toStringTag]() {
+    return "AxiosHeaders";
   }
-  /**
-   * Returns the epoch milliseconds of this DateTime. Alias of {@link DateTime#toMillis}
-   * @return {number}
-   */
-  valueOf() {
-    return this.toMillis();
+  static from(thing) {
+    return thing instanceof this ? thing : new this(thing);
   }
-  /**
-   * Returns the epoch milliseconds of this DateTime.
-   * @return {number}
-   */
-  toMillis() {
-    return this.isValid ? this.ts : NaN;
+  static concat(first, ...targets) {
+    const computed3 = new this(first);
+    targets.forEach((target) => computed3.set(target));
+    return computed3;
   }
-  /**
-   * Returns the epoch seconds of this DateTime.
-   * @return {number}
-   */
-  toSeconds() {
-    return this.isValid ? this.ts / 1e3 : NaN;
-  }
-  /**
-   * Returns the epoch seconds (as a whole number) of this DateTime.
-   * @return {number}
-   */
-  toUnixInteger() {
-    return this.isValid ? Math.floor(this.ts / 1e3) : NaN;
-  }
-  /**
-   * Returns an ISO 8601 representation of this DateTime appropriate for use in JSON.
-   * @return {string}
-   */
-  toJSON() {
-    return this.toISO();
-  }
-  /**
-   * Returns a BSON serializable equivalent to this DateTime.
-   * @return {Date}
-   */
-  toBSON() {
-    return this.toJSDate();
-  }
-  /**
-   * Returns a JavaScript object with this DateTime's year, month, day, and so on.
-   * @param opts - options for generating the object
-   * @param {boolean} [opts.includeConfig=false] - include configuration attributes in the output
-   * @example DateTime.now().toObject() //=> { year: 2017, month: 4, day: 22, hour: 20, minute: 49, second: 42, millisecond: 268 }
-   * @return {Object}
-   */
-  toObject(opts = {}) {
-    if (!this.isValid) return {};
-    const base = {
-      ...this.c
+  static accessor(header) {
+    const internals = this[$internals] = this[$internals] = {
+      accessors: {}
     };
-    if (opts.includeConfig) {
-      base.outputCalendar = this.outputCalendar;
-      base.numberingSystem = this.loc.numberingSystem;
-      base.locale = this.loc.locale;
+    const accessors = internals.accessors;
+    const prototype2 = this.prototype;
+    function defineAccessor(_header) {
+      const lHeader = normalizeHeader(_header);
+      if (!accessors[lHeader]) {
+        buildAccessors(prototype2, _header);
+        accessors[lHeader] = true;
+      }
     }
-    return base;
-  }
-  /**
-   * Returns a JavaScript Date equivalent to this DateTime.
-   * @return {Date}
-   */
-  toJSDate() {
-    return new Date(this.isValid ? this.ts : NaN);
-  }
-  // COMPARE
-  /**
-   * Return the difference between two DateTimes as a Duration.
-   * @param {DateTime} otherDateTime - the DateTime to compare this one to
-   * @param {string|string[]} [unit=['milliseconds']] - the unit or array of units (such as 'hours' or 'days') to include in the duration.
-   * @param {Object} opts - options that affect the creation of the Duration
-   * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-   * @example
-   * var i1 = DateTime.fromISO('1982-05-25T09:45'),
-   *     i2 = DateTime.fromISO('1983-10-14T10:30');
-   * i2.diff(i1).toObject() //=> { milliseconds: 43807500000 }
-   * i2.diff(i1, 'hours').toObject() //=> { hours: 12168.75 }
-   * i2.diff(i1, ['months', 'days']).toObject() //=> { months: 16, days: 19.03125 }
-   * i2.diff(i1, ['months', 'days', 'hours']).toObject() //=> { months: 16, days: 19, hours: 0.75 }
-   * @return {Duration}
-   */
-  diff(otherDateTime, unit = "milliseconds", opts = {}) {
-    if (!this.isValid || !otherDateTime.isValid) {
-      return Duration.invalid("created by diffing an invalid DateTime");
-    }
-    const durOpts = {
-      locale: this.locale,
-      numberingSystem: this.numberingSystem,
-      ...opts
-    };
-    const units = maybeArray(unit).map(Duration.normalizeUnit), otherIsLater = otherDateTime.valueOf() > this.valueOf(), earlier = otherIsLater ? this : otherDateTime, later = otherIsLater ? otherDateTime : this, diffed = diff(earlier, later, units, durOpts);
-    return otherIsLater ? diffed.negate() : diffed;
-  }
-  /**
-   * Return the difference between this DateTime and right now.
-   * See {@link DateTime#diff}
-   * @param {string|string[]} [unit=['milliseconds']] - the unit or units units (such as 'hours' or 'days') to include in the duration
-   * @param {Object} opts - options that affect the creation of the Duration
-   * @param {string} [opts.conversionAccuracy='casual'] - the conversion system to use
-   * @return {Duration}
-   */
-  diffNow(unit = "milliseconds", opts = {}) {
-    return this.diff(DateTime.now(), unit, opts);
-  }
-  /**
-   * Return an Interval spanning between this DateTime and another DateTime
-   * @param {DateTime} otherDateTime - the other end point of the Interval
-   * @return {Interval}
-   */
-  until(otherDateTime) {
-    return this.isValid ? Interval.fromDateTimes(this, otherDateTime) : this;
-  }
-  /**
-   * Return whether this DateTime is in the same unit of time as another DateTime.
-   * Higher-order units must also be identical for this function to return `true`.
-   * Note that time zones are **ignored** in this comparison, which compares the **local** calendar time. Use {@link DateTime#setZone} to convert one of the dates if needed.
-   * @param {DateTime} otherDateTime - the other DateTime
-   * @param {string} unit - the unit of time to check sameness on
-   * @param {Object} opts - options
-   * @param {boolean} [opts.useLocaleWeeks=false] - If true, use weeks based on the locale, i.e. use the locale-dependent start of the week; only the locale of this DateTime is used
-   * @example DateTime.now().hasSame(otherDT, 'day'); //~> true if otherDT is in the same current calendar day
-   * @return {boolean}
-   */
-  hasSame(otherDateTime, unit, opts) {
-    if (!this.isValid) return false;
-    const inputMs = otherDateTime.valueOf();
-    const adjustedToZone = this.setZone(otherDateTime.zone, {
-      keepLocalTime: true
-    });
-    return adjustedToZone.startOf(unit, opts) <= inputMs && inputMs <= adjustedToZone.endOf(unit, opts);
-  }
-  /**
-   * Equality check
-   * Two DateTimes are equal if and only if they represent the same millisecond, have the same zone and location, and are both valid.
-   * To compare just the millisecond values, use `+dt1 === +dt2`.
-   * @param {DateTime} other - the other DateTime
-   * @return {boolean}
-   */
-  equals(other) {
-    return this.isValid && other.isValid && this.valueOf() === other.valueOf() && this.zone.equals(other.zone) && this.loc.equals(other.loc);
-  }
-  /**
-   * Returns a string representation of a this time relative to now, such as "in two days". Can only internationalize if your
-   * platform supports Intl.RelativeTimeFormat. Rounds down by default.
-   * @param {Object} options - options that affect the output
-   * @param {DateTime} [options.base=DateTime.now()] - the DateTime to use as the basis to which this time is compared. Defaults to now.
-   * @param {string} [options.style="long"] - the style of units, must be "long", "short", or "narrow"
-   * @param {string|string[]} options.unit - use a specific unit or array of units; if omitted, or an array, the method will pick the best unit. Use an array or one of "years", "quarters", "months", "weeks", "days", "hours", "minutes", or "seconds"
-   * @param {boolean} [options.round=true] - whether to round the numbers in the output.
-   * @param {number} [options.padding=0] - padding in milliseconds. This allows you to round up the result if it fits inside the threshold. Don't use in combination with {round: false} because the decimal output will include the padding.
-   * @param {string} options.locale - override the locale of this DateTime
-   * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
-   * @example DateTime.now().plus({ days: 1 }).toRelative() //=> "in 1 day"
-   * @example DateTime.now().setLocale("es").toRelative({ days: 1 }) //=> "dentro de 1 día"
-   * @example DateTime.now().plus({ days: 1 }).toRelative({ locale: "fr" }) //=> "dans 23 heures"
-   * @example DateTime.now().minus({ days: 2 }).toRelative() //=> "2 days ago"
-   * @example DateTime.now().minus({ days: 2 }).toRelative({ unit: "hours" }) //=> "48 hours ago"
-   * @example DateTime.now().minus({ hours: 36 }).toRelative({ round: false }) //=> "1.5 days ago"
-   */
-  toRelative(options = {}) {
-    if (!this.isValid) return null;
-    const base = options.base || DateTime.fromObject({}, {
-      zone: this.zone
-    }), padding = options.padding ? this < base ? -options.padding : options.padding : 0;
-    let units = ["years", "months", "days", "hours", "minutes", "seconds"];
-    let unit = options.unit;
-    if (Array.isArray(options.unit)) {
-      units = options.unit;
-      unit = void 0;
-    }
-    return diffRelative(base, this.plus(padding), {
-      ...options,
-      numeric: "always",
-      units,
-      unit
-    });
-  }
-  /**
-   * Returns a string representation of this date relative to today, such as "yesterday" or "next month".
-   * Only internationalizes on platforms that supports Intl.RelativeTimeFormat.
-   * @param {Object} options - options that affect the output
-   * @param {DateTime} [options.base=DateTime.now()] - the DateTime to use as the basis to which this time is compared. Defaults to now.
-   * @param {string} options.locale - override the locale of this DateTime
-   * @param {string} options.unit - use a specific unit; if omitted, the method will pick the unit. Use one of "years", "quarters", "months", "weeks", or "days"
-   * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
-   * @example DateTime.now().plus({ days: 1 }).toRelativeCalendar() //=> "tomorrow"
-   * @example DateTime.now().setLocale("es").plus({ days: 1 }).toRelative() //=> ""mañana"
-   * @example DateTime.now().plus({ days: 1 }).toRelativeCalendar({ locale: "fr" }) //=> "demain"
-   * @example DateTime.now().minus({ days: 2 }).toRelativeCalendar() //=> "2 days ago"
-   */
-  toRelativeCalendar(options = {}) {
-    if (!this.isValid) return null;
-    return diffRelative(options.base || DateTime.fromObject({}, {
-      zone: this.zone
-    }), this, {
-      ...options,
-      numeric: "auto",
-      units: ["years", "months", "days"],
-      calendary: true
-    });
-  }
-  /**
-   * Return the min of several date times
-   * @param {...DateTime} dateTimes - the DateTimes from which to choose the minimum
-   * @return {DateTime} the min DateTime, or undefined if called with no argument
-   */
-  static min(...dateTimes) {
-    if (!dateTimes.every(DateTime.isDateTime)) {
-      throw new InvalidArgumentError("min requires all arguments be DateTimes");
-    }
-    return bestBy(dateTimes, (i) => i.valueOf(), Math.min);
-  }
-  /**
-   * Return the max of several date times
-   * @param {...DateTime} dateTimes - the DateTimes from which to choose the maximum
-   * @return {DateTime} the max DateTime, or undefined if called with no argument
-   */
-  static max(...dateTimes) {
-    if (!dateTimes.every(DateTime.isDateTime)) {
-      throw new InvalidArgumentError("max requires all arguments be DateTimes");
-    }
-    return bestBy(dateTimes, (i) => i.valueOf(), Math.max);
-  }
-  // MISC
-  /**
-   * Explain how a string would be parsed by fromFormat()
-   * @param {string} text - the string to parse
-   * @param {string} fmt - the format the string is expected to be in (see description)
-   * @param {Object} options - options taken by fromFormat()
-   * @return {Object}
-   */
-  static fromFormatExplain(text, fmt, options = {}) {
-    const {
-      locale = null,
-      numberingSystem = null
-    } = options, localeToUse = Locale.fromOpts({
-      locale,
-      numberingSystem,
-      defaultToEN: true
-    });
-    return explainFromTokens(localeToUse, text, fmt);
-  }
-  /**
-   * @deprecated use fromFormatExplain instead
-   */
-  static fromStringExplain(text, fmt, options = {}) {
-    return DateTime.fromFormatExplain(text, fmt, options);
-  }
-  /**
-   * Build a parser for `fmt` using the given locale. This parser can be passed
-   * to {@link DateTime.fromFormatParser} to a parse a date in this format. This
-   * can be used to optimize cases where many dates need to be parsed in a
-   * specific format.
-   *
-   * @param {String} fmt - the format the string is expected to be in (see
-   * description)
-   * @param {Object} options - options used to set locale and numberingSystem
-   * for parser
-   * @returns {TokenParser} - opaque object to be used
-   */
-  static buildFormatParser(fmt, options = {}) {
-    const {
-      locale = null,
-      numberingSystem = null
-    } = options, localeToUse = Locale.fromOpts({
-      locale,
-      numberingSystem,
-      defaultToEN: true
-    });
-    return new TokenParser(localeToUse, fmt);
-  }
-  /**
-   * Create a DateTime from an input string and format parser.
-   *
-   * The format parser must have been created with the same locale as this call.
-   *
-   * @param {String} text - the string to parse
-   * @param {TokenParser} formatParser - parser from {@link DateTime.buildFormatParser}
-   * @param {Object} opts - options taken by fromFormat()
-   * @returns {DateTime}
-   */
-  static fromFormatParser(text, formatParser, opts = {}) {
-    if (isUndefined(text) || isUndefined(formatParser)) {
-      throw new InvalidArgumentError("fromFormatParser requires an input string and a format parser");
-    }
-    const {
-      locale = null,
-      numberingSystem = null
-    } = opts, localeToUse = Locale.fromOpts({
-      locale,
-      numberingSystem,
-      defaultToEN: true
-    });
-    if (!localeToUse.equals(formatParser.locale)) {
-      throw new InvalidArgumentError(`fromFormatParser called with a locale of ${localeToUse}, but the format parser was created for ${formatParser.locale}`);
-    }
-    const {
-      result,
-      zone,
-      specificOffset,
-      invalidReason
-    } = formatParser.explainFromTokens(text);
-    if (invalidReason) {
-      return DateTime.invalid(invalidReason);
-    } else {
-      return parseDataToDateTime(result, zone, opts, `format ${formatParser.format}`, text, specificOffset);
-    }
-  }
-  // FORMAT PRESETS
-  /**
-   * {@link DateTime#toLocaleString} format like 10/14/1983
-   * @type {Object}
-   */
-  static get DATE_SHORT() {
-    return DATE_SHORT;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Oct 14, 1983'
-   * @type {Object}
-   */
-  static get DATE_MED() {
-    return DATE_MED;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Fri, Oct 14, 1983'
-   * @type {Object}
-   */
-  static get DATE_MED_WITH_WEEKDAY() {
-    return DATE_MED_WITH_WEEKDAY;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'October 14, 1983'
-   * @type {Object}
-   */
-  static get DATE_FULL() {
-    return DATE_FULL;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Tuesday, October 14, 1983'
-   * @type {Object}
-   */
-  static get DATE_HUGE() {
-    return DATE_HUGE;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get TIME_SIMPLE() {
-    return TIME_SIMPLE;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get TIME_WITH_SECONDS() {
-    return TIME_WITH_SECONDS;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23 AM EDT'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get TIME_WITH_SHORT_OFFSET() {
-    return TIME_WITH_SHORT_OFFSET;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get TIME_WITH_LONG_OFFSET() {
-    return TIME_WITH_LONG_OFFSET;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30', always 24-hour.
-   * @type {Object}
-   */
-  static get TIME_24_SIMPLE() {
-    return TIME_24_SIMPLE;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23', always 24-hour.
-   * @type {Object}
-   */
-  static get TIME_24_WITH_SECONDS() {
-    return TIME_24_WITH_SECONDS;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23 EDT', always 24-hour.
-   * @type {Object}
-   */
-  static get TIME_24_WITH_SHORT_OFFSET() {
-    return TIME_24_WITH_SHORT_OFFSET;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '09:30:23 Eastern Daylight Time', always 24-hour.
-   * @type {Object}
-   */
-  static get TIME_24_WITH_LONG_OFFSET() {
-    return TIME_24_WITH_LONG_OFFSET;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '10/14/1983, 9:30 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_SHORT() {
-    return DATETIME_SHORT;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like '10/14/1983, 9:30:33 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_SHORT_WITH_SECONDS() {
-    return DATETIME_SHORT_WITH_SECONDS;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Oct 14, 1983, 9:30 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_MED() {
-    return DATETIME_MED;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Oct 14, 1983, 9:30:33 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_MED_WITH_SECONDS() {
-    return DATETIME_MED_WITH_SECONDS;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Fri, 14 Oct 1983, 9:30 AM'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_MED_WITH_WEEKDAY() {
-    return DATETIME_MED_WITH_WEEKDAY;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'October 14, 1983, 9:30 AM EDT'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_FULL() {
-    return DATETIME_FULL;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'October 14, 1983, 9:30:33 AM EDT'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_FULL_WITH_SECONDS() {
-    return DATETIME_FULL_WITH_SECONDS;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Friday, October 14, 1983, 9:30 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_HUGE() {
-    return DATETIME_HUGE;
-  }
-  /**
-   * {@link DateTime#toLocaleString} format like 'Friday, October 14, 1983, 9:30:33 AM Eastern Daylight Time'. Only 12-hour if the locale is.
-   * @type {Object}
-   */
-  static get DATETIME_HUGE_WITH_SECONDS() {
-    return DATETIME_HUGE_WITH_SECONDS;
+    utils$1.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
+    return this;
   }
 }
-function friendlyDateTime(dateTimeish) {
-  if (DateTime.isDateTime(dateTimeish)) {
-    return dateTimeish;
-  } else if (dateTimeish && dateTimeish.valueOf && isNumber(dateTimeish.valueOf())) {
-    return DateTime.fromJSDate(dateTimeish);
-  } else if (dateTimeish && typeof dateTimeish === "object") {
-    return DateTime.fromObject(dateTimeish);
-  } else {
-    throw new InvalidArgumentError(`Unknown datetime argument: ${dateTimeish}, of type ${typeof dateTimeish}`);
-  }
-}
-const VERSION = "3.5.0";
-luxon$1.DateTime = DateTime;
-luxon$1.Duration = Duration;
-luxon$1.FixedOffsetZone = FixedOffsetZone;
-luxon$1.IANAZone = IANAZone;
-luxon$1.Info = Info;
-luxon$1.Interval = Interval;
-luxon$1.InvalidZone = InvalidZone;
-luxon$1.Settings = Settings;
-luxon$1.SystemZone = SystemZone;
-luxon$1.VERSION = VERSION;
-luxon$1.Zone = Zone;
-var luxon = luxon$1;
-CronDate$3.prototype.addYear = function() {
-  this._date = this._date.plus({ years: 1 });
-};
-CronDate$3.prototype.addMonth = function() {
-  this._date = this._date.plus({ months: 1 }).startOf("month");
-};
-CronDate$3.prototype.addDay = function() {
-  this._date = this._date.plus({ days: 1 }).startOf("day");
-};
-CronDate$3.prototype.addHour = function() {
-  var prev2 = this._date;
-  this._date = this._date.plus({ hours: 1 }).startOf("hour");
-  if (this._date <= prev2) {
-    this._date = this._date.plus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.addMinute = function() {
-  var prev2 = this._date;
-  this._date = this._date.plus({ minutes: 1 }).startOf("minute");
-  if (this._date < prev2) {
-    this._date = this._date.plus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.addSecond = function() {
-  var prev2 = this._date;
-  this._date = this._date.plus({ seconds: 1 }).startOf("second");
-  if (this._date < prev2) {
-    this._date = this._date.plus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.subtractYear = function() {
-  this._date = this._date.minus({ years: 1 });
-};
-CronDate$3.prototype.subtractMonth = function() {
-  this._date = this._date.minus({ months: 1 }).endOf("month").startOf("second");
-};
-CronDate$3.prototype.subtractDay = function() {
-  this._date = this._date.minus({ days: 1 }).endOf("day").startOf("second");
-};
-CronDate$3.prototype.subtractHour = function() {
-  var prev2 = this._date;
-  this._date = this._date.minus({ hours: 1 }).endOf("hour").startOf("second");
-  if (this._date >= prev2) {
-    this._date = this._date.minus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.subtractMinute = function() {
-  var prev2 = this._date;
-  this._date = this._date.minus({ minutes: 1 }).endOf("minute").startOf("second");
-  if (this._date > prev2) {
-    this._date = this._date.minus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.subtractSecond = function() {
-  var prev2 = this._date;
-  this._date = this._date.minus({ seconds: 1 }).startOf("second");
-  if (this._date > prev2) {
-    this._date = this._date.minus({ hours: 1 });
-  }
-};
-CronDate$3.prototype.getDate = function() {
-  return this._date.day;
-};
-CronDate$3.prototype.getFullYear = function() {
-  return this._date.year;
-};
-CronDate$3.prototype.getDay = function() {
-  var weekday = this._date.weekday;
-  return weekday == 7 ? 0 : weekday;
-};
-CronDate$3.prototype.getMonth = function() {
-  return this._date.month - 1;
-};
-CronDate$3.prototype.getHours = function() {
-  return this._date.hour;
-};
-CronDate$3.prototype.getMinutes = function() {
-  return this._date.minute;
-};
-CronDate$3.prototype.getSeconds = function() {
-  return this._date.second;
-};
-CronDate$3.prototype.getMilliseconds = function() {
-  return this._date.millisecond;
-};
-CronDate$3.prototype.getTime = function() {
-  return this._date.valueOf();
-};
-CronDate$3.prototype.getUTCDate = function() {
-  return this._getUTC().day;
-};
-CronDate$3.prototype.getUTCFullYear = function() {
-  return this._getUTC().year;
-};
-CronDate$3.prototype.getUTCDay = function() {
-  var weekday = this._getUTC().weekday;
-  return weekday == 7 ? 0 : weekday;
-};
-CronDate$3.prototype.getUTCMonth = function() {
-  return this._getUTC().month - 1;
-};
-CronDate$3.prototype.getUTCHours = function() {
-  return this._getUTC().hour;
-};
-CronDate$3.prototype.getUTCMinutes = function() {
-  return this._getUTC().minute;
-};
-CronDate$3.prototype.getUTCSeconds = function() {
-  return this._getUTC().second;
-};
-CronDate$3.prototype.toISOString = function() {
-  return this._date.toUTC().toISO();
-};
-CronDate$3.prototype.toJSON = function() {
-  return this._date.toJSON();
-};
-CronDate$3.prototype.setDate = function(d) {
-  this._date = this._date.set({ day: d });
-};
-CronDate$3.prototype.setFullYear = function(y) {
-  this._date = this._date.set({ year: y });
-};
-CronDate$3.prototype.setDay = function(d) {
-  this._date = this._date.set({ weekday: d });
-};
-CronDate$3.prototype.setMonth = function(m) {
-  this._date = this._date.set({ month: m + 1 });
-};
-CronDate$3.prototype.setHours = function(h) {
-  this._date = this._date.set({ hour: h });
-};
-CronDate$3.prototype.setMinutes = function(m) {
-  this._date = this._date.set({ minute: m });
-};
-CronDate$3.prototype.setSeconds = function(s2) {
-  this._date = this._date.set({ second: s2 });
-};
-CronDate$3.prototype.setMilliseconds = function(s2) {
-  this._date = this._date.set({ millisecond: s2 });
-};
-CronDate$3.prototype._getUTC = function() {
-  return this._date.toUTC();
-};
-CronDate$3.prototype.toString = function() {
-  return this.toDate().toString();
-};
-CronDate$3.prototype.toDate = function() {
-  return this._date.toJSDate();
-};
-CronDate$3.prototype.isLastDayOfMonth = function() {
-  var newDate = this._date.plus({ days: 1 }).startOf("day");
-  return this._date.month !== newDate.month;
-};
-CronDate$3.prototype.isLastWeekdayOfMonth = function() {
-  var newDate = this._date.plus({ days: 7 }).startOf("day");
-  return this._date.month !== newDate.month;
-};
-function CronDate$3(timestamp, tz) {
-  var dateOpts = { zone: tz };
-  if (!timestamp) {
-    this._date = luxon.DateTime.local();
-  } else if (timestamp instanceof CronDate$3) {
-    this._date = timestamp._date;
-  } else if (timestamp instanceof Date) {
-    this._date = luxon.DateTime.fromJSDate(timestamp, dateOpts);
-  } else if (typeof timestamp === "number") {
-    this._date = luxon.DateTime.fromMillis(timestamp, dateOpts);
-  } else if (typeof timestamp === "string") {
-    this._date = luxon.DateTime.fromISO(timestamp, dateOpts);
-    this._date.isValid || (this._date = luxon.DateTime.fromRFC2822(timestamp, dateOpts));
-    this._date.isValid || (this._date = luxon.DateTime.fromSQL(timestamp, dateOpts));
-    this._date.isValid || (this._date = luxon.DateTime.fromFormat(timestamp, "EEE, d MMM yyyy HH:mm:ss", dateOpts));
-  }
-  if (!this._date || !this._date.isValid) {
-    throw new Error("CronDate: unhandled timestamp: " + JSON.stringify(timestamp));
-  }
-  if (tz && tz !== this._date.zoneName) {
-    this._date = this._date.setZone(tz);
-  }
-}
-var date = CronDate$3;
-function buildRange(item) {
+AxiosHeaders.accessor(["Content-Type", "Content-Length", "Accept", "Accept-Encoding", "User-Agent", "Authorization"]);
+utils$1.reduceDescriptors(AxiosHeaders.prototype, ({ value }, key) => {
+  let mapped = key[0].toUpperCase() + key.slice(1);
   return {
-    start: item,
-    count: 1
+    get: () => value,
+    set(headerValue) {
+      this[mapped] = headerValue;
+    }
   };
-}
-function completeRangeWithItem(range, item) {
-  range.end = item;
-  range.step = item - range.start;
-  range.count = 2;
-}
-function finalizeCurrentRange(results, currentRange, currentItemRange) {
-  if (currentRange) {
-    if (currentRange.count === 2) {
-      results.push(buildRange(currentRange.start));
-      results.push(buildRange(currentRange.end));
-    } else {
-      results.push(currentRange);
-    }
-  }
-  if (currentItemRange) {
-    results.push(currentItemRange);
-  }
-}
-function compactField$1(arr) {
-  var results = [];
-  var currentRange = void 0;
-  for (var i = 0; i < arr.length; i++) {
-    var currentItem = arr[i];
-    if (typeof currentItem !== "number") {
-      finalizeCurrentRange(results, currentRange, buildRange(currentItem));
-      currentRange = void 0;
-    } else if (!currentRange) {
-      currentRange = buildRange(currentItem);
-    } else if (currentRange.count === 1) {
-      completeRangeWithItem(currentRange, currentItem);
-    } else {
-      if (currentRange.step === currentItem - currentRange.end) {
-        currentRange.count++;
-        currentRange.end = currentItem;
-      } else if (currentRange.count === 2) {
-        results.push(buildRange(currentRange.start));
-        currentRange = buildRange(currentRange.end);
-        completeRangeWithItem(currentRange, currentItem);
-      } else {
-        finalizeCurrentRange(results, currentRange);
-        currentRange = buildRange(currentItem);
-      }
-    }
-  }
-  finalizeCurrentRange(results, currentRange);
-  return results;
-}
-var field_compactor = compactField$1;
-var compactField = field_compactor;
-function stringifyField$1(arr, min, max) {
-  var ranges = compactField(arr);
-  if (ranges.length === 1) {
-    var singleRange = ranges[0];
-    var step = singleRange.step;
-    if (step === 1 && singleRange.start === min && singleRange.end === max) {
-      return "*";
-    }
-    if (step !== 1 && singleRange.start === min && singleRange.end === max - step + 1) {
-      return "*/" + step;
-    }
-  }
-  var result = [];
-  for (var i = 0, l2 = ranges.length; i < l2; ++i) {
-    var range = ranges[i];
-    if (range.count === 1) {
-      result.push(range.start);
-      continue;
-    }
-    var step = range.step;
-    if (range.step === 1) {
-      result.push(range.start + "-" + range.end);
-      continue;
-    }
-    var multiplier = range.start == 0 ? range.count - 1 : range.count;
-    if (range.step * multiplier > range.end) {
-      result = result.concat(
-        Array.from({ length: range.end - range.start + 1 }).map(function(_, index) {
-          var value = range.start + index;
-          if ((value - range.start) % range.step === 0) {
-            return value;
-          }
-          return null;
-        }).filter(function(value) {
-          return value != null;
-        })
-      );
-    } else if (range.end === max - range.step + 1) {
-      result.push(range.start + "/" + range.step);
-    } else {
-      result.push(range.start + "-" + range.end + "/" + range.step);
-    }
-  }
-  return result.join(",");
-}
-var field_stringify = stringifyField$1;
-var CronDate$2 = date;
-var stringifyField = field_stringify;
-var LOOP_LIMIT = 1e4;
-function CronExpression$1(fields, options) {
-  this._options = options;
-  this._utc = options.utc || false;
-  this._tz = this._utc ? "UTC" : options.tz;
-  this._currentDate = new CronDate$2(options.currentDate, this._tz);
-  this._startDate = options.startDate ? new CronDate$2(options.startDate, this._tz) : null;
-  this._endDate = options.endDate ? new CronDate$2(options.endDate, this._tz) : null;
-  this._isIterator = options.iterator || false;
-  this._hasIterated = false;
-  this._nthDayOfWeek = options.nthDayOfWeek || 0;
-  this.fields = CronExpression$1._freezeFields(fields);
-}
-CronExpression$1.map = ["second", "minute", "hour", "dayOfMonth", "month", "dayOfWeek"];
-CronExpression$1.predefined = {
-  "@yearly": "0 0 1 1 *",
-  "@monthly": "0 0 1 * *",
-  "@weekly": "0 0 * * 0",
-  "@daily": "0 0 * * *",
-  "@hourly": "0 * * * *"
-};
-CronExpression$1.constraints = [
-  { min: 0, max: 59, chars: [] },
-  // Second
-  { min: 0, max: 59, chars: [] },
-  // Minute
-  { min: 0, max: 23, chars: [] },
-  // Hour
-  { min: 1, max: 31, chars: ["L"] },
-  // Day of month
-  { min: 1, max: 12, chars: [] },
-  // Month
-  { min: 0, max: 7, chars: ["L"] }
-  // Day of week
-];
-CronExpression$1.daysInMonth = [
-  31,
-  29,
-  31,
-  30,
-  31,
-  30,
-  31,
-  31,
-  30,
-  31,
-  30,
-  31
-];
-CronExpression$1.aliases = {
-  month: {
-    jan: 1,
-    feb: 2,
-    mar: 3,
-    apr: 4,
-    may: 5,
-    jun: 6,
-    jul: 7,
-    aug: 8,
-    sep: 9,
-    oct: 10,
-    nov: 11,
-    dec: 12
-  },
-  dayOfWeek: {
-    sun: 0,
-    mon: 1,
-    tue: 2,
-    wed: 3,
-    thu: 4,
-    fri: 5,
-    sat: 6
-  }
-};
-CronExpression$1.parseDefaults = ["0", "*", "*", "*", "*", "*"];
-CronExpression$1.standardValidCharacters = /^[,*\d/-]+$/;
-CronExpression$1.dayOfWeekValidCharacters = /^[?,*\dL#/-]+$/;
-CronExpression$1.dayOfMonthValidCharacters = /^[?,*\dL/-]+$/;
-CronExpression$1.validCharacters = {
-  second: CronExpression$1.standardValidCharacters,
-  minute: CronExpression$1.standardValidCharacters,
-  hour: CronExpression$1.standardValidCharacters,
-  dayOfMonth: CronExpression$1.dayOfMonthValidCharacters,
-  month: CronExpression$1.standardValidCharacters,
-  dayOfWeek: CronExpression$1.dayOfWeekValidCharacters
-};
-CronExpression$1._isValidConstraintChar = function _isValidConstraintChar(constraints, value) {
-  if (typeof value !== "string") {
-    return false;
-  }
-  return constraints.chars.some(function(char) {
-    return value.indexOf(char) > -1;
+});
+utils$1.freezeMethods(AxiosHeaders);
+function transformData(fns, response) {
+  const config = this || defaults;
+  const context = response || config;
+  const headers = AxiosHeaders.from(context.headers);
+  let data = context.data;
+  utils$1.forEach(fns, function transform(fn) {
+    data = fn.call(config, data, headers.normalize(), response ? response.status : void 0);
   });
-};
-CronExpression$1._parseField = function _parseField(field, value, constraints) {
-  switch (field) {
-    case "month":
-    case "dayOfWeek":
-      var aliases = CronExpression$1.aliases[field];
-      value = value.replace(/[a-z]{3}/gi, function(match2) {
-        match2 = match2.toLowerCase();
-        if (typeof aliases[match2] !== "undefined") {
-          return aliases[match2];
-        } else {
-          throw new Error('Validation error, cannot resolve alias "' + match2 + '"');
-        }
-      });
-      break;
-  }
-  if (!CronExpression$1.validCharacters[field].test(value)) {
-    throw new Error("Invalid characters, got value: " + value);
-  }
-  if (value.indexOf("*") !== -1) {
-    value = value.replace(/\*/g, constraints.min + "-" + constraints.max);
-  } else if (value.indexOf("?") !== -1) {
-    value = value.replace(/\?/g, constraints.min + "-" + constraints.max);
-  }
-  function parseSequence(val) {
-    var stack = [];
-    function handleResult(result) {
-      if (result instanceof Array) {
-        for (var i2 = 0, c2 = result.length; i2 < c2; i2++) {
-          var value2 = result[i2];
-          if (CronExpression$1._isValidConstraintChar(constraints, value2)) {
-            stack.push(value2);
-            continue;
-          }
-          if (typeof value2 !== "number" || Number.isNaN(value2) || value2 < constraints.min || value2 > constraints.max) {
-            throw new Error(
-              "Constraint error, got value " + value2 + " expected range " + constraints.min + "-" + constraints.max
-            );
-          }
-          stack.push(value2);
-        }
-      } else {
-        if (CronExpression$1._isValidConstraintChar(constraints, result)) {
-          stack.push(result);
-          return;
-        }
-        var numResult = +result;
-        if (Number.isNaN(numResult) || numResult < constraints.min || numResult > constraints.max) {
-          throw new Error(
-            "Constraint error, got value " + result + " expected range " + constraints.min + "-" + constraints.max
-          );
-        }
-        if (field === "dayOfWeek") {
-          numResult = numResult % 7;
-        }
-        stack.push(numResult);
-      }
-    }
-    var atoms = val.split(",");
-    if (!atoms.every(function(atom) {
-      return atom.length > 0;
-    })) {
-      throw new Error("Invalid list value format");
-    }
-    if (atoms.length > 1) {
-      for (var i = 0, c = atoms.length; i < c; i++) {
-        handleResult(parseRepeat(atoms[i]));
-      }
-    } else {
-      handleResult(parseRepeat(val));
-    }
-    stack.sort(CronExpression$1._sortCompareFn);
-    return stack;
-  }
-  function parseRepeat(val) {
-    var repeatInterval = 1;
-    var atoms = val.split("/");
-    if (atoms.length > 2) {
-      throw new Error("Invalid repeat: " + val);
-    }
-    if (atoms.length > 1) {
-      if (atoms[0] == +atoms[0]) {
-        atoms = [atoms[0] + "-" + constraints.max, atoms[1]];
-      }
-      return parseRange(atoms[0], atoms[atoms.length - 1]);
-    }
-    return parseRange(val, repeatInterval);
-  }
-  function parseRange(val, repeatInterval) {
-    var stack = [];
-    var atoms = val.split("-");
-    if (atoms.length > 1) {
-      if (atoms.length < 2) {
-        return +val;
-      }
-      if (!atoms[0].length) {
-        if (!atoms[1].length) {
-          throw new Error("Invalid range: " + val);
-        }
-        return +val;
-      }
-      var min = +atoms[0];
-      var max = +atoms[1];
-      if (Number.isNaN(min) || Number.isNaN(max) || min < constraints.min || max > constraints.max) {
-        throw new Error(
-          "Constraint error, got range " + min + "-" + max + " expected range " + constraints.min + "-" + constraints.max
-        );
-      } else if (min > max) {
-        throw new Error("Invalid range: " + val);
-      }
-      var repeatIndex = +repeatInterval;
-      if (Number.isNaN(repeatIndex) || repeatIndex <= 0) {
-        throw new Error("Constraint error, cannot repeat at every " + repeatIndex + " time.");
-      }
-      if (field === "dayOfWeek" && max % 7 === 0) {
-        stack.push(0);
-      }
-      for (var index = min, count = max; index <= count; index++) {
-        var exists = stack.indexOf(index) !== -1;
-        if (!exists && repeatIndex > 0 && repeatIndex % repeatInterval === 0) {
-          repeatIndex = 1;
-          stack.push(index);
-        } else {
-          repeatIndex++;
-        }
-      }
-      return stack;
-    }
-    return Number.isNaN(+val) ? val : +val;
-  }
-  return parseSequence(value);
-};
-CronExpression$1._sortCompareFn = function(a, b) {
-  var aIsNumber = typeof a === "number";
-  var bIsNumber = typeof b === "number";
-  if (aIsNumber && bIsNumber) {
-    return a - b;
-  }
-  if (!aIsNumber && bIsNumber) {
-    return 1;
-  }
-  if (aIsNumber && !bIsNumber) {
-    return -1;
-  }
-  return a.localeCompare(b);
-};
-CronExpression$1._handleMaxDaysInMonth = function(mappedFields) {
-  if (mappedFields.month.length === 1) {
-    var daysInMonth2 = CronExpression$1.daysInMonth[mappedFields.month[0] - 1];
-    if (mappedFields.dayOfMonth[0] > daysInMonth2) {
-      throw new Error("Invalid explicit day of month definition");
-    }
-    return mappedFields.dayOfMonth.filter(function(dayOfMonth) {
-      return dayOfMonth === "L" ? true : dayOfMonth <= daysInMonth2;
-    }).sort(CronExpression$1._sortCompareFn);
-  }
-};
-CronExpression$1._freezeFields = function(fields) {
-  for (var i = 0, c = CronExpression$1.map.length; i < c; ++i) {
-    var field = CronExpression$1.map[i];
-    var value = fields[field];
-    fields[field] = Object.freeze(value);
-  }
-  return Object.freeze(fields);
-};
-CronExpression$1.prototype._applyTimezoneShift = function(currentDate, dateMathVerb, method) {
-  if (method === "Month" || method === "Day") {
-    var prevTime = currentDate.getTime();
-    currentDate[dateMathVerb + method]();
-    var currTime = currentDate.getTime();
-    if (prevTime === currTime) {
-      if (currentDate.getMinutes() === 0 && currentDate.getSeconds() === 0) {
-        currentDate.addHour();
-      } else if (currentDate.getMinutes() === 59 && currentDate.getSeconds() === 59) {
-        currentDate.subtractHour();
-      }
-    }
-  } else {
-    var previousHour = currentDate.getHours();
-    currentDate[dateMathVerb + method]();
-    var currentHour = currentDate.getHours();
-    var diff2 = currentHour - previousHour;
-    if (diff2 === 2) {
-      if (this.fields.hour.length !== 24) {
-        this._dstStart = currentHour;
-      }
-    } else if (diff2 === 0 && currentDate.getMinutes() === 0 && currentDate.getSeconds() === 0) {
-      if (this.fields.hour.length !== 24) {
-        this._dstEnd = currentHour;
-      }
-    }
-  }
-};
-CronExpression$1.prototype._findSchedule = function _findSchedule(reverse) {
-  function matchSchedule(value, sequence) {
-    for (var i = 0, c = sequence.length; i < c; i++) {
-      if (sequence[i] >= value) {
-        return sequence[i] === value;
-      }
-    }
-    return sequence[0] === value;
-  }
-  function isNthDayMatch(date2, nthDayOfWeek) {
-    if (nthDayOfWeek < 6) {
-      if (date2.getDate() < 8 && nthDayOfWeek === 1) {
-        return true;
-      }
-      var offset2 = date2.getDate() % 7 ? 1 : 0;
-      var adjustedDate = date2.getDate() - date2.getDate() % 7;
-      var occurrence = Math.floor(adjustedDate / 7) + offset2;
-      return occurrence === nthDayOfWeek;
-    }
-    return false;
-  }
-  function isLInExpressions(expressions) {
-    return expressions.length > 0 && expressions.some(function(expression2) {
-      return typeof expression2 === "string" && expression2.indexOf("L") >= 0;
-    });
-  }
-  reverse = reverse || false;
-  var dateMathVerb = reverse ? "subtract" : "add";
-  var currentDate = new CronDate$2(this._currentDate, this._tz);
-  var startDate = this._startDate;
-  var endDate = this._endDate;
-  var startTimestamp = currentDate.getTime();
-  var stepCount = 0;
-  function isLastWeekdayOfMonthMatch(expressions) {
-    return expressions.some(function(expression2) {
-      if (!isLInExpressions([expression2])) {
-        return false;
-      }
-      var weekday = Number.parseInt(expression2[0]) % 7;
-      if (Number.isNaN(weekday)) {
-        throw new Error("Invalid last weekday of the month expression: " + expression2);
-      }
-      return currentDate.getDay() === weekday && currentDate.isLastWeekdayOfMonth();
-    });
-  }
-  while (stepCount < LOOP_LIMIT) {
-    stepCount++;
-    if (reverse) {
-      if (startDate && currentDate.getTime() - startDate.getTime() < 0) {
-        throw new Error("Out of the timespan range");
-      }
-    } else {
-      if (endDate && endDate.getTime() - currentDate.getTime() < 0) {
-        throw new Error("Out of the timespan range");
-      }
-    }
-    var dayOfMonthMatch = matchSchedule(currentDate.getDate(), this.fields.dayOfMonth);
-    if (isLInExpressions(this.fields.dayOfMonth)) {
-      dayOfMonthMatch = dayOfMonthMatch || currentDate.isLastDayOfMonth();
-    }
-    var dayOfWeekMatch = matchSchedule(currentDate.getDay(), this.fields.dayOfWeek);
-    if (isLInExpressions(this.fields.dayOfWeek)) {
-      dayOfWeekMatch = dayOfWeekMatch || isLastWeekdayOfMonthMatch(this.fields.dayOfWeek);
-    }
-    var isDayOfMonthWildcardMatch = this.fields.dayOfMonth.length >= CronExpression$1.daysInMonth[currentDate.getMonth()];
-    var isDayOfWeekWildcardMatch = this.fields.dayOfWeek.length === CronExpression$1.constraints[5].max - CronExpression$1.constraints[5].min + 1;
-    var currentHour = currentDate.getHours();
-    if (!dayOfMonthMatch && (!dayOfWeekMatch || isDayOfWeekWildcardMatch)) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Day");
-      continue;
-    }
-    if (!isDayOfMonthWildcardMatch && isDayOfWeekWildcardMatch && !dayOfMonthMatch) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Day");
-      continue;
-    }
-    if (isDayOfMonthWildcardMatch && !isDayOfWeekWildcardMatch && !dayOfWeekMatch) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Day");
-      continue;
-    }
-    if (this._nthDayOfWeek > 0 && !isNthDayMatch(currentDate, this._nthDayOfWeek)) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Day");
-      continue;
-    }
-    if (!matchSchedule(currentDate.getMonth() + 1, this.fields.month)) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Month");
-      continue;
-    }
-    if (!matchSchedule(currentHour, this.fields.hour)) {
-      if (this._dstStart !== currentHour) {
-        this._dstStart = null;
-        this._applyTimezoneShift(currentDate, dateMathVerb, "Hour");
-        continue;
-      } else if (!matchSchedule(currentHour - 1, this.fields.hour)) {
-        currentDate[dateMathVerb + "Hour"]();
-        continue;
-      }
-    } else if (this._dstEnd === currentHour) {
-      if (!reverse) {
-        this._dstEnd = null;
-        this._applyTimezoneShift(currentDate, "add", "Hour");
-        continue;
-      }
-    }
-    if (!matchSchedule(currentDate.getMinutes(), this.fields.minute)) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Minute");
-      continue;
-    }
-    if (!matchSchedule(currentDate.getSeconds(), this.fields.second)) {
-      this._applyTimezoneShift(currentDate, dateMathVerb, "Second");
-      continue;
-    }
-    if (startTimestamp === currentDate.getTime()) {
-      if (dateMathVerb === "add" || currentDate.getMilliseconds() === 0) {
-        this._applyTimezoneShift(currentDate, dateMathVerb, "Second");
-      } else {
-        currentDate.setMilliseconds(0);
-      }
-      continue;
-    }
-    break;
-  }
-  if (stepCount >= LOOP_LIMIT) {
-    throw new Error("Invalid expression, loop limit exceeded");
-  }
-  this._currentDate = new CronDate$2(currentDate, this._tz);
-  this._hasIterated = true;
-  return currentDate;
-};
-CronExpression$1.prototype.next = function next() {
-  var schedule2 = this._findSchedule();
-  if (this._isIterator) {
-    return {
-      value: schedule2,
-      done: !this.hasNext()
-    };
-  }
-  return schedule2;
-};
-CronExpression$1.prototype.prev = function prev() {
-  var schedule2 = this._findSchedule(true);
-  if (this._isIterator) {
-    return {
-      value: schedule2,
-      done: !this.hasPrev()
-    };
-  }
-  return schedule2;
-};
-CronExpression$1.prototype.hasNext = function() {
-  var current = this._currentDate;
-  var hasIterated = this._hasIterated;
-  try {
-    this._findSchedule();
-    return true;
-  } catch (err) {
-    return false;
-  } finally {
-    this._currentDate = current;
-    this._hasIterated = hasIterated;
-  }
-};
-CronExpression$1.prototype.hasPrev = function() {
-  var current = this._currentDate;
-  var hasIterated = this._hasIterated;
-  try {
-    this._findSchedule(true);
-    return true;
-  } catch (err) {
-    return false;
-  } finally {
-    this._currentDate = current;
-    this._hasIterated = hasIterated;
-  }
-};
-CronExpression$1.prototype.iterate = function iterate(steps, callback) {
-  var dates = [];
-  if (steps >= 0) {
-    for (var i = 0, c = steps; i < c; i++) {
-      try {
-        var item = this.next();
-        dates.push(item);
-        if (callback) {
-          callback(item, i);
-        }
-      } catch (err) {
-        break;
-      }
-    }
-  } else {
-    for (var i = 0, c = steps; i > c; i--) {
-      try {
-        var item = this.prev();
-        dates.push(item);
-        if (callback) {
-          callback(item, i);
-        }
-      } catch (err) {
-        break;
-      }
-    }
-  }
-  return dates;
-};
-CronExpression$1.prototype.reset = function reset(newDate) {
-  this._currentDate = new CronDate$2(newDate || this._options.currentDate);
-};
-CronExpression$1.prototype.stringify = function stringify(includeSeconds) {
-  var resultArr = [];
-  for (var i = includeSeconds ? 0 : 1, c = CronExpression$1.map.length; i < c; ++i) {
-    var field = CronExpression$1.map[i];
-    var value = this.fields[field];
-    var constraint = CronExpression$1.constraints[i];
-    if (field === "dayOfMonth" && this.fields.month.length === 1) {
-      constraint = { min: 1, max: CronExpression$1.daysInMonth[this.fields.month[0] - 1] };
-    } else if (field === "dayOfWeek") {
-      constraint = { min: 0, max: 6 };
-      value = value[value.length - 1] === 7 ? value.slice(0, -1) : value;
-    }
-    resultArr.push(stringifyField(value, constraint.min, constraint.max));
-  }
-  return resultArr.join(" ");
-};
-CronExpression$1.parse = function parse2(expression2, options) {
-  var self = this;
-  if (typeof options === "function") {
-    options = {};
-  }
-  function parse3(expression3, options2) {
-    if (!options2) {
-      options2 = {};
-    }
-    if (typeof options2.currentDate === "undefined") {
-      options2.currentDate = new CronDate$2(void 0, self._tz);
-    }
-    if (CronExpression$1.predefined[expression3]) {
-      expression3 = CronExpression$1.predefined[expression3];
-    }
-    var fields = [];
-    var atoms = (expression3 + "").trim().split(/\s+/);
-    if (atoms.length > 6) {
-      throw new Error("Invalid cron expression");
-    }
-    var start = CronExpression$1.map.length - atoms.length;
-    for (var i = 0, c = CronExpression$1.map.length; i < c; ++i) {
-      var field = CronExpression$1.map[i];
-      var value = atoms[atoms.length > c ? i : i - start];
-      if (i < start || !value) {
-        fields.push(
-          CronExpression$1._parseField(
-            field,
-            CronExpression$1.parseDefaults[i],
-            CronExpression$1.constraints[i]
-          )
-        );
-      } else {
-        var val = field === "dayOfWeek" ? parseNthDay(value) : value;
-        fields.push(
-          CronExpression$1._parseField(
-            field,
-            val,
-            CronExpression$1.constraints[i]
-          )
-        );
-      }
-    }
-    var mappedFields = {};
-    for (var i = 0, c = CronExpression$1.map.length; i < c; i++) {
-      var key = CronExpression$1.map[i];
-      mappedFields[key] = fields[i];
-    }
-    var dayOfMonth = CronExpression$1._handleMaxDaysInMonth(mappedFields);
-    mappedFields.dayOfMonth = dayOfMonth || mappedFields.dayOfMonth;
-    return new CronExpression$1(mappedFields, options2);
-    function parseNthDay(val2) {
-      var atoms2 = val2.split("#");
-      if (atoms2.length > 1) {
-        var nthValue = +atoms2[atoms2.length - 1];
-        if (/,/.test(val2)) {
-          throw new Error("Constraint error, invalid dayOfWeek `#` and `,` special characters are incompatible");
-        }
-        if (/\//.test(val2)) {
-          throw new Error("Constraint error, invalid dayOfWeek `#` and `/` special characters are incompatible");
-        }
-        if (/-/.test(val2)) {
-          throw new Error("Constraint error, invalid dayOfWeek `#` and `-` special characters are incompatible");
-        }
-        if (atoms2.length > 2 || Number.isNaN(nthValue) || (nthValue < 1 || nthValue > 5)) {
-          throw new Error("Constraint error, invalid dayOfWeek occurrence number (#)");
-        }
-        options2.nthDayOfWeek = nthValue;
-        return atoms2[0];
-      }
-      return val2;
-    }
-  }
-  return parse3(expression2, options);
-};
-CronExpression$1.fieldsToExpression = function fieldsToExpression(fields, options) {
-  function validateConstraints(field2, values2, constraints) {
-    if (!values2) {
-      throw new Error("Validation error, Field " + field2 + " is missing");
-    }
-    if (values2.length === 0) {
-      throw new Error("Validation error, Field " + field2 + " contains no values");
-    }
-    for (var i2 = 0, c2 = values2.length; i2 < c2; i2++) {
-      var value = values2[i2];
-      if (CronExpression$1._isValidConstraintChar(constraints, value)) {
-        continue;
-      }
-      if (typeof value !== "number" || Number.isNaN(value) || value < constraints.min || value > constraints.max) {
-        throw new Error(
-          "Constraint error, got value " + value + " expected range " + constraints.min + "-" + constraints.max
-        );
-      }
-    }
-  }
-  var mappedFields = {};
-  for (var i = 0, c = CronExpression$1.map.length; i < c; ++i) {
-    var field = CronExpression$1.map[i];
-    var values = fields[field];
-    validateConstraints(
-      field,
-      values,
-      CronExpression$1.constraints[i]
-    );
-    var copy = [];
-    var j = -1;
-    while (++j < values.length) {
-      copy[j] = values[j];
-    }
-    values = copy.sort(CronExpression$1._sortCompareFn).filter(function(item, pos, ary) {
-      return !pos || item !== ary[pos - 1];
-    });
-    if (values.length !== copy.length) {
-      throw new Error("Validation error, Field " + field + " contains duplicate values");
-    }
-    mappedFields[field] = values;
-  }
-  var dayOfMonth = CronExpression$1._handleMaxDaysInMonth(mappedFields);
-  mappedFields.dayOfMonth = dayOfMonth || mappedFields.dayOfMonth;
-  return new CronExpression$1(mappedFields, options || {});
-};
-var expression = CronExpression$1;
-var CronExpression = expression;
-function CronParser() {
+  headers.normalize();
+  return data;
 }
-CronParser._parseEntry = function _parseEntry(entry) {
-  var atoms = entry.split(" ");
-  if (atoms.length === 6) {
-    return {
-      interval: CronExpression.parse(entry)
-    };
-  } else if (atoms.length > 6) {
-    return {
-      interval: CronExpression.parse(
-        atoms.slice(0, 6).join(" ")
-      ),
-      command: atoms.slice(6, atoms.length)
-    };
+function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+}
+function CanceledError(message, config, request) {
+  AxiosError.call(this, message == null ? "canceled" : message, AxiosError.ERR_CANCELED, config, request);
+  this.name = "CanceledError";
+}
+utils$1.inherits(CanceledError, AxiosError, {
+  __CANCEL__: true
+});
+function settle(resolve, reject, response) {
+  const validateStatus2 = response.config.validateStatus;
+  if (!response.status || !validateStatus2 || validateStatus2(response.status)) {
+    resolve(response);
   } else {
-    throw new Error("Invalid entry: " + entry);
+    reject(new AxiosError(
+      "Request failed with status code " + response.status,
+      [AxiosError.ERR_BAD_REQUEST, AxiosError.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4],
+      response.config,
+      response.request,
+      response
+    ));
   }
+}
+function isAbsoluteURL(url2) {
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url2);
+}
+function combineURLs(baseURL, relativeURL) {
+  return relativeURL ? baseURL.replace(/\/?\/$/, "") + "/" + relativeURL.replace(/^\/+/, "") : baseURL;
+}
+function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+}
+var proxyFromEnv = {};
+var parseUrl$1 = require$$0$1.parse;
+var DEFAULT_PORTS = {
+  ftp: 21,
+  gopher: 70,
+  http: 80,
+  https: 443,
+  ws: 80,
+  wss: 443
 };
-CronParser.parseExpression = function parseExpression(expression2, options) {
-  return CronExpression.parse(expression2, options);
+var stringEndsWith = String.prototype.endsWith || function(s) {
+  return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
 };
-CronParser.fieldsToExpression = function fieldsToExpression2(fields, options) {
-  return CronExpression.fieldsToExpression(fields, options);
-};
-CronParser.parseString = function parseString(data) {
-  var blocks = data.split("\n");
-  var response = {
-    variables: {},
-    expressions: [],
-    errors: {}
-  };
-  for (var i = 0, c = blocks.length; i < c; i++) {
-    var block = blocks[i];
-    var matches = null;
-    var entry = block.trim();
-    if (entry.length > 0) {
-      if (entry.match(/^#/)) {
-        continue;
-      } else if (matches = entry.match(/^(.*)=(.*)$/)) {
-        response.variables[matches[1]] = matches[2];
-      } else {
-        var result = null;
-        try {
-          result = CronParser._parseEntry("0 " + entry);
-          response.expressions.push(result.interval);
-        } catch (err) {
-          response.errors[entry] = err;
-        }
-      }
+function getProxyForUrl(url2) {
+  var parsedUrl = typeof url2 === "string" ? parseUrl$1(url2) : url2 || {};
+  var proto = parsedUrl.protocol;
+  var hostname = parsedUrl.host;
+  var port = parsedUrl.port;
+  if (typeof hostname !== "string" || !hostname || typeof proto !== "string") {
+    return "";
+  }
+  proto = proto.split(":", 1)[0];
+  hostname = hostname.replace(/:\d*$/, "");
+  port = parseInt(port) || DEFAULT_PORTS[proto] || 0;
+  if (!shouldProxy(hostname, port)) {
+    return "";
+  }
+  var proxy = getEnv("npm_config_" + proto + "_proxy") || getEnv(proto + "_proxy") || getEnv("npm_config_proxy") || getEnv("all_proxy");
+  if (proxy && proxy.indexOf("://") === -1) {
+    proxy = proto + "://" + proxy;
+  }
+  return proxy;
+}
+function shouldProxy(hostname, port) {
+  var NO_PROXY = (getEnv("npm_config_no_proxy") || getEnv("no_proxy")).toLowerCase();
+  if (!NO_PROXY) {
+    return true;
+  }
+  if (NO_PROXY === "*") {
+    return false;
+  }
+  return NO_PROXY.split(/[,\s]/).every(function(proxy) {
+    if (!proxy) {
+      return true;
     }
-  }
-  return response;
-};
-CronParser.parseFile = function parseFile(filePath, callback) {
-  require$$1.readFile(filePath, function(err, data) {
-    if (err) {
-      callback(err);
+    var parsedProxy = proxy.match(/^(.+):(\d+)$/);
+    var parsedProxyHostname = parsedProxy ? parsedProxy[1] : proxy;
+    var parsedProxyPort = parsedProxy ? parseInt(parsedProxy[2]) : 0;
+    if (parsedProxyPort && parsedProxyPort !== port) {
+      return true;
+    }
+    if (!/^[.*]/.test(parsedProxyHostname)) {
+      return hostname !== parsedProxyHostname;
+    }
+    if (parsedProxyHostname.charAt(0) === "*") {
+      parsedProxyHostname = parsedProxyHostname.slice(1);
+    }
+    return !stringEndsWith.call(hostname, parsedProxyHostname);
+  });
+}
+function getEnv(key) {
+  return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
+}
+proxyFromEnv.getProxyForUrl = getProxyForUrl;
+var followRedirects$1 = { exports: {} };
+var src = { exports: {} };
+var browser = { exports: {} };
+var ms;
+var hasRequiredMs;
+function requireMs() {
+  if (hasRequiredMs) return ms;
+  hasRequiredMs = 1;
+  var s = 1e3;
+  var m = s * 60;
+  var h = m * 60;
+  var d = h * 24;
+  var w = d * 7;
+  var y = d * 365.25;
+  ms = function(val, options) {
+    options = options || {};
+    var type = typeof val;
+    if (type === "string" && val.length > 0) {
+      return parse(val);
+    } else if (type === "number" && isFinite(val)) {
+      return options.long ? fmtLong(val) : fmtShort(val);
+    }
+    throw new Error(
+      "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
+    );
+  };
+  function parse(str) {
+    str = String(str);
+    if (str.length > 100) {
       return;
     }
-    return callback(null, CronParser.parseString(data.toString()));
-  });
-};
-var parser = CronParser;
-var sortedArrayFunctions = {};
-sortedArrayFunctions.add = add;
-sortedArrayFunctions.addFromFront = addFromFront;
-sortedArrayFunctions.remove = remove;
-sortedArrayFunctions.has = has;
-sortedArrayFunctions.eq = eq;
-sortedArrayFunctions.lte = lte;
-sortedArrayFunctions.lt = lt$1;
-sortedArrayFunctions.gte = gte;
-sortedArrayFunctions.gt = gt;
-sortedArrayFunctions.nearest = nearest;
-function defaultCmp(a, b) {
-  if (a === b) return 0;
-  return a < b ? -1 : 1;
-}
-function add(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var top = list.push(value) - 1;
-  while (top) {
-    if (cmp(list[top - 1], value) < 0) return;
-    list[top] = list[top - 1];
-    list[top - 1] = value;
-    top--;
+    var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+      str
+    );
+    if (!match) {
+      return;
+    }
+    var n = parseFloat(match[1]);
+    var type = (match[2] || "ms").toLowerCase();
+    switch (type) {
+      case "years":
+      case "year":
+      case "yrs":
+      case "yr":
+      case "y":
+        return n * y;
+      case "weeks":
+      case "week":
+      case "w":
+        return n * w;
+      case "days":
+      case "day":
+      case "d":
+        return n * d;
+      case "hours":
+      case "hour":
+      case "hrs":
+      case "hr":
+      case "h":
+        return n * h;
+      case "minutes":
+      case "minute":
+      case "mins":
+      case "min":
+      case "m":
+        return n * m;
+      case "seconds":
+      case "second":
+      case "secs":
+      case "sec":
+      case "s":
+        return n * s;
+      case "milliseconds":
+      case "millisecond":
+      case "msecs":
+      case "msec":
+      case "ms":
+        return n;
+      default:
+        return void 0;
+    }
   }
-}
-function addFromFront(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var top = list.unshift(value) - 1;
-  for (var i = 0; i < top; i++) {
-    if (cmp(value, list[i + 1]) < 0) return;
-    list[i] = list[i + 1];
-    list[i + 1] = value;
+  function fmtShort(ms2) {
+    var msAbs = Math.abs(ms2);
+    if (msAbs >= d) {
+      return Math.round(ms2 / d) + "d";
+    }
+    if (msAbs >= h) {
+      return Math.round(ms2 / h) + "h";
+    }
+    if (msAbs >= m) {
+      return Math.round(ms2 / m) + "m";
+    }
+    if (msAbs >= s) {
+      return Math.round(ms2 / s) + "s";
+    }
+    return ms2 + "ms";
   }
-}
-function lte(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var i = indexOf(list, value, cmp);
-  if (i === -1) return -1;
-  for (; i >= 0; i--) {
-    var c = cmp(list[i], value);
-    if (c <= 0) return i;
+  function fmtLong(ms2) {
+    var msAbs = Math.abs(ms2);
+    if (msAbs >= d) {
+      return plural(ms2, msAbs, d, "day");
+    }
+    if (msAbs >= h) {
+      return plural(ms2, msAbs, h, "hour");
+    }
+    if (msAbs >= m) {
+      return plural(ms2, msAbs, m, "minute");
+    }
+    if (msAbs >= s) {
+      return plural(ms2, msAbs, s, "second");
+    }
+    return ms2 + " ms";
   }
-  return -1;
-}
-function lt$1(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var i = indexOf(list, value, cmp);
-  if (i === -1) return -1;
-  for (; i >= 0; i--) {
-    var c = cmp(list[i], value);
-    if (c < 0) return i;
+  function plural(ms2, msAbs, n, name) {
+    var isPlural = msAbs >= n * 1.5;
+    return Math.round(ms2 / n) + " " + name + (isPlural ? "s" : "");
   }
-  return -1;
+  return ms;
 }
-function gte(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var i = indexOf(list, value, cmp);
-  if (i === -1) return -1;
-  for (; i < list.length; i++) {
-    var c = cmp(list[i], value);
-    if (c >= 0) return i;
-  }
-  return -1;
-}
-function gt(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var i = indexOf(list, value, cmp);
-  if (i === -1) return -1;
-  for (; i < list.length; i++) {
-    var c = cmp(list[i], value);
-    if (c > 0) return i;
-  }
-  return -1;
-}
-function eq(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var i = indexOf(list, value, cmp);
-  if (i === -1) return -1;
-  return cmp(list[i], value) === 0 ? i : -1;
-}
-function nearest(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var len = list.length;
-  var top = len - 1;
-  var btm = 0;
-  var mid = -1;
-  var trending = 1;
-  while (top >= btm && btm >= 0 && top < len) {
-    mid = Math.floor((top + btm) / 2);
-    var c = cmp(list[mid], value);
-    if (c === 0) return mid;
-    if (c >= 0) {
-      if (trending === 1) trending = 0;
-      else if (trending === 2) {
-        if (Math.abs(list[mid] - value) > Math.abs(list[mid - 1] - value)) return mid - 1;
-        return mid;
+var common;
+var hasRequiredCommon;
+function requireCommon() {
+  if (hasRequiredCommon) return common;
+  hasRequiredCommon = 1;
+  function setup(env) {
+    createDebug.debug = createDebug;
+    createDebug.default = createDebug;
+    createDebug.coerce = coerce;
+    createDebug.disable = disable;
+    createDebug.enable = enable;
+    createDebug.enabled = enabled;
+    createDebug.humanize = requireMs();
+    createDebug.destroy = destroy2;
+    Object.keys(env).forEach((key) => {
+      createDebug[key] = env[key];
+    });
+    createDebug.names = [];
+    createDebug.skips = [];
+    createDebug.formatters = {};
+    function selectColor(namespace) {
+      let hash = 0;
+      for (let i = 0; i < namespace.length; i++) {
+        hash = (hash << 5) - hash + namespace.charCodeAt(i);
+        hash |= 0;
       }
-      top = mid - 1;
-    } else {
-      if (trending === 1) trending = 2;
-      else if (trending === 0) return mid;
-      btm = mid + 1;
+      return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
     }
-  }
-  return mid;
-}
-function indexOf(list, value, cmp) {
-  if (!cmp) cmp = defaultCmp;
-  var len = list.length;
-  var top = len - 1;
-  var btm = 0;
-  var mid = -1;
-  while (top >= btm && btm >= 0 && top < len) {
-    mid = Math.floor((top + btm) / 2);
-    var c = cmp(list[mid], value);
-    if (c === 0) return mid;
-    if (c >= 0) {
-      top = mid - 1;
-    } else {
-      btm = mid + 1;
+    createDebug.selectColor = selectColor;
+    function createDebug(namespace) {
+      let prevTime;
+      let enableOverride = null;
+      let namespacesCache;
+      let enabledCache;
+      function debug2(...args) {
+        if (!debug2.enabled) {
+          return;
+        }
+        const self2 = debug2;
+        const curr = Number(/* @__PURE__ */ new Date());
+        const ms2 = curr - (prevTime || curr);
+        self2.diff = ms2;
+        self2.prev = prevTime;
+        self2.curr = curr;
+        prevTime = curr;
+        args[0] = createDebug.coerce(args[0]);
+        if (typeof args[0] !== "string") {
+          args.unshift("%O");
+        }
+        let index = 0;
+        args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+          if (match === "%%") {
+            return "%";
+          }
+          index++;
+          const formatter = createDebug.formatters[format];
+          if (typeof formatter === "function") {
+            const val = args[index];
+            match = formatter.call(self2, val);
+            args.splice(index, 1);
+            index--;
+          }
+          return match;
+        });
+        createDebug.formatArgs.call(self2, args);
+        const logFn = self2.log || createDebug.log;
+        logFn.apply(self2, args);
+      }
+      debug2.namespace = namespace;
+      debug2.useColors = createDebug.useColors();
+      debug2.color = createDebug.selectColor(namespace);
+      debug2.extend = extend2;
+      debug2.destroy = createDebug.destroy;
+      Object.defineProperty(debug2, "enabled", {
+        enumerable: true,
+        configurable: false,
+        get: () => {
+          if (enableOverride !== null) {
+            return enableOverride;
+          }
+          if (namespacesCache !== createDebug.namespaces) {
+            namespacesCache = createDebug.namespaces;
+            enabledCache = createDebug.enabled(namespace);
+          }
+          return enabledCache;
+        },
+        set: (v) => {
+          enableOverride = v;
+        }
+      });
+      if (typeof createDebug.init === "function") {
+        createDebug.init(debug2);
+      }
+      return debug2;
     }
-  }
-  return mid;
-}
-function has(list, value, cmp) {
-  return eq(list, value, cmp) > -1;
-}
-function remove(list, value, cmp) {
-  var i = eq(list, value, cmp);
-  if (i === -1) return false;
-  list.splice(i, 1);
-  return true;
-}
-var longTimeout = {};
-(function(exports) {
-  var TIMEOUT_MAX = 2147483647;
-  exports.setTimeout = function(listener, after) {
-    return new Timeout(listener, after);
-  };
-  exports.setInterval = function(listener, after) {
-    return new Interval2(listener, after);
-  };
-  exports.clearTimeout = function(timer) {
-    if (timer) timer.close();
-  };
-  exports.clearInterval = exports.clearTimeout;
-  exports.Timeout = Timeout;
-  exports.Interval = Interval2;
-  function Timeout(listener, after) {
-    this.listener = listener;
-    this.after = after;
-    this.unreffed = false;
-    this.start();
-  }
-  Timeout.prototype.unref = function() {
-    if (!this.unreffed) {
-      this.unreffed = true;
-      this.timeout.unref();
+    function extend2(namespace, delimiter) {
+      const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
+      newDebug.log = this.log;
+      return newDebug;
     }
-  };
-  Timeout.prototype.ref = function() {
-    if (this.unreffed) {
-      this.unreffed = false;
-      this.timeout.ref();
+    function enable(namespaces) {
+      createDebug.save(namespaces);
+      createDebug.namespaces = namespaces;
+      createDebug.names = [];
+      createDebug.skips = [];
+      let i;
+      const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
+      const len = split.length;
+      for (i = 0; i < len; i++) {
+        if (!split[i]) {
+          continue;
+        }
+        namespaces = split[i].replace(/\*/g, ".*?");
+        if (namespaces[0] === "-") {
+          createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+        } else {
+          createDebug.names.push(new RegExp("^" + namespaces + "$"));
+        }
+      }
     }
-  };
-  Timeout.prototype.start = function() {
-    if (this.after <= TIMEOUT_MAX) {
-      this.timeout = setTimeout(this.listener, this.after);
-    } else {
-      var self = this;
-      this.timeout = setTimeout(function() {
-        self.after -= TIMEOUT_MAX;
-        self.start();
-      }, TIMEOUT_MAX);
+    function disable() {
+      const namespaces = [
+        ...createDebug.names.map(toNamespace),
+        ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
+      ].join(",");
+      createDebug.enable("");
+      return namespaces;
     }
-    if (this.unreffed) {
-      this.timeout.unref();
-    }
-  };
-  Timeout.prototype.close = function() {
-    clearTimeout(this.timeout);
-  };
-  function Interval2(listener, after) {
-    this.listener = listener;
-    this.after = this.timeLeft = after;
-    this.unreffed = false;
-    this.start();
-  }
-  Interval2.prototype.unref = function() {
-    if (!this.unreffed) {
-      this.unreffed = true;
-      this.timeout.unref();
-    }
-  };
-  Interval2.prototype.ref = function() {
-    if (this.unreffed) {
-      this.unreffed = false;
-      this.timeout.ref();
-    }
-  };
-  Interval2.prototype.start = function() {
-    var self = this;
-    if (this.timeLeft <= TIMEOUT_MAX) {
-      this.timeout = setTimeout(function() {
-        self.listener();
-        self.timeLeft = self.after;
-        self.start();
-      }, this.timeLeft);
-    } else {
-      this.timeout = setTimeout(function() {
-        self.timeLeft -= TIMEOUT_MAX;
-        self.start();
-      }, TIMEOUT_MAX);
-    }
-    if (this.unreffed) {
-      this.timeout.unref();
-    }
-  };
-  Interval2.prototype.close = function() {
-    Timeout.prototype.close.apply(this, arguments);
-  };
-})(longTimeout);
-const lt = longTimeout;
-const CronDate$1 = date;
-const sorted$1 = sortedArrayFunctions;
-const invocations = [];
-let currentInvocation = null;
-const DoesntRecur = new RecurrenceRule$2();
-DoesntRecur.recurs = false;
-function Invocation$2(job, fireDate, recurrenceRule, endDate) {
-  this.job = job;
-  this.fireDate = fireDate;
-  this.endDate = endDate;
-  this.recurrenceRule = recurrenceRule || DoesntRecur;
-  this.timerID = null;
-}
-function sorter$1(a, b) {
-  return a.fireDate.getTime() - b.fireDate.getTime();
-}
-function Range$1(start, end, step) {
-  this.start = start || 0;
-  this.end = end || 60;
-  this.step = step || 1;
-}
-Range$1.prototype.contains = function(val) {
-  if (this.step === null || this.step === 1) {
-    return val >= this.start && val <= this.end;
-  } else {
-    for (let i = this.start; i < this.end; i += this.step) {
-      if (i === val) {
+    function enabled(name) {
+      if (name[name.length - 1] === "*") {
         return true;
       }
-    }
-    return false;
-  }
-};
-function RecurrenceRule$2(year, month, date2, dayOfWeek2, hour, minute, second) {
-  this.recurs = true;
-  this.year = year == null ? null : year;
-  this.month = month == null ? null : month;
-  this.date = date2 == null ? null : date2;
-  this.dayOfWeek = dayOfWeek2 == null ? null : dayOfWeek2;
-  this.hour = hour == null ? null : hour;
-  this.minute = minute == null ? null : minute;
-  this.second = second == null ? 0 : second;
-}
-RecurrenceRule$2.prototype.isValid = function() {
-  function isValidType(num) {
-    if (Array.isArray(num) || num instanceof Array) {
-      return num.every(function(e) {
-        return isValidType(e);
-      });
-    }
-    return !(Number.isNaN(Number(num)) && !(num instanceof Range$1));
-  }
-  if (this.month !== null && (this.month < 0 || this.month > 11 || !isValidType(this.month))) {
-    return false;
-  }
-  if (this.dayOfWeek !== null && (this.dayOfWeek < 0 || this.dayOfWeek > 6 || !isValidType(this.dayOfWeek))) {
-    return false;
-  }
-  if (this.hour !== null && (this.hour < 0 || this.hour > 23 || !isValidType(this.hour))) {
-    return false;
-  }
-  if (this.minute !== null && (this.minute < 0 || this.minute > 59 || !isValidType(this.minute))) {
-    return false;
-  }
-  if (this.second !== null && (this.second < 0 || this.second > 59 || !isValidType(this.second))) {
-    return false;
-  }
-  if (this.date !== null) {
-    if (!isValidType(this.date)) {
+      let i;
+      let len;
+      for (i = 0, len = createDebug.skips.length; i < len; i++) {
+        if (createDebug.skips[i].test(name)) {
+          return false;
+        }
+      }
+      for (i = 0, len = createDebug.names.length; i < len; i++) {
+        if (createDebug.names[i].test(name)) {
+          return true;
+        }
+      }
       return false;
     }
-    switch (this.month) {
-      case 3:
-      case 5:
-      case 8:
-      case 10:
-        if (this.date < 1 || this.date > 30) {
-          return false;
-        }
-        break;
-      case 1:
-        if (this.date < 1 || this.date > 29) {
-          return false;
-        }
-        break;
-      default:
-        if (this.date < 1 || this.date > 31) {
-          return false;
-        }
+    function toNamespace(regexp) {
+      return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
     }
-  }
-  return true;
-};
-RecurrenceRule$2.prototype.nextInvocationDate = function(base) {
-  const next2 = this._nextInvocationDate(base);
-  return next2 ? next2.toDate() : null;
-};
-RecurrenceRule$2.prototype._nextInvocationDate = function(base) {
-  base = base instanceof CronDate$1 || base instanceof Date ? base : /* @__PURE__ */ new Date();
-  if (!this.recurs) {
-    return null;
-  }
-  if (!this.isValid()) {
-    return null;
-  }
-  const now2 = new CronDate$1(Date.now(), this.tz);
-  let fullYear = now2.getFullYear();
-  if (this.year !== null && typeof this.year == "number" && this.year < fullYear) {
-    return null;
-  }
-  let next2 = new CronDate$1(base.getTime(), this.tz);
-  next2.addSecond();
-  while (true) {
-    if (this.year !== null) {
-      fullYear = next2.getFullYear();
-      if (typeof this.year == "number" && this.year < fullYear) {
-        next2 = null;
-        break;
+    function coerce(val) {
+      if (val instanceof Error) {
+        return val.stack || val.message;
       }
-      if (!recurMatch(fullYear, this.year)) {
-        next2.addYear();
-        next2.setMonth(0);
-        next2.setDate(1);
-        next2.setHours(0);
-        next2.setMinutes(0);
-        next2.setSeconds(0);
-        continue;
-      }
+      return val;
     }
-    if (this.month != null && !recurMatch(next2.getMonth(), this.month)) {
-      next2.addMonth();
-      continue;
+    function destroy2() {
+      console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
     }
-    if (this.date != null && !recurMatch(next2.getDate(), this.date)) {
-      next2.addDay();
-      continue;
-    }
-    if (this.dayOfWeek != null && !recurMatch(next2.getDay(), this.dayOfWeek)) {
-      next2.addDay();
-      continue;
-    }
-    if (this.hour != null && !recurMatch(next2.getHours(), this.hour)) {
-      next2.addHour();
-      continue;
-    }
-    if (this.minute != null && !recurMatch(next2.getMinutes(), this.minute)) {
-      next2.addMinute();
-      continue;
-    }
-    if (this.second != null && !recurMatch(next2.getSeconds(), this.second)) {
-      next2.addSecond();
-      continue;
-    }
-    break;
+    createDebug.enable(createDebug.load());
+    return createDebug;
   }
-  return next2;
-};
-function recurMatch(val, matcher) {
-  if (matcher == null) {
-    return true;
-  }
-  if (typeof matcher === "number") {
-    return val === matcher;
-  } else if (typeof matcher === "string") {
-    return val === Number(matcher);
-  } else if (matcher instanceof Range$1) {
-    return matcher.contains(val);
-  } else if (Array.isArray(matcher) || matcher instanceof Array) {
-    for (let i = 0; i < matcher.length; i++) {
-      if (recurMatch(val, matcher[i])) {
+  common = setup;
+  return common;
+}
+var hasRequiredBrowser;
+function requireBrowser() {
+  if (hasRequiredBrowser) return browser.exports;
+  hasRequiredBrowser = 1;
+  (function(module, exports) {
+    exports.formatArgs = formatArgs;
+    exports.save = save;
+    exports.load = load;
+    exports.useColors = useColors;
+    exports.storage = localstorage();
+    exports.destroy = /* @__PURE__ */ (() => {
+      let warned = false;
+      return () => {
+        if (!warned) {
+          warned = true;
+          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+        }
+      };
+    })();
+    exports.colors = [
+      "#0000CC",
+      "#0000FF",
+      "#0033CC",
+      "#0033FF",
+      "#0066CC",
+      "#0066FF",
+      "#0099CC",
+      "#0099FF",
+      "#00CC00",
+      "#00CC33",
+      "#00CC66",
+      "#00CC99",
+      "#00CCCC",
+      "#00CCFF",
+      "#3300CC",
+      "#3300FF",
+      "#3333CC",
+      "#3333FF",
+      "#3366CC",
+      "#3366FF",
+      "#3399CC",
+      "#3399FF",
+      "#33CC00",
+      "#33CC33",
+      "#33CC66",
+      "#33CC99",
+      "#33CCCC",
+      "#33CCFF",
+      "#6600CC",
+      "#6600FF",
+      "#6633CC",
+      "#6633FF",
+      "#66CC00",
+      "#66CC33",
+      "#9900CC",
+      "#9900FF",
+      "#9933CC",
+      "#9933FF",
+      "#99CC00",
+      "#99CC33",
+      "#CC0000",
+      "#CC0033",
+      "#CC0066",
+      "#CC0099",
+      "#CC00CC",
+      "#CC00FF",
+      "#CC3300",
+      "#CC3333",
+      "#CC3366",
+      "#CC3399",
+      "#CC33CC",
+      "#CC33FF",
+      "#CC6600",
+      "#CC6633",
+      "#CC9900",
+      "#CC9933",
+      "#CCCC00",
+      "#CCCC33",
+      "#FF0000",
+      "#FF0033",
+      "#FF0066",
+      "#FF0099",
+      "#FF00CC",
+      "#FF00FF",
+      "#FF3300",
+      "#FF3333",
+      "#FF3366",
+      "#FF3399",
+      "#FF33CC",
+      "#FF33FF",
+      "#FF6600",
+      "#FF6633",
+      "#FF9900",
+      "#FF9933",
+      "#FFCC00",
+      "#FFCC33"
+    ];
+    function useColors() {
+      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
         return true;
       }
+      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+        return false;
+      }
+      let m;
+      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+      typeof navigator !== "undefined" && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
     }
+    function formatArgs(args) {
+      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module.exports.humanize(this.diff);
+      if (!this.useColors) {
+        return;
+      }
+      const c = "color: " + this.color;
+      args.splice(1, 0, c, "color: inherit");
+      let index = 0;
+      let lastC = 0;
+      args[0].replace(/%[a-zA-Z%]/g, (match) => {
+        if (match === "%%") {
+          return;
+        }
+        index++;
+        if (match === "%c") {
+          lastC = index;
+        }
+      });
+      args.splice(lastC, 0, c);
+    }
+    exports.log = console.debug || console.log || (() => {
+    });
+    function save(namespaces) {
+      try {
+        if (namespaces) {
+          exports.storage.setItem("debug", namespaces);
+        } else {
+          exports.storage.removeItem("debug");
+        }
+      } catch (error) {
+      }
+    }
+    function load() {
+      let r;
+      try {
+        r = exports.storage.getItem("debug");
+      } catch (error) {
+      }
+      if (!r && typeof process !== "undefined" && "env" in process) {
+        r = process.env.DEBUG;
+      }
+      return r;
+    }
+    function localstorage() {
+      try {
+        return localStorage;
+      } catch (error) {
+      }
+    }
+    module.exports = requireCommon()(exports);
+    const { formatters } = module.exports;
+    formatters.j = function(v) {
+      try {
+        return JSON.stringify(v);
+      } catch (error) {
+        return "[UnexpectedJSONParseError]: " + error.message;
+      }
+    };
+  })(browser, browser.exports);
+  return browser.exports;
+}
+var node = { exports: {} };
+var hasFlag;
+var hasRequiredHasFlag;
+function requireHasFlag() {
+  if (hasRequiredHasFlag) return hasFlag;
+  hasRequiredHasFlag = 1;
+  hasFlag = (flag, argv = process.argv) => {
+    const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+    const position = argv.indexOf(prefix + flag);
+    const terminatorPosition = argv.indexOf("--");
+    return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+  };
+  return hasFlag;
+}
+var supportsColor_1;
+var hasRequiredSupportsColor;
+function requireSupportsColor() {
+  if (hasRequiredSupportsColor) return supportsColor_1;
+  hasRequiredSupportsColor = 1;
+  const os = require$$0$2;
+  const tty = require$$1$2;
+  const hasFlag2 = requireHasFlag();
+  const { env } = process;
+  let forceColor;
+  if (hasFlag2("no-color") || hasFlag2("no-colors") || hasFlag2("color=false") || hasFlag2("color=never")) {
+    forceColor = 0;
+  } else if (hasFlag2("color") || hasFlag2("colors") || hasFlag2("color=true") || hasFlag2("color=always")) {
+    forceColor = 1;
+  }
+  if ("FORCE_COLOR" in env) {
+    if (env.FORCE_COLOR === "true") {
+      forceColor = 1;
+    } else if (env.FORCE_COLOR === "false") {
+      forceColor = 0;
+    } else {
+      forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+    }
+  }
+  function translateLevel(level) {
+    if (level === 0) {
+      return false;
+    }
+    return {
+      level,
+      hasBasic: true,
+      has256: level >= 2,
+      has16m: level >= 3
+    };
+  }
+  function supportsColor(haveStream, streamIsTTY) {
+    if (forceColor === 0) {
+      return 0;
+    }
+    if (hasFlag2("color=16m") || hasFlag2("color=full") || hasFlag2("color=truecolor")) {
+      return 3;
+    }
+    if (hasFlag2("color=256")) {
+      return 2;
+    }
+    if (haveStream && !streamIsTTY && forceColor === void 0) {
+      return 0;
+    }
+    const min = forceColor || 0;
+    if (env.TERM === "dumb") {
+      return min;
+    }
+    if (process.platform === "win32") {
+      const osRelease = os.release().split(".");
+      if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+        return Number(osRelease[2]) >= 14931 ? 3 : 2;
+      }
+      return 1;
+    }
+    if ("CI" in env) {
+      if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+        return 1;
+      }
+      return min;
+    }
+    if ("TEAMCITY_VERSION" in env) {
+      return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+    }
+    if (env.COLORTERM === "truecolor") {
+      return 3;
+    }
+    if ("TERM_PROGRAM" in env) {
+      const version = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+      switch (env.TERM_PROGRAM) {
+        case "iTerm.app":
+          return version >= 3 ? 3 : 2;
+        case "Apple_Terminal":
+          return 2;
+      }
+    }
+    if (/-256(color)?$/i.test(env.TERM)) {
+      return 2;
+    }
+    if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+      return 1;
+    }
+    if ("COLORTERM" in env) {
+      return 1;
+    }
+    return min;
+  }
+  function getSupportLevel(stream2) {
+    const level = supportsColor(stream2, stream2 && stream2.isTTY);
+    return translateLevel(level);
+  }
+  supportsColor_1 = {
+    supportsColor: getSupportLevel,
+    stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+    stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+  };
+  return supportsColor_1;
+}
+var hasRequiredNode;
+function requireNode() {
+  if (hasRequiredNode) return node.exports;
+  hasRequiredNode = 1;
+  (function(module, exports) {
+    const tty = require$$1$2;
+    const util2 = require$$1;
+    exports.init = init;
+    exports.log = log;
+    exports.formatArgs = formatArgs;
+    exports.save = save;
+    exports.load = load;
+    exports.useColors = useColors;
+    exports.destroy = util2.deprecate(
+      () => {
+      },
+      "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
+    );
+    exports.colors = [6, 2, 3, 4, 5, 1];
+    try {
+      const supportsColor = requireSupportsColor();
+      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
+        exports.colors = [
+          20,
+          21,
+          26,
+          27,
+          32,
+          33,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          56,
+          57,
+          62,
+          63,
+          68,
+          69,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          92,
+          93,
+          98,
+          99,
+          112,
+          113,
+          128,
+          129,
+          134,
+          135,
+          148,
+          149,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          172,
+          173,
+          178,
+          179,
+          184,
+          185,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          214,
+          215,
+          220,
+          221
+        ];
+      }
+    } catch (error) {
+    }
+    exports.inspectOpts = Object.keys(process.env).filter((key) => {
+      return /^debug_/i.test(key);
+    }).reduce((obj, key) => {
+      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_14, k) => {
+        return k.toUpperCase();
+      });
+      let val = process.env[key];
+      if (/^(yes|on|true|enabled)$/i.test(val)) {
+        val = true;
+      } else if (/^(no|off|false|disabled)$/i.test(val)) {
+        val = false;
+      } else if (val === "null") {
+        val = null;
+      } else {
+        val = Number(val);
+      }
+      obj[prop] = val;
+      return obj;
+    }, {});
+    function useColors() {
+      return "colors" in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
+    }
+    function formatArgs(args) {
+      const { namespace: name, useColors: useColors2 } = this;
+      if (useColors2) {
+        const c = this.color;
+        const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
+        const prefix = `  ${colorCode};1m${name} \x1B[0m`;
+        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
+        args.push(colorCode + "m+" + module.exports.humanize(this.diff) + "\x1B[0m");
+      } else {
+        args[0] = getDate() + name + " " + args[0];
+      }
+    }
+    function getDate() {
+      if (exports.inspectOpts.hideDate) {
+        return "";
+      }
+      return (/* @__PURE__ */ new Date()).toISOString() + " ";
+    }
+    function log(...args) {
+      return process.stderr.write(util2.formatWithOptions(exports.inspectOpts, ...args) + "\n");
+    }
+    function save(namespaces) {
+      if (namespaces) {
+        process.env.DEBUG = namespaces;
+      } else {
+        delete process.env.DEBUG;
+      }
+    }
+    function load() {
+      return process.env.DEBUG;
+    }
+    function init(debug2) {
+      debug2.inspectOpts = {};
+      const keys = Object.keys(exports.inspectOpts);
+      for (let i = 0; i < keys.length; i++) {
+        debug2.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
+      }
+    }
+    module.exports = requireCommon()(exports);
+    const { formatters } = module.exports;
+    formatters.o = function(v) {
+      this.inspectOpts.colors = this.useColors;
+      return util2.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+    };
+    formatters.O = function(v) {
+      this.inspectOpts.colors = this.useColors;
+      return util2.inspect(v, this.inspectOpts);
+    };
+  })(node, node.exports);
+  return node.exports;
+}
+var hasRequiredSrc;
+function requireSrc() {
+  if (hasRequiredSrc) return src.exports;
+  hasRequiredSrc = 1;
+  if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
+    src.exports = requireBrowser();
+  } else {
+    src.exports = requireNode();
+  }
+  return src.exports;
+}
+var debug$1;
+var debug_1 = function() {
+  if (!debug$1) {
+    try {
+      debug$1 = requireSrc()("follow-redirects");
+    } catch (error) {
+    }
+    if (typeof debug$1 !== "function") {
+      debug$1 = function() {
+      };
+    }
+  }
+  debug$1.apply(null, arguments);
+};
+var url = require$$0$1;
+var URL$1 = url.URL;
+var http = require$$3;
+var https = require$$4;
+var Writable = stream.Writable;
+var assert = require$$4$1;
+var debug = debug_1;
+(function detectUnsupportedEnvironment() {
+  var looksLikeNode = typeof process !== "undefined";
+  var looksLikeBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+  var looksLikeV8 = isFunction$1(Error.captureStackTrace);
+  if (!looksLikeNode && (looksLikeBrowser || !looksLikeV8)) {
+    console.warn("The follow-redirects package should be excluded from browser builds.");
+  }
+})();
+var useNativeURL = false;
+try {
+  assert(new URL$1(""));
+} catch (error) {
+  useNativeURL = error.code === "ERR_INVALID_URL";
+}
+var preservedUrlFields = [
+  "auth",
+  "host",
+  "hostname",
+  "href",
+  "path",
+  "pathname",
+  "port",
+  "protocol",
+  "query",
+  "search",
+  "hash"
+];
+var events = ["abort", "aborted", "connect", "error", "socket", "timeout"];
+var eventHandlers = /* @__PURE__ */ Object.create(null);
+events.forEach(function(event) {
+  eventHandlers[event] = function(arg1, arg2, arg3) {
+    this._redirectable.emit(event, arg1, arg2, arg3);
+  };
+});
+var InvalidUrlError = createErrorType(
+  "ERR_INVALID_URL",
+  "Invalid URL",
+  TypeError
+);
+var RedirectionError = createErrorType(
+  "ERR_FR_REDIRECTION_FAILURE",
+  "Redirected request failed"
+);
+var TooManyRedirectsError = createErrorType(
+  "ERR_FR_TOO_MANY_REDIRECTS",
+  "Maximum number of redirects exceeded",
+  RedirectionError
+);
+var MaxBodyLengthExceededError = createErrorType(
+  "ERR_FR_MAX_BODY_LENGTH_EXCEEDED",
+  "Request body larger than maxBodyLength limit"
+);
+var WriteAfterEndError = createErrorType(
+  "ERR_STREAM_WRITE_AFTER_END",
+  "write after end"
+);
+var destroy = Writable.prototype.destroy || noop$1;
+function RedirectableRequest(options, responseCallback) {
+  Writable.call(this);
+  this._sanitizeOptions(options);
+  this._options = options;
+  this._ended = false;
+  this._ending = false;
+  this._redirectCount = 0;
+  this._redirects = [];
+  this._requestBodyLength = 0;
+  this._requestBodyBuffers = [];
+  if (responseCallback) {
+    this.on("response", responseCallback);
+  }
+  var self2 = this;
+  this._onNativeResponse = function(response) {
+    try {
+      self2._processResponse(response);
+    } catch (cause) {
+      self2.emit("error", cause instanceof RedirectionError ? cause : new RedirectionError({ cause }));
+    }
+  };
+  this._performRequest();
+}
+RedirectableRequest.prototype = Object.create(Writable.prototype);
+RedirectableRequest.prototype.abort = function() {
+  destroyRequest(this._currentRequest);
+  this._currentRequest.abort();
+  this.emit("abort");
+};
+RedirectableRequest.prototype.destroy = function(error) {
+  destroyRequest(this._currentRequest, error);
+  destroy.call(this, error);
+  return this;
+};
+RedirectableRequest.prototype.write = function(data, encoding, callback) {
+  if (this._ending) {
+    throw new WriteAfterEndError();
+  }
+  if (!isString(data) && !isBuffer(data)) {
+    throw new TypeError("data should be a string, Buffer or Uint8Array");
+  }
+  if (isFunction$1(encoding)) {
+    callback = encoding;
+    encoding = null;
+  }
+  if (data.length === 0) {
+    if (callback) {
+      callback();
+    }
+    return;
+  }
+  if (this._requestBodyLength + data.length <= this._options.maxBodyLength) {
+    this._requestBodyLength += data.length;
+    this._requestBodyBuffers.push({ data, encoding });
+    this._currentRequest.write(data, encoding, callback);
+  } else {
+    this.emit("error", new MaxBodyLengthExceededError());
+    this.abort();
+  }
+};
+RedirectableRequest.prototype.end = function(data, encoding, callback) {
+  if (isFunction$1(data)) {
+    callback = data;
+    data = encoding = null;
+  } else if (isFunction$1(encoding)) {
+    callback = encoding;
+    encoding = null;
+  }
+  if (!data) {
+    this._ended = this._ending = true;
+    this._currentRequest.end(null, null, callback);
+  } else {
+    var self2 = this;
+    var currentRequest = this._currentRequest;
+    this.write(data, encoding, function() {
+      self2._ended = true;
+      currentRequest.end(null, null, callback);
+    });
+    this._ending = true;
+  }
+};
+RedirectableRequest.prototype.setHeader = function(name, value) {
+  this._options.headers[name] = value;
+  this._currentRequest.setHeader(name, value);
+};
+RedirectableRequest.prototype.removeHeader = function(name) {
+  delete this._options.headers[name];
+  this._currentRequest.removeHeader(name);
+};
+RedirectableRequest.prototype.setTimeout = function(msecs, callback) {
+  var self2 = this;
+  function destroyOnTimeout(socket) {
+    socket.setTimeout(msecs);
+    socket.removeListener("timeout", socket.destroy);
+    socket.addListener("timeout", socket.destroy);
+  }
+  function startTimer(socket) {
+    if (self2._timeout) {
+      clearTimeout(self2._timeout);
+    }
+    self2._timeout = setTimeout(function() {
+      self2.emit("timeout");
+      clearTimer();
+    }, msecs);
+    destroyOnTimeout(socket);
+  }
+  function clearTimer() {
+    if (self2._timeout) {
+      clearTimeout(self2._timeout);
+      self2._timeout = null;
+    }
+    self2.removeListener("abort", clearTimer);
+    self2.removeListener("error", clearTimer);
+    self2.removeListener("response", clearTimer);
+    self2.removeListener("close", clearTimer);
+    if (callback) {
+      self2.removeListener("timeout", callback);
+    }
+    if (!self2.socket) {
+      self2._currentRequest.removeListener("socket", startTimer);
+    }
+  }
+  if (callback) {
+    this.on("timeout", callback);
+  }
+  if (this.socket) {
+    startTimer(this.socket);
+  } else {
+    this._currentRequest.once("socket", startTimer);
+  }
+  this.on("socket", destroyOnTimeout);
+  this.on("abort", clearTimer);
+  this.on("error", clearTimer);
+  this.on("response", clearTimer);
+  this.on("close", clearTimer);
+  return this;
+};
+[
+  "flushHeaders",
+  "getHeader",
+  "setNoDelay",
+  "setSocketKeepAlive"
+].forEach(function(method) {
+  RedirectableRequest.prototype[method] = function(a, b) {
+    return this._currentRequest[method](a, b);
+  };
+});
+["aborted", "connection", "socket"].forEach(function(property) {
+  Object.defineProperty(RedirectableRequest.prototype, property, {
+    get: function() {
+      return this._currentRequest[property];
+    }
+  });
+});
+RedirectableRequest.prototype._sanitizeOptions = function(options) {
+  if (!options.headers) {
+    options.headers = {};
+  }
+  if (options.host) {
+    if (!options.hostname) {
+      options.hostname = options.host;
+    }
+    delete options.host;
+  }
+  if (!options.pathname && options.path) {
+    var searchPos = options.path.indexOf("?");
+    if (searchPos < 0) {
+      options.pathname = options.path;
+    } else {
+      options.pathname = options.path.substring(0, searchPos);
+      options.search = options.path.substring(searchPos);
+    }
+  }
+};
+RedirectableRequest.prototype._performRequest = function() {
+  var protocol = this._options.protocol;
+  var nativeProtocol = this._options.nativeProtocols[protocol];
+  if (!nativeProtocol) {
+    throw new TypeError("Unsupported protocol " + protocol);
+  }
+  if (this._options.agents) {
+    var scheme = protocol.slice(0, -1);
+    this._options.agent = this._options.agents[scheme];
+  }
+  var request = this._currentRequest = nativeProtocol.request(this._options, this._onNativeResponse);
+  request._redirectable = this;
+  for (var event of events) {
+    request.on(event, eventHandlers[event]);
+  }
+  this._currentUrl = /^\//.test(this._options.path) ? url.format(this._options) : (
+    // When making a request to a proxy, […]
+    // a client MUST send the target URI in absolute-form […].
+    this._options.path
+  );
+  if (this._isRedirect) {
+    var i = 0;
+    var self2 = this;
+    var buffers = this._requestBodyBuffers;
+    (function writeNext(error) {
+      if (request === self2._currentRequest) {
+        if (error) {
+          self2.emit("error", error);
+        } else if (i < buffers.length) {
+          var buffer = buffers[i++];
+          if (!request.finished) {
+            request.write(buffer.data, buffer.encoding, writeNext);
+          }
+        } else if (self2._ended) {
+          request.end();
+        }
+      }
+    })();
+  }
+};
+RedirectableRequest.prototype._processResponse = function(response) {
+  var statusCode = response.statusCode;
+  if (this._options.trackRedirects) {
+    this._redirects.push({
+      url: this._currentUrl,
+      headers: response.headers,
+      statusCode
+    });
+  }
+  var location = response.headers.location;
+  if (!location || this._options.followRedirects === false || statusCode < 300 || statusCode >= 400) {
+    response.responseUrl = this._currentUrl;
+    response.redirects = this._redirects;
+    this.emit("response", response);
+    this._requestBodyBuffers = [];
+    return;
+  }
+  destroyRequest(this._currentRequest);
+  response.destroy();
+  if (++this._redirectCount > this._options.maxRedirects) {
+    throw new TooManyRedirectsError();
+  }
+  var requestHeaders;
+  var beforeRedirect = this._options.beforeRedirect;
+  if (beforeRedirect) {
+    requestHeaders = Object.assign({
+      // The Host header was set by nativeProtocol.request
+      Host: response.req.getHeader("host")
+    }, this._options.headers);
+  }
+  var method = this._options.method;
+  if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" || // RFC7231§6.4.4: The 303 (See Other) status code indicates that
+  // the server is redirecting the user agent to a different resource […]
+  // A user agent can perform a retrieval request targeting that URI
+  // (a GET or HEAD request if using HTTP) […]
+  statusCode === 303 && !/^(?:GET|HEAD)$/.test(this._options.method)) {
+    this._options.method = "GET";
+    this._requestBodyBuffers = [];
+    removeMatchingHeaders(/^content-/i, this._options.headers);
+  }
+  var currentHostHeader = removeMatchingHeaders(/^host$/i, this._options.headers);
+  var currentUrlParts = parseUrl(this._currentUrl);
+  var currentHost = currentHostHeader || currentUrlParts.host;
+  var currentUrl = /^\w+:/.test(location) ? this._currentUrl : url.format(Object.assign(currentUrlParts, { host: currentHost }));
+  var redirectUrl = resolveUrl(location, currentUrl);
+  debug("redirecting to", redirectUrl.href);
+  this._isRedirect = true;
+  spreadUrlObject(redirectUrl, this._options);
+  if (redirectUrl.protocol !== currentUrlParts.protocol && redirectUrl.protocol !== "https:" || redirectUrl.host !== currentHost && !isSubdomain(redirectUrl.host, currentHost)) {
+    removeMatchingHeaders(/^(?:(?:proxy-)?authorization|cookie)$/i, this._options.headers);
+  }
+  if (isFunction$1(beforeRedirect)) {
+    var responseDetails = {
+      headers: response.headers,
+      statusCode
+    };
+    var requestDetails = {
+      url: currentUrl,
+      method,
+      headers: requestHeaders
+    };
+    beforeRedirect(this._options, responseDetails, requestDetails);
+    this._sanitizeOptions(this._options);
+  }
+  this._performRequest();
+};
+function wrap(protocols) {
+  var exports = {
+    maxRedirects: 21,
+    maxBodyLength: 10 * 1024 * 1024
+  };
+  var nativeProtocols = {};
+  Object.keys(protocols).forEach(function(scheme) {
+    var protocol = scheme + ":";
+    var nativeProtocol = nativeProtocols[protocol] = protocols[scheme];
+    var wrappedProtocol = exports[scheme] = Object.create(nativeProtocol);
+    function request(input, options, callback) {
+      if (isURL(input)) {
+        input = spreadUrlObject(input);
+      } else if (isString(input)) {
+        input = spreadUrlObject(parseUrl(input));
+      } else {
+        callback = options;
+        options = validateUrl(input);
+        input = { protocol };
+      }
+      if (isFunction$1(options)) {
+        callback = options;
+        options = null;
+      }
+      options = Object.assign({
+        maxRedirects: exports.maxRedirects,
+        maxBodyLength: exports.maxBodyLength
+      }, input, options);
+      options.nativeProtocols = nativeProtocols;
+      if (!isString(options.host) && !isString(options.hostname)) {
+        options.hostname = "::1";
+      }
+      assert.equal(options.protocol, protocol, "protocol mismatch");
+      debug("options", options);
+      return new RedirectableRequest(options, callback);
+    }
+    function get(input, options, callback) {
+      var wrappedRequest = wrappedProtocol.request(input, options, callback);
+      wrappedRequest.end();
+      return wrappedRequest;
+    }
+    Object.defineProperties(wrappedProtocol, {
+      request: { value: request, configurable: true, enumerable: true, writable: true },
+      get: { value: get, configurable: true, enumerable: true, writable: true }
+    });
+  });
+  return exports;
+}
+function noop$1() {
+}
+function parseUrl(input) {
+  var parsed;
+  if (useNativeURL) {
+    parsed = new URL$1(input);
+  } else {
+    parsed = validateUrl(url.parse(input));
+    if (!isString(parsed.protocol)) {
+      throw new InvalidUrlError({ input });
+    }
+  }
+  return parsed;
+}
+function resolveUrl(relative, base) {
+  return useNativeURL ? new URL$1(relative, base) : parseUrl(url.resolve(base, relative));
+}
+function validateUrl(input) {
+  if (/^\[/.test(input.hostname) && !/^\[[:0-9a-f]+\]$/i.test(input.hostname)) {
+    throw new InvalidUrlError({ input: input.href || input });
+  }
+  if (/^\[/.test(input.host) && !/^\[[:0-9a-f]+\](:\d+)?$/i.test(input.host)) {
+    throw new InvalidUrlError({ input: input.href || input });
+  }
+  return input;
+}
+function spreadUrlObject(urlObject, target) {
+  var spread2 = target || {};
+  for (var key of preservedUrlFields) {
+    spread2[key] = urlObject[key];
+  }
+  if (spread2.hostname.startsWith("[")) {
+    spread2.hostname = spread2.hostname.slice(1, -1);
+  }
+  if (spread2.port !== "") {
+    spread2.port = Number(spread2.port);
+  }
+  spread2.path = spread2.search ? spread2.pathname + spread2.search : spread2.pathname;
+  return spread2;
+}
+function removeMatchingHeaders(regex, headers) {
+  var lastValue;
+  for (var header in headers) {
+    if (regex.test(header)) {
+      lastValue = headers[header];
+      delete headers[header];
+    }
+  }
+  return lastValue === null || typeof lastValue === "undefined" ? void 0 : String(lastValue).trim();
+}
+function createErrorType(code, message, baseClass) {
+  function CustomError(properties) {
+    if (isFunction$1(Error.captureStackTrace)) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+    Object.assign(this, properties || {});
+    this.code = code;
+    this.message = this.cause ? message + ": " + this.cause.message : message;
+  }
+  CustomError.prototype = new (baseClass || Error)();
+  Object.defineProperties(CustomError.prototype, {
+    constructor: {
+      value: CustomError,
+      enumerable: false
+    },
+    name: {
+      value: "Error [" + code + "]",
+      enumerable: false
+    }
+  });
+  return CustomError;
+}
+function destroyRequest(request, error) {
+  for (var event of events) {
+    request.removeListener(event, eventHandlers[event]);
+  }
+  request.on("error", noop$1);
+  request.destroy(error);
+}
+function isSubdomain(subdomain, domain) {
+  assert(isString(subdomain) && isString(domain));
+  var dot = subdomain.length - domain.length - 1;
+  return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
+}
+function isString(value) {
+  return typeof value === "string" || value instanceof String;
+}
+function isFunction$1(value) {
+  return typeof value === "function";
+}
+function isBuffer(value) {
+  return typeof value === "object" && "length" in value;
+}
+function isURL(value) {
+  return URL$1 && value instanceof URL$1;
+}
+followRedirects$1.exports = wrap({ http, https });
+followRedirects$1.exports.wrap = wrap;
+var followRedirectsExports = followRedirects$1.exports;
+const followRedirects = /* @__PURE__ */ getDefaultExportFromCjs(followRedirectsExports);
+const VERSION = "1.7.9";
+function parseProtocol(url2) {
+  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
+  return match && match[1] || "";
+}
+const DATA_URL_PATTERN = /^(?:([^;]+);)?(?:[^;]+;)?(base64|),([\s\S]*)$/;
+function fromDataURI(uri, asBlob, options) {
+  const _Blob = options && options.Blob || platform.classes.Blob;
+  const protocol = parseProtocol(uri);
+  if (asBlob === void 0 && _Blob) {
+    asBlob = true;
+  }
+  if (protocol === "data") {
+    uri = protocol.length ? uri.slice(protocol.length + 1) : uri;
+    const match = DATA_URL_PATTERN.exec(uri);
+    if (!match) {
+      throw new AxiosError("Invalid URL", AxiosError.ERR_INVALID_URL);
+    }
+    const mime2 = match[1];
+    const isBase64 = match[2];
+    const body = match[3];
+    const buffer = Buffer.from(decodeURIComponent(body), isBase64 ? "base64" : "utf8");
+    if (asBlob) {
+      if (!_Blob) {
+        throw new AxiosError("Blob is not supported", AxiosError.ERR_NOT_SUPPORT);
+      }
+      return new _Blob([buffer], { type: mime2 });
+    }
+    return buffer;
+  }
+  throw new AxiosError("Unsupported protocol " + protocol, AxiosError.ERR_NOT_SUPPORT);
+}
+const kInternals = Symbol("internals");
+class AxiosTransformStream extends stream.Transform {
+  constructor(options) {
+    options = utils$1.toFlatObject(options, {
+      maxRate: 0,
+      chunkSize: 64 * 1024,
+      minChunkSize: 100,
+      timeWindow: 500,
+      ticksRate: 2,
+      samplesCount: 15
+    }, null, (prop, source) => {
+      return !utils$1.isUndefined(source[prop]);
+    });
+    super({
+      readableHighWaterMark: options.chunkSize
+    });
+    const internals = this[kInternals] = {
+      timeWindow: options.timeWindow,
+      chunkSize: options.chunkSize,
+      maxRate: options.maxRate,
+      minChunkSize: options.minChunkSize,
+      bytesSeen: 0,
+      isCaptured: false,
+      notifiedBytesLoaded: 0,
+      ts: Date.now(),
+      bytes: 0,
+      onReadCallback: null
+    };
+    this.on("newListener", (event) => {
+      if (event === "progress") {
+        if (!internals.isCaptured) {
+          internals.isCaptured = true;
+        }
+      }
+    });
+  }
+  _read(size) {
+    const internals = this[kInternals];
+    if (internals.onReadCallback) {
+      internals.onReadCallback();
+    }
+    return super._read(size);
+  }
+  _transform(chunk, encoding, callback) {
+    const internals = this[kInternals];
+    const maxRate = internals.maxRate;
+    const readableHighWaterMark = this.readableHighWaterMark;
+    const timeWindow = internals.timeWindow;
+    const divider = 1e3 / timeWindow;
+    const bytesThreshold = maxRate / divider;
+    const minChunkSize = internals.minChunkSize !== false ? Math.max(internals.minChunkSize, bytesThreshold * 0.01) : 0;
+    const pushChunk = (_chunk, _callback) => {
+      const bytes = Buffer.byteLength(_chunk);
+      internals.bytesSeen += bytes;
+      internals.bytes += bytes;
+      internals.isCaptured && this.emit("progress", internals.bytesSeen);
+      if (this.push(_chunk)) {
+        process.nextTick(_callback);
+      } else {
+        internals.onReadCallback = () => {
+          internals.onReadCallback = null;
+          process.nextTick(_callback);
+        };
+      }
+    };
+    const transformChunk = (_chunk, _callback) => {
+      const chunkSize = Buffer.byteLength(_chunk);
+      let chunkRemainder = null;
+      let maxChunkSize = readableHighWaterMark;
+      let bytesLeft;
+      let passed = 0;
+      if (maxRate) {
+        const now = Date.now();
+        if (!internals.ts || (passed = now - internals.ts) >= timeWindow) {
+          internals.ts = now;
+          bytesLeft = bytesThreshold - internals.bytes;
+          internals.bytes = bytesLeft < 0 ? -bytesLeft : 0;
+          passed = 0;
+        }
+        bytesLeft = bytesThreshold - internals.bytes;
+      }
+      if (maxRate) {
+        if (bytesLeft <= 0) {
+          return setTimeout(() => {
+            _callback(null, _chunk);
+          }, timeWindow - passed);
+        }
+        if (bytesLeft < maxChunkSize) {
+          maxChunkSize = bytesLeft;
+        }
+      }
+      if (maxChunkSize && chunkSize > maxChunkSize && chunkSize - maxChunkSize > minChunkSize) {
+        chunkRemainder = _chunk.subarray(maxChunkSize);
+        _chunk = _chunk.subarray(0, maxChunkSize);
+      }
+      pushChunk(_chunk, chunkRemainder ? () => {
+        process.nextTick(_callback, null, chunkRemainder);
+      } : _callback);
+    };
+    transformChunk(chunk, function transformNextChunk(err, _chunk) {
+      if (err) {
+        return callback(err);
+      }
+      if (_chunk) {
+        transformChunk(_chunk, transformNextChunk);
+      } else {
+        callback(null);
+      }
+    });
+  }
+}
+const { asyncIterator } = Symbol;
+const readBlob = async function* (blob) {
+  if (blob.stream) {
+    yield* blob.stream();
+  } else if (blob.arrayBuffer) {
+    yield await blob.arrayBuffer();
+  } else if (blob[asyncIterator]) {
+    yield* blob[asyncIterator]();
+  } else {
+    yield blob;
+  }
+};
+const BOUNDARY_ALPHABET = utils$1.ALPHABET.ALPHA_DIGIT + "-_";
+const textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new require$$1.TextEncoder();
+const CRLF = "\r\n";
+const CRLF_BYTES = textEncoder.encode(CRLF);
+const CRLF_BYTES_COUNT = 2;
+class FormDataPart {
+  constructor(name, value) {
+    const { escapeName } = this.constructor;
+    const isStringValue = utils$1.isString(value);
+    let headers = `Content-Disposition: form-data; name="${escapeName(name)}"${!isStringValue && value.name ? `; filename="${escapeName(value.name)}"` : ""}${CRLF}`;
+    if (isStringValue) {
+      value = textEncoder.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF));
+    } else {
+      headers += `Content-Type: ${value.type || "application/octet-stream"}${CRLF}`;
+    }
+    this.headers = textEncoder.encode(headers + CRLF);
+    this.contentLength = isStringValue ? value.byteLength : value.size;
+    this.size = this.headers.byteLength + this.contentLength + CRLF_BYTES_COUNT;
+    this.name = name;
+    this.value = value;
+  }
+  async *encode() {
+    yield this.headers;
+    const { value } = this;
+    if (utils$1.isTypedArray(value)) {
+      yield value;
+    } else {
+      yield* readBlob(value);
+    }
+    yield CRLF_BYTES;
+  }
+  static escapeName(name) {
+    return String(name).replace(/[\r\n"]/g, (match) => ({
+      "\r": "%0D",
+      "\n": "%0A",
+      '"': "%22"
+    })[match]);
+  }
+}
+const formDataToStream = (form, headersHandler, options) => {
+  const {
+    tag = "form-data-boundary",
+    size = 25,
+    boundary = tag + "-" + utils$1.generateString(size, BOUNDARY_ALPHABET)
+  } = options || {};
+  if (!utils$1.isFormData(form)) {
+    throw TypeError("FormData instance required");
+  }
+  if (boundary.length < 1 || boundary.length > 70) {
+    throw Error("boundary must be 10-70 characters long");
+  }
+  const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
+  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF + CRLF);
+  let contentLength = footerBytes.byteLength;
+  const parts = Array.from(form.entries()).map(([name, value]) => {
+    const part = new FormDataPart(name, value);
+    contentLength += part.size;
+    return part;
+  });
+  contentLength += boundaryBytes.byteLength * parts.length;
+  contentLength = utils$1.toFiniteNumber(contentLength);
+  const computedHeaders = {
+    "Content-Type": `multipart/form-data; boundary=${boundary}`
+  };
+  if (Number.isFinite(contentLength)) {
+    computedHeaders["Content-Length"] = contentLength;
+  }
+  headersHandler && headersHandler(computedHeaders);
+  return Readable.from(async function* () {
+    for (const part of parts) {
+      yield boundaryBytes;
+      yield* part.encode();
+    }
+    yield footerBytes;
+  }());
+};
+class ZlibHeaderTransformStream extends stream.Transform {
+  __transform(chunk, encoding, callback) {
+    this.push(chunk);
+    callback();
+  }
+  _transform(chunk, encoding, callback) {
+    if (chunk.length !== 0) {
+      this._transform = this.__transform;
+      if (chunk[0] !== 120) {
+        const header = Buffer.alloc(2);
+        header[0] = 120;
+        header[1] = 156;
+        this.push(header, encoding);
+      }
+    }
+    this.__transform(chunk, encoding, callback);
+  }
+}
+const callbackify = (fn, reducer) => {
+  return utils$1.isAsyncFn(fn) ? function(...args) {
+    const cb = args.pop();
+    fn.apply(this, args).then((value) => {
+      try {
+        reducer ? cb(null, ...reducer(value)) : cb(null, value);
+      } catch (err) {
+        cb(err);
+      }
+    }, cb);
+  } : fn;
+};
+function speedometer(samplesCount, min) {
+  samplesCount = samplesCount || 10;
+  const bytes = new Array(samplesCount);
+  const timestamps = new Array(samplesCount);
+  let head = 0;
+  let tail = 0;
+  let firstSampleTS;
+  min = min !== void 0 ? min : 1e3;
+  return function push2(chunkLength) {
+    const now = Date.now();
+    const startedAt = timestamps[tail];
+    if (!firstSampleTS) {
+      firstSampleTS = now;
+    }
+    bytes[head] = chunkLength;
+    timestamps[head] = now;
+    let i = tail;
+    let bytesCount = 0;
+    while (i !== head) {
+      bytesCount += bytes[i++];
+      i = i % samplesCount;
+    }
+    head = (head + 1) % samplesCount;
+    if (head === tail) {
+      tail = (tail + 1) % samplesCount;
+    }
+    if (now - firstSampleTS < min) {
+      return;
+    }
+    const passed = startedAt && now - startedAt;
+    return passed ? Math.round(bytesCount * 1e3 / passed) : void 0;
+  };
+}
+function throttle(fn, freq) {
+  let timestamp = 0;
+  let threshold = 1e3 / freq;
+  let lastArgs;
+  let timer;
+  const invoke = (args, now = Date.now()) => {
+    timestamp = now;
+    lastArgs = null;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    fn.apply(null, args);
+  };
+  const throttled = (...args) => {
+    const now = Date.now();
+    const passed = now - timestamp;
+    if (passed >= threshold) {
+      invoke(args, now);
+    } else {
+      lastArgs = args;
+      if (!timer) {
+        timer = setTimeout(() => {
+          timer = null;
+          invoke(lastArgs);
+        }, threshold - passed);
+      }
+    }
+  };
+  const flush = () => lastArgs && invoke(lastArgs);
+  return [throttled, flush];
+}
+const progressEventReducer = (listener, isDownloadStream, freq = 3) => {
+  let bytesNotified = 0;
+  const _speedometer = speedometer(50, 250);
+  return throttle((e) => {
+    const loaded = e.loaded;
+    const total = e.lengthComputable ? e.total : void 0;
+    const progressBytes = loaded - bytesNotified;
+    const rate = _speedometer(progressBytes);
+    const inRange = loaded <= total;
+    bytesNotified = loaded;
+    const data = {
+      loaded,
+      total,
+      progress: total ? loaded / total : void 0,
+      bytes: progressBytes,
+      rate: rate ? rate : void 0,
+      estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
+      event: e,
+      lengthComputable: total != null,
+      [isDownloadStream ? "download" : "upload"]: true
+    };
+    listener(data);
+  }, freq);
+};
+const progressEventDecorator = (total, throttled) => {
+  const lengthComputable = total != null;
+  return [(loaded) => throttled[0]({
+    lengthComputable,
+    total,
+    loaded
+  }), throttled[1]];
+};
+const asyncDecorator = (fn) => (...args) => utils$1.asap(() => fn(...args));
+const zlibOptions = {
+  flush: zlib.constants.Z_SYNC_FLUSH,
+  finishFlush: zlib.constants.Z_SYNC_FLUSH
+};
+const brotliOptions = {
+  flush: zlib.constants.BROTLI_OPERATION_FLUSH,
+  finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH
+};
+const isBrotliSupported = utils$1.isFunction(zlib.createBrotliDecompress);
+const { http: httpFollow, https: httpsFollow } = followRedirects;
+const isHttps = /https:?/;
+const supportedProtocols = platform.protocols.map((protocol) => {
+  return protocol + ":";
+});
+const flushOnFinish = (stream2, [throttled, flush]) => {
+  stream2.on("end", flush).on("error", flush);
+  return throttled;
+};
+function dispatchBeforeRedirect(options, responseDetails) {
+  if (options.beforeRedirects.proxy) {
+    options.beforeRedirects.proxy(options);
+  }
+  if (options.beforeRedirects.config) {
+    options.beforeRedirects.config(options, responseDetails);
+  }
+}
+function setProxy(options, configProxy, location) {
+  let proxy = configProxy;
+  if (!proxy && proxy !== false) {
+    const proxyUrl = proxyFromEnv.getProxyForUrl(location);
+    if (proxyUrl) {
+      proxy = new URL(proxyUrl);
+    }
+  }
+  if (proxy) {
+    if (proxy.username) {
+      proxy.auth = (proxy.username || "") + ":" + (proxy.password || "");
+    }
+    if (proxy.auth) {
+      if (proxy.auth.username || proxy.auth.password) {
+        proxy.auth = (proxy.auth.username || "") + ":" + (proxy.auth.password || "");
+      }
+      const base64 = Buffer.from(proxy.auth, "utf8").toString("base64");
+      options.headers["Proxy-Authorization"] = "Basic " + base64;
+    }
+    options.headers.host = options.hostname + (options.port ? ":" + options.port : "");
+    const proxyHost = proxy.hostname || proxy.host;
+    options.hostname = proxyHost;
+    options.host = proxyHost;
+    options.port = proxy.port;
+    options.path = location;
+    if (proxy.protocol) {
+      options.protocol = proxy.protocol.includes(":") ? proxy.protocol : `${proxy.protocol}:`;
+    }
+  }
+  options.beforeRedirects.proxy = function beforeRedirect(redirectOptions) {
+    setProxy(redirectOptions, configProxy, redirectOptions.href);
+  };
+}
+const isHttpAdapterSupported = typeof process !== "undefined" && utils$1.kindOf(process) === "process";
+const wrapAsync = (asyncExecutor) => {
+  return new Promise((resolve, reject) => {
+    let onDone;
+    let isDone;
+    const done = (value, isRejected) => {
+      if (isDone) return;
+      isDone = true;
+      onDone && onDone(value, isRejected);
+    };
+    const _resolve = (value) => {
+      done(value);
+      resolve(value);
+    };
+    const _reject = (reason) => {
+      done(reason, true);
+      reject(reason);
+    };
+    asyncExecutor(_resolve, _reject, (onDoneHandler) => onDone = onDoneHandler).catch(_reject);
+  });
+};
+const resolveFamily = ({ address, family }) => {
+  if (!utils$1.isString(address)) {
+    throw TypeError("address must be a string");
+  }
+  return {
+    address,
+    family: family || (address.indexOf(".") < 0 ? 6 : 4)
+  };
+};
+const buildAddressEntry = (address, family) => resolveFamily(utils$1.isObject(address) ? address : { address, family });
+const httpAdapter = isHttpAdapterSupported && function httpAdapter2(config) {
+  return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
+    let { data, lookup, family } = config;
+    const { responseType, responseEncoding } = config;
+    const method = config.method.toUpperCase();
+    let isDone;
+    let rejected = false;
+    let req;
+    if (lookup) {
+      const _lookup = callbackify(lookup, (value) => utils$1.isArray(value) ? value : [value]);
+      lookup = (hostname, opt, cb) => {
+        _lookup(hostname, opt, (err, arg0, arg1) => {
+          if (err) {
+            return cb(err);
+          }
+          const addresses = utils$1.isArray(arg0) ? arg0.map((addr) => buildAddressEntry(addr)) : [buildAddressEntry(arg0, arg1)];
+          opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
+        });
+      };
+    }
+    const emitter = new EventEmitter();
+    const onFinished = () => {
+      if (config.cancelToken) {
+        config.cancelToken.unsubscribe(abort2);
+      }
+      if (config.signal) {
+        config.signal.removeEventListener("abort", abort2);
+      }
+      emitter.removeAllListeners();
+    };
+    onDone((value, isRejected) => {
+      isDone = true;
+      if (isRejected) {
+        rejected = true;
+        onFinished();
+      }
+    });
+    function abort2(reason) {
+      emitter.emit("abort", !reason || reason.type ? new CanceledError(null, config, req) : reason);
+    }
+    emitter.once("abort", reject);
+    if (config.cancelToken || config.signal) {
+      config.cancelToken && config.cancelToken.subscribe(abort2);
+      if (config.signal) {
+        config.signal.aborted ? abort2() : config.signal.addEventListener("abort", abort2);
+      }
+    }
+    const fullPath = buildFullPath(config.baseURL, config.url);
+    const parsed = new URL(fullPath, platform.hasBrowserEnv ? platform.origin : void 0);
+    const protocol = parsed.protocol || supportedProtocols[0];
+    if (protocol === "data:") {
+      let convertedData;
+      if (method !== "GET") {
+        return settle(resolve, reject, {
+          status: 405,
+          statusText: "method not allowed",
+          headers: {},
+          config
+        });
+      }
+      try {
+        convertedData = fromDataURI(config.url, responseType === "blob", {
+          Blob: config.env && config.env.Blob
+        });
+      } catch (err) {
+        throw AxiosError.from(err, AxiosError.ERR_BAD_REQUEST, config);
+      }
+      if (responseType === "text") {
+        convertedData = convertedData.toString(responseEncoding);
+        if (!responseEncoding || responseEncoding === "utf8") {
+          convertedData = utils$1.stripBOM(convertedData);
+        }
+      } else if (responseType === "stream") {
+        convertedData = stream.Readable.from(convertedData);
+      }
+      return settle(resolve, reject, {
+        data: convertedData,
+        status: 200,
+        statusText: "OK",
+        headers: new AxiosHeaders(),
+        config
+      });
+    }
+    if (supportedProtocols.indexOf(protocol) === -1) {
+      return reject(new AxiosError(
+        "Unsupported protocol " + protocol,
+        AxiosError.ERR_BAD_REQUEST,
+        config
+      ));
+    }
+    const headers = AxiosHeaders.from(config.headers).normalize();
+    headers.set("User-Agent", "axios/" + VERSION, false);
+    const { onUploadProgress, onDownloadProgress } = config;
+    const maxRate = config.maxRate;
+    let maxUploadRate = void 0;
+    let maxDownloadRate = void 0;
+    if (utils$1.isSpecCompliantForm(data)) {
+      const userBoundary = headers.getContentType(/boundary=([-_\w\d]{10,70})/i);
+      data = formDataToStream(data, (formHeaders) => {
+        headers.set(formHeaders);
+      }, {
+        tag: `axios-${VERSION}-boundary`,
+        boundary: userBoundary && userBoundary[1] || void 0
+      });
+    } else if (utils$1.isFormData(data) && utils$1.isFunction(data.getHeaders)) {
+      headers.set(data.getHeaders());
+      if (!headers.hasContentLength()) {
+        try {
+          const knownLength = await require$$1.promisify(data.getLength).call(data);
+          Number.isFinite(knownLength) && knownLength >= 0 && headers.setContentLength(knownLength);
+        } catch (e) {
+        }
+      }
+    } else if (utils$1.isBlob(data) || utils$1.isFile(data)) {
+      data.size && headers.setContentType(data.type || "application/octet-stream");
+      headers.setContentLength(data.size || 0);
+      data = stream.Readable.from(readBlob(data));
+    } else if (data && !utils$1.isStream(data)) {
+      if (Buffer.isBuffer(data)) ;
+      else if (utils$1.isArrayBuffer(data)) {
+        data = Buffer.from(new Uint8Array(data));
+      } else if (utils$1.isString(data)) {
+        data = Buffer.from(data, "utf-8");
+      } else {
+        return reject(new AxiosError(
+          "Data after transformation must be a string, an ArrayBuffer, a Buffer, or a Stream",
+          AxiosError.ERR_BAD_REQUEST,
+          config
+        ));
+      }
+      headers.setContentLength(data.length, false);
+      if (config.maxBodyLength > -1 && data.length > config.maxBodyLength) {
+        return reject(new AxiosError(
+          "Request body larger than maxBodyLength limit",
+          AxiosError.ERR_BAD_REQUEST,
+          config
+        ));
+      }
+    }
+    const contentLength = utils$1.toFiniteNumber(headers.getContentLength());
+    if (utils$1.isArray(maxRate)) {
+      maxUploadRate = maxRate[0];
+      maxDownloadRate = maxRate[1];
+    } else {
+      maxUploadRate = maxDownloadRate = maxRate;
+    }
+    if (data && (onUploadProgress || maxUploadRate)) {
+      if (!utils$1.isStream(data)) {
+        data = stream.Readable.from(data, { objectMode: false });
+      }
+      data = stream.pipeline([data, new AxiosTransformStream({
+        maxRate: utils$1.toFiniteNumber(maxUploadRate)
+      })], utils$1.noop);
+      onUploadProgress && data.on("progress", flushOnFinish(
+        data,
+        progressEventDecorator(
+          contentLength,
+          progressEventReducer(asyncDecorator(onUploadProgress), false, 3)
+        )
+      ));
+    }
+    let auth = void 0;
+    if (config.auth) {
+      const username = config.auth.username || "";
+      const password = config.auth.password || "";
+      auth = username + ":" + password;
+    }
+    if (!auth && parsed.username) {
+      const urlUsername = parsed.username;
+      const urlPassword = parsed.password;
+      auth = urlUsername + ":" + urlPassword;
+    }
+    auth && headers.delete("authorization");
+    let path2;
+    try {
+      path2 = buildURL(
+        parsed.pathname + parsed.search,
+        config.params,
+        config.paramsSerializer
+      ).replace(/^\?/, "");
+    } catch (err) {
+      const customErr = new Error(err.message);
+      customErr.config = config;
+      customErr.url = config.url;
+      customErr.exists = true;
+      return reject(customErr);
+    }
+    headers.set(
+      "Accept-Encoding",
+      "gzip, compress, deflate" + (isBrotliSupported ? ", br" : ""),
+      false
+    );
+    const options = {
+      path: path2,
+      method,
+      headers: headers.toJSON(),
+      agents: { http: config.httpAgent, https: config.httpsAgent },
+      auth,
+      protocol,
+      family,
+      beforeRedirect: dispatchBeforeRedirect,
+      beforeRedirects: {}
+    };
+    !utils$1.isUndefined(lookup) && (options.lookup = lookup);
+    if (config.socketPath) {
+      options.socketPath = config.socketPath;
+    } else {
+      options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
+      options.port = parsed.port;
+      setProxy(options, config.proxy, protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options.path);
+    }
+    let transport;
+    const isHttpsRequest = isHttps.test(options.protocol);
+    options.agent = isHttpsRequest ? config.httpsAgent : config.httpAgent;
+    if (config.transport) {
+      transport = config.transport;
+    } else if (config.maxRedirects === 0) {
+      transport = isHttpsRequest ? require$$4 : require$$3;
+    } else {
+      if (config.maxRedirects) {
+        options.maxRedirects = config.maxRedirects;
+      }
+      if (config.beforeRedirect) {
+        options.beforeRedirects.config = config.beforeRedirect;
+      }
+      transport = isHttpsRequest ? httpsFollow : httpFollow;
+    }
+    if (config.maxBodyLength > -1) {
+      options.maxBodyLength = config.maxBodyLength;
+    } else {
+      options.maxBodyLength = Infinity;
+    }
+    if (config.insecureHTTPParser) {
+      options.insecureHTTPParser = config.insecureHTTPParser;
+    }
+    req = transport.request(options, function handleResponse(res) {
+      if (req.destroyed) return;
+      const streams = [res];
+      const responseLength = +res.headers["content-length"];
+      if (onDownloadProgress || maxDownloadRate) {
+        const transformStream = new AxiosTransformStream({
+          maxRate: utils$1.toFiniteNumber(maxDownloadRate)
+        });
+        onDownloadProgress && transformStream.on("progress", flushOnFinish(
+          transformStream,
+          progressEventDecorator(
+            responseLength,
+            progressEventReducer(asyncDecorator(onDownloadProgress), true, 3)
+          )
+        ));
+        streams.push(transformStream);
+      }
+      let responseStream = res;
+      const lastRequest = res.req || req;
+      if (config.decompress !== false && res.headers["content-encoding"]) {
+        if (method === "HEAD" || res.statusCode === 204) {
+          delete res.headers["content-encoding"];
+        }
+        switch ((res.headers["content-encoding"] || "").toLowerCase()) {
+          case "gzip":
+          case "x-gzip":
+          case "compress":
+          case "x-compress":
+            streams.push(zlib.createUnzip(zlibOptions));
+            delete res.headers["content-encoding"];
+            break;
+          case "deflate":
+            streams.push(new ZlibHeaderTransformStream());
+            streams.push(zlib.createUnzip(zlibOptions));
+            delete res.headers["content-encoding"];
+            break;
+          case "br":
+            if (isBrotliSupported) {
+              streams.push(zlib.createBrotliDecompress(brotliOptions));
+              delete res.headers["content-encoding"];
+            }
+        }
+      }
+      responseStream = streams.length > 1 ? stream.pipeline(streams, utils$1.noop) : streams[0];
+      const offListeners = stream.finished(responseStream, () => {
+        offListeners();
+        onFinished();
+      });
+      const response = {
+        status: res.statusCode,
+        statusText: res.statusMessage,
+        headers: new AxiosHeaders(res.headers),
+        config,
+        request: lastRequest
+      };
+      if (responseType === "stream") {
+        response.data = responseStream;
+        settle(resolve, reject, response);
+      } else {
+        const responseBuffer = [];
+        let totalResponseBytes = 0;
+        responseStream.on("data", function handleStreamData(chunk) {
+          responseBuffer.push(chunk);
+          totalResponseBytes += chunk.length;
+          if (config.maxContentLength > -1 && totalResponseBytes > config.maxContentLength) {
+            rejected = true;
+            responseStream.destroy();
+            reject(new AxiosError(
+              "maxContentLength size of " + config.maxContentLength + " exceeded",
+              AxiosError.ERR_BAD_RESPONSE,
+              config,
+              lastRequest
+            ));
+          }
+        });
+        responseStream.on("aborted", function handlerStreamAborted() {
+          if (rejected) {
+            return;
+          }
+          const err = new AxiosError(
+            "stream has been aborted",
+            AxiosError.ERR_BAD_RESPONSE,
+            config,
+            lastRequest
+          );
+          responseStream.destroy(err);
+          reject(err);
+        });
+        responseStream.on("error", function handleStreamError(err) {
+          if (req.destroyed) return;
+          reject(AxiosError.from(err, null, config, lastRequest));
+        });
+        responseStream.on("end", function handleStreamEnd() {
+          try {
+            let responseData = responseBuffer.length === 1 ? responseBuffer[0] : Buffer.concat(responseBuffer);
+            if (responseType !== "arraybuffer") {
+              responseData = responseData.toString(responseEncoding);
+              if (!responseEncoding || responseEncoding === "utf8") {
+                responseData = utils$1.stripBOM(responseData);
+              }
+            }
+            response.data = responseData;
+          } catch (err) {
+            return reject(AxiosError.from(err, null, config, response.request, response));
+          }
+          settle(resolve, reject, response);
+        });
+      }
+      emitter.once("abort", (err) => {
+        if (!responseStream.destroyed) {
+          responseStream.emit("error", err);
+          responseStream.destroy();
+        }
+      });
+    });
+    emitter.once("abort", (err) => {
+      reject(err);
+      req.destroy(err);
+    });
+    req.on("error", function handleRequestError(err) {
+      reject(AxiosError.from(err, null, config, req));
+    });
+    req.on("socket", function handleRequestSocket(socket) {
+      socket.setKeepAlive(true, 1e3 * 60);
+    });
+    if (config.timeout) {
+      const timeout = parseInt(config.timeout, 10);
+      if (Number.isNaN(timeout)) {
+        reject(new AxiosError(
+          "error trying to parse `config.timeout` to int",
+          AxiosError.ERR_BAD_OPTION_VALUE,
+          config,
+          req
+        ));
+        return;
+      }
+      req.setTimeout(timeout, function handleRequestTimeout() {
+        if (isDone) return;
+        let timeoutErrorMessage = config.timeout ? "timeout of " + config.timeout + "ms exceeded" : "timeout exceeded";
+        const transitional2 = config.transitional || transitionalDefaults;
+        if (config.timeoutErrorMessage) {
+          timeoutErrorMessage = config.timeoutErrorMessage;
+        }
+        reject(new AxiosError(
+          timeoutErrorMessage,
+          transitional2.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED,
+          config,
+          req
+        ));
+        abort2();
+      });
+    }
+    if (utils$1.isStream(data)) {
+      let ended = false;
+      let errored = false;
+      data.on("end", () => {
+        ended = true;
+      });
+      data.once("error", (err) => {
+        errored = true;
+        req.destroy(err);
+      });
+      data.on("close", () => {
+        if (!ended && !errored) {
+          abort2(new CanceledError("Request stream has been aborted", config, req));
+        }
+      });
+      data.pipe(req);
+    } else {
+      req.end(data);
+    }
+  });
+};
+const isURLSameOrigin = platform.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2, isMSIE) => (url2) => {
+  url2 = new URL(url2, platform.origin);
+  return origin2.protocol === url2.protocol && origin2.host === url2.host && (isMSIE || origin2.port === url2.port);
+})(
+  new URL(platform.origin),
+  platform.navigator && /(msie|trident)/i.test(platform.navigator.userAgent)
+) : () => true;
+const cookies = platform.hasStandardBrowserEnv ? (
+  // Standard browser envs support document.cookie
+  {
+    write(name, value, expires, path2, domain, secure) {
+      const cookie = [name + "=" + encodeURIComponent(value)];
+      utils$1.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
+      utils$1.isString(path2) && cookie.push("path=" + path2);
+      utils$1.isString(domain) && cookie.push("domain=" + domain);
+      secure === true && cookie.push("secure");
+      document.cookie = cookie.join("; ");
+    },
+    read(name) {
+      const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+      return match ? decodeURIComponent(match[3]) : null;
+    },
+    remove(name) {
+      this.write(name, "", Date.now() - 864e5);
+    }
+  }
+) : (
+  // Non-standard browser env (web workers, react-native) lack needed support.
+  {
+    write() {
+    },
+    read() {
+      return null;
+    },
+    remove() {
+    }
+  }
+);
+const headersToObject = (thing) => thing instanceof AxiosHeaders ? { ...thing } : thing;
+function mergeConfig(config1, config2) {
+  config2 = config2 || {};
+  const config = {};
+  function getMergedValue(target, source, prop, caseless) {
+    if (utils$1.isPlainObject(target) && utils$1.isPlainObject(source)) {
+      return utils$1.merge.call({ caseless }, target, source);
+    } else if (utils$1.isPlainObject(source)) {
+      return utils$1.merge({}, source);
+    } else if (utils$1.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+  function mergeDeepProperties(a, b, prop, caseless) {
+    if (!utils$1.isUndefined(b)) {
+      return getMergedValue(a, b, prop, caseless);
+    } else if (!utils$1.isUndefined(a)) {
+      return getMergedValue(void 0, a, prop, caseless);
+    }
+  }
+  function valueFromConfig2(a, b) {
+    if (!utils$1.isUndefined(b)) {
+      return getMergedValue(void 0, b);
+    }
+  }
+  function defaultToConfig2(a, b) {
+    if (!utils$1.isUndefined(b)) {
+      return getMergedValue(void 0, b);
+    } else if (!utils$1.isUndefined(a)) {
+      return getMergedValue(void 0, a);
+    }
+  }
+  function mergeDirectKeys(a, b, prop) {
+    if (prop in config2) {
+      return getMergedValue(a, b);
+    } else if (prop in config1) {
+      return getMergedValue(void 0, a);
+    }
+  }
+  const mergeMap = {
+    url: valueFromConfig2,
+    method: valueFromConfig2,
+    data: valueFromConfig2,
+    baseURL: defaultToConfig2,
+    transformRequest: defaultToConfig2,
+    transformResponse: defaultToConfig2,
+    paramsSerializer: defaultToConfig2,
+    timeout: defaultToConfig2,
+    timeoutMessage: defaultToConfig2,
+    withCredentials: defaultToConfig2,
+    withXSRFToken: defaultToConfig2,
+    adapter: defaultToConfig2,
+    responseType: defaultToConfig2,
+    xsrfCookieName: defaultToConfig2,
+    xsrfHeaderName: defaultToConfig2,
+    onUploadProgress: defaultToConfig2,
+    onDownloadProgress: defaultToConfig2,
+    decompress: defaultToConfig2,
+    maxContentLength: defaultToConfig2,
+    maxBodyLength: defaultToConfig2,
+    beforeRedirect: defaultToConfig2,
+    transport: defaultToConfig2,
+    httpAgent: defaultToConfig2,
+    httpsAgent: defaultToConfig2,
+    cancelToken: defaultToConfig2,
+    socketPath: defaultToConfig2,
+    responseEncoding: defaultToConfig2,
+    validateStatus: mergeDirectKeys,
+    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
+  };
+  utils$1.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
+    const merge2 = mergeMap[prop] || mergeDeepProperties;
+    const configValue = merge2(config1[prop], config2[prop], prop);
+    utils$1.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config[prop] = configValue);
+  });
+  return config;
+}
+const resolveConfig = (config) => {
+  const newConfig = mergeConfig({}, config);
+  let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
+  newConfig.headers = headers = AxiosHeaders.from(headers);
+  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  if (auth) {
+    headers.set(
+      "Authorization",
+      "Basic " + btoa((auth.username || "") + ":" + (auth.password ? unescape(encodeURIComponent(auth.password)) : ""))
+    );
+  }
+  let contentType;
+  if (utils$1.isFormData(data)) {
+    if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv) {
+      headers.setContentType(void 0);
+    } else if ((contentType = headers.getContentType()) !== false) {
+      const [type, ...tokens] = contentType ? contentType.split(";").map((token) => token.trim()).filter(Boolean) : [];
+      headers.setContentType([type || "multipart/form-data", ...tokens].join("; "));
+    }
+  }
+  if (platform.hasStandardBrowserEnv) {
+    withXSRFToken && utils$1.isFunction(withXSRFToken) && (withXSRFToken = withXSRFToken(newConfig));
+    if (withXSRFToken || withXSRFToken !== false && isURLSameOrigin(newConfig.url)) {
+      const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies.read(xsrfCookieName);
+      if (xsrfValue) {
+        headers.set(xsrfHeaderName, xsrfValue);
+      }
+    }
+  }
+  return newConfig;
+};
+const isXHRAdapterSupported = typeof XMLHttpRequest !== "undefined";
+const xhrAdapter = isXHRAdapterSupported && function(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    const _config = resolveConfig(config);
+    let requestData = _config.data;
+    const requestHeaders = AxiosHeaders.from(_config.headers).normalize();
+    let { responseType, onUploadProgress, onDownloadProgress } = _config;
+    let onCanceled;
+    let uploadThrottled, downloadThrottled;
+    let flushUpload, flushDownload;
+    function done() {
+      flushUpload && flushUpload();
+      flushDownload && flushDownload();
+      _config.cancelToken && _config.cancelToken.unsubscribe(onCanceled);
+      _config.signal && _config.signal.removeEventListener("abort", onCanceled);
+    }
+    let request = new XMLHttpRequest();
+    request.open(_config.method.toUpperCase(), _config.url, true);
+    request.timeout = _config.timeout;
+    function onloadend() {
+      if (!request) {
+        return;
+      }
+      const responseHeaders = AxiosHeaders.from(
+        "getAllResponseHeaders" in request && request.getAllResponseHeaders()
+      );
+      const responseData = !responseType || responseType === "text" || responseType === "json" ? request.responseText : request.response;
+      const response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config,
+        request
+      };
+      settle(function _resolve(value) {
+        resolve(value);
+        done();
+      }, function _reject(err) {
+        reject(err);
+        done();
+      }, response);
+      request = null;
+    }
+    if ("onloadend" in request) {
+      request.onloadend = onloadend;
+    } else {
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf("file:") === 0)) {
+          return;
+        }
+        setTimeout(onloadend);
+      };
+    }
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+      reject(new AxiosError("Request aborted", AxiosError.ECONNABORTED, config, request));
+      request = null;
+    };
+    request.onerror = function handleError() {
+      reject(new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request));
+      request = null;
+    };
+    request.ontimeout = function handleTimeout() {
+      let timeoutErrorMessage = _config.timeout ? "timeout of " + _config.timeout + "ms exceeded" : "timeout exceeded";
+      const transitional2 = _config.transitional || transitionalDefaults;
+      if (_config.timeoutErrorMessage) {
+        timeoutErrorMessage = _config.timeoutErrorMessage;
+      }
+      reject(new AxiosError(
+        timeoutErrorMessage,
+        transitional2.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED,
+        config,
+        request
+      ));
+      request = null;
+    };
+    requestData === void 0 && requestHeaders.setContentType(null);
+    if ("setRequestHeader" in request) {
+      utils$1.forEach(requestHeaders.toJSON(), function setRequestHeader(val, key) {
+        request.setRequestHeader(key, val);
+      });
+    }
+    if (!utils$1.isUndefined(_config.withCredentials)) {
+      request.withCredentials = !!_config.withCredentials;
+    }
+    if (responseType && responseType !== "json") {
+      request.responseType = _config.responseType;
+    }
+    if (onDownloadProgress) {
+      [downloadThrottled, flushDownload] = progressEventReducer(onDownloadProgress, true);
+      request.addEventListener("progress", downloadThrottled);
+    }
+    if (onUploadProgress && request.upload) {
+      [uploadThrottled, flushUpload] = progressEventReducer(onUploadProgress);
+      request.upload.addEventListener("progress", uploadThrottled);
+      request.upload.addEventListener("loadend", flushUpload);
+    }
+    if (_config.cancelToken || _config.signal) {
+      onCanceled = (cancel) => {
+        if (!request) {
+          return;
+        }
+        reject(!cancel || cancel.type ? new CanceledError(null, config, request) : cancel);
+        request.abort();
+        request = null;
+      };
+      _config.cancelToken && _config.cancelToken.subscribe(onCanceled);
+      if (_config.signal) {
+        _config.signal.aborted ? onCanceled() : _config.signal.addEventListener("abort", onCanceled);
+      }
+    }
+    const protocol = parseProtocol(_config.url);
+    if (protocol && platform.protocols.indexOf(protocol) === -1) {
+      reject(new AxiosError("Unsupported protocol " + protocol + ":", AxiosError.ERR_BAD_REQUEST, config));
+      return;
+    }
+    request.send(requestData || null);
+  });
+};
+const composeSignals = (signals, timeout) => {
+  const { length } = signals = signals ? signals.filter(Boolean) : [];
+  if (timeout || length) {
+    let controller = new AbortController();
+    let aborted;
+    const onabort = function(reason) {
+      if (!aborted) {
+        aborted = true;
+        unsubscribe();
+        const err = reason instanceof Error ? reason : this.reason;
+        controller.abort(err instanceof AxiosError ? err : new CanceledError(err instanceof Error ? err.message : err));
+      }
+    };
+    let timer = timeout && setTimeout(() => {
+      timer = null;
+      onabort(new AxiosError(`timeout ${timeout} of ms exceeded`, AxiosError.ETIMEDOUT));
+    }, timeout);
+    const unsubscribe = () => {
+      if (signals) {
+        timer && clearTimeout(timer);
+        timer = null;
+        signals.forEach((signal2) => {
+          signal2.unsubscribe ? signal2.unsubscribe(onabort) : signal2.removeEventListener("abort", onabort);
+        });
+        signals = null;
+      }
+    };
+    signals.forEach((signal2) => signal2.addEventListener("abort", onabort));
+    const { signal } = controller;
+    signal.unsubscribe = () => utils$1.asap(unsubscribe);
+    return signal;
+  }
+};
+const streamChunk = function* (chunk, chunkSize) {
+  let len = chunk.byteLength;
+  if (len < chunkSize) {
+    yield chunk;
+    return;
+  }
+  let pos = 0;
+  let end;
+  while (pos < len) {
+    end = pos + chunkSize;
+    yield chunk.slice(pos, end);
+    pos = end;
+  }
+};
+const readBytes = async function* (iterable, chunkSize) {
+  for await (const chunk of readStream(iterable)) {
+    yield* streamChunk(chunk, chunkSize);
+  }
+};
+const readStream = async function* (stream2) {
+  if (stream2[Symbol.asyncIterator]) {
+    yield* stream2;
+    return;
+  }
+  const reader = stream2.getReader();
+  try {
+    for (; ; ) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      yield value;
+    }
+  } finally {
+    await reader.cancel();
+  }
+};
+const trackStream = (stream2, chunkSize, onProgress, onFinish) => {
+  const iterator = readBytes(stream2, chunkSize);
+  let bytes = 0;
+  let done;
+  let _onFinish = (e) => {
+    if (!done) {
+      done = true;
+      onFinish && onFinish(e);
+    }
+  };
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done: done2, value } = await iterator.next();
+        if (done2) {
+          _onFinish();
+          controller.close();
+          return;
+        }
+        let len = value.byteLength;
+        if (onProgress) {
+          let loadedBytes = bytes += len;
+          onProgress(loadedBytes);
+        }
+        controller.enqueue(new Uint8Array(value));
+      } catch (err) {
+        _onFinish(err);
+        throw err;
+      }
+    },
+    cancel(reason) {
+      _onFinish(reason);
+      return iterator.return();
+    }
+  }, {
+    highWaterMark: 2
+  });
+};
+const isFetchSupported = typeof fetch === "function" && typeof Request === "function" && typeof Response === "function";
+const isReadableStreamSupported = isFetchSupported && typeof ReadableStream === "function";
+const encodeText = isFetchSupported && (typeof TextEncoder === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder()) : async (str) => new Uint8Array(await new Response(str).arrayBuffer()));
+const test = (fn, ...args) => {
+  try {
+    return !!fn(...args);
+  } catch (e) {
+    return false;
+  }
+};
+const supportsRequestStream = isReadableStreamSupported && test(() => {
+  let duplexAccessed = false;
+  const hasContentType = new Request(platform.origin, {
+    body: new ReadableStream(),
+    method: "POST",
+    get duplex() {
+      duplexAccessed = true;
+      return "half";
+    }
+  }).headers.has("Content-Type");
+  return duplexAccessed && !hasContentType;
+});
+const DEFAULT_CHUNK_SIZE = 64 * 1024;
+const supportsResponseStream = isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response("").body));
+const resolvers = {
+  stream: supportsResponseStream && ((res) => res.body)
+};
+isFetchSupported && ((res) => {
+  ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((type) => {
+    !resolvers[type] && (resolvers[type] = utils$1.isFunction(res[type]) ? (res2) => res2[type]() : (_14, config) => {
+      throw new AxiosError(`Response type '${type}' is not supported`, AxiosError.ERR_NOT_SUPPORT, config);
+    });
+  });
+})(new Response());
+const getBodyLength = async (body) => {
+  if (body == null) {
+    return 0;
+  }
+  if (utils$1.isBlob(body)) {
+    return body.size;
+  }
+  if (utils$1.isSpecCompliantForm(body)) {
+    const _request = new Request(platform.origin, {
+      method: "POST",
+      body
+    });
+    return (await _request.arrayBuffer()).byteLength;
+  }
+  if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
+    return body.byteLength;
+  }
+  if (utils$1.isURLSearchParams(body)) {
+    body = body + "";
+  }
+  if (utils$1.isString(body)) {
+    return (await encodeText(body)).byteLength;
+  }
+};
+const resolveBodyLength = async (headers, body) => {
+  const length = utils$1.toFiniteNumber(headers.getContentLength());
+  return length == null ? getBodyLength(body) : length;
+};
+const fetchAdapter = isFetchSupported && (async (config) => {
+  let {
+    url: url2,
+    method,
+    data,
+    signal,
+    cancelToken,
+    timeout,
+    onDownloadProgress,
+    onUploadProgress,
+    responseType,
+    headers,
+    withCredentials = "same-origin",
+    fetchOptions
+  } = resolveConfig(config);
+  responseType = responseType ? (responseType + "").toLowerCase() : "text";
+  let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+  let request;
+  const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+    composedSignal.unsubscribe();
+  });
+  let requestContentLength;
+  try {
+    if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
+      let _request = new Request(url2, {
+        method: "POST",
+        body: data,
+        duplex: "half"
+      });
+      let contentTypeHeader;
+      if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get("content-type"))) {
+        headers.setContentType(contentTypeHeader);
+      }
+      if (_request.body) {
+        const [onProgress, flush] = progressEventDecorator(
+          requestContentLength,
+          progressEventReducer(asyncDecorator(onUploadProgress))
+        );
+        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
+      }
+    }
+    if (!utils$1.isString(withCredentials)) {
+      withCredentials = withCredentials ? "include" : "omit";
+    }
+    const isCredentialsSupported = "credentials" in Request.prototype;
+    request = new Request(url2, {
+      ...fetchOptions,
+      signal: composedSignal,
+      method: method.toUpperCase(),
+      headers: headers.normalize().toJSON(),
+      body: data,
+      duplex: "half",
+      credentials: isCredentialsSupported ? withCredentials : void 0
+    });
+    let response = await fetch(request);
+    const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
+    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
+      const options = {};
+      ["status", "statusText", "headers"].forEach((prop) => {
+        options[prop] = response[prop];
+      });
+      const responseContentLength = utils$1.toFiniteNumber(response.headers.get("content-length"));
+      const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
+        responseContentLength,
+        progressEventReducer(asyncDecorator(onDownloadProgress), true)
+      ) || [];
+      response = new Response(
+        trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+          flush && flush();
+          unsubscribe && unsubscribe();
+        }),
+        options
+      );
+    }
+    responseType = responseType || "text";
+    let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || "text"](response, config);
+    !isStreamResponse && unsubscribe && unsubscribe();
+    return await new Promise((resolve, reject) => {
+      settle(resolve, reject, {
+        data: responseData,
+        headers: AxiosHeaders.from(response.headers),
+        status: response.status,
+        statusText: response.statusText,
+        config,
+        request
+      });
+    });
+  } catch (err) {
+    unsubscribe && unsubscribe();
+    if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
+      throw Object.assign(
+        new AxiosError("Network Error", AxiosError.ERR_NETWORK, config, request),
+        {
+          cause: err.cause || err
+        }
+      );
+    }
+    throw AxiosError.from(err, err && err.code, config, request);
+  }
+});
+const knownAdapters = {
+  http: httpAdapter,
+  xhr: xhrAdapter,
+  fetch: fetchAdapter
+};
+utils$1.forEach(knownAdapters, (fn, value) => {
+  if (fn) {
+    try {
+      Object.defineProperty(fn, "name", { value });
+    } catch (e) {
+    }
+    Object.defineProperty(fn, "adapterName", { value });
+  }
+});
+const renderReason = (reason) => `- ${reason}`;
+const isResolvedHandle = (adapter) => utils$1.isFunction(adapter) || adapter === null || adapter === false;
+const adapters = {
+  getAdapter: (adapters2) => {
+    adapters2 = utils$1.isArray(adapters2) ? adapters2 : [adapters2];
+    const { length } = adapters2;
+    let nameOrAdapter;
+    let adapter;
+    const rejectedReasons = {};
+    for (let i = 0; i < length; i++) {
+      nameOrAdapter = adapters2[i];
+      let id;
+      adapter = nameOrAdapter;
+      if (!isResolvedHandle(nameOrAdapter)) {
+        adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
+        if (adapter === void 0) {
+          throw new AxiosError(`Unknown adapter '${id}'`);
+        }
+      }
+      if (adapter) {
+        break;
+      }
+      rejectedReasons[id || "#" + i] = adapter;
+    }
+    if (!adapter) {
+      const reasons = Object.entries(rejectedReasons).map(
+        ([id, state2]) => `adapter ${id} ` + (state2 === false ? "is not supported by the environment" : "is not available in the build")
+      );
+      let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
+      throw new AxiosError(
+        `There is no suitable adapter to dispatch the request ` + s,
+        "ERR_NOT_SUPPORT"
+      );
+    }
+    return adapter;
+  },
+  adapters: knownAdapters
+};
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+  if (config.signal && config.signal.aborted) {
+    throw new CanceledError(null, config);
+  }
+}
+function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+  config.headers = AxiosHeaders.from(config.headers);
+  config.data = transformData.call(
+    config,
+    config.transformRequest
+  );
+  if (["post", "put", "patch"].indexOf(config.method) !== -1) {
+    config.headers.setContentType("application/x-www-form-urlencoded", false);
+  }
+  const adapter = adapters.getAdapter(config.adapter || defaults.adapter);
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+    response.data = transformData.call(
+      config,
+      config.transformResponse,
+      response
+    );
+    response.headers = AxiosHeaders.from(response.headers);
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+      if (reason && reason.response) {
+        reason.response.data = transformData.call(
+          config,
+          config.transformResponse,
+          reason.response
+        );
+        reason.response.headers = AxiosHeaders.from(reason.response.headers);
+      }
+    }
+    return Promise.reject(reason);
+  });
+}
+const validators$1 = {};
+["object", "boolean", "number", "function", "string", "symbol"].forEach((type, i) => {
+  validators$1[type] = function validator2(thing) {
+    return typeof thing === type || "a" + (i < 1 ? "n " : " ") + type;
+  };
+});
+const deprecatedWarnings = {};
+validators$1.transitional = function transitional(validator2, version, message) {
+  function formatMessage(opt, desc) {
+    return "[Axios v" + VERSION + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
+  }
+  return (value, opt, opts) => {
+    if (validator2 === false) {
+      throw new AxiosError(
+        formatMessage(opt, " has been removed" + (version ? " in " + version : "")),
+        AxiosError.ERR_DEPRECATED
+      );
+    }
+    if (version && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      console.warn(
+        formatMessage(
+          opt,
+          " has been deprecated since v" + version + " and will be removed in the near future"
+        )
+      );
+    }
+    return validator2 ? validator2(value, opt, opts) : true;
+  };
+};
+validators$1.spelling = function spelling(correctSpelling) {
+  return (value, opt) => {
+    console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
+    return true;
+  };
+};
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== "object") {
+    throw new AxiosError("options must be an object", AxiosError.ERR_BAD_OPTION_VALUE);
+  }
+  const keys = Object.keys(options);
+  let i = keys.length;
+  while (i-- > 0) {
+    const opt = keys[i];
+    const validator2 = schema[opt];
+    if (validator2) {
+      const value = options[opt];
+      const result = value === void 0 || validator2(value, opt, options);
+      if (result !== true) {
+        throw new AxiosError("option " + opt + " must be " + result, AxiosError.ERR_BAD_OPTION_VALUE);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw new AxiosError("Unknown option " + opt, AxiosError.ERR_BAD_OPTION);
+    }
+  }
+}
+const validator = {
+  assertOptions,
+  validators: validators$1
+};
+const validators = validator.validators;
+class Axios {
+  constructor(instanceConfig) {
+    this.defaults = instanceConfig;
+    this.interceptors = {
+      request: new InterceptorManager(),
+      response: new InterceptorManager()
+    };
+  }
+  /**
+   * Dispatch a request
+   *
+   * @param {String|Object} configOrUrl The config specific for this request (merged with this.defaults)
+   * @param {?Object} config
+   *
+   * @returns {Promise} The Promise to be fulfilled
+   */
+  async request(configOrUrl, config) {
+    try {
+      return await this._request(configOrUrl, config);
+    } catch (err) {
+      if (err instanceof Error) {
+        let dummy = {};
+        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
+        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
+        try {
+          if (!err.stack) {
+            err.stack = stack;
+          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
+            err.stack += "\n" + stack;
+          }
+        } catch (e) {
+        }
+      }
+      throw err;
+    }
+  }
+  _request(configOrUrl, config) {
+    if (typeof configOrUrl === "string") {
+      config = config || {};
+      config.url = configOrUrl;
+    } else {
+      config = configOrUrl || {};
+    }
+    config = mergeConfig(this.defaults, config);
+    const { transitional: transitional2, paramsSerializer, headers } = config;
+    if (transitional2 !== void 0) {
+      validator.assertOptions(transitional2, {
+        silentJSONParsing: validators.transitional(validators.boolean),
+        forcedJSONParsing: validators.transitional(validators.boolean),
+        clarifyTimeoutError: validators.transitional(validators.boolean)
+      }, false);
+    }
+    if (paramsSerializer != null) {
+      if (utils$1.isFunction(paramsSerializer)) {
+        config.paramsSerializer = {
+          serialize: paramsSerializer
+        };
+      } else {
+        validator.assertOptions(paramsSerializer, {
+          encode: validators.function,
+          serialize: validators.function
+        }, true);
+      }
+    }
+    validator.assertOptions(config, {
+      baseUrl: validators.spelling("baseURL"),
+      withXsrfToken: validators.spelling("withXSRFToken")
+    }, true);
+    config.method = (config.method || this.defaults.method || "get").toLowerCase();
+    let contextHeaders = headers && utils$1.merge(
+      headers.common,
+      headers[config.method]
+    );
+    headers && utils$1.forEach(
+      ["delete", "get", "head", "post", "put", "patch", "common"],
+      (method) => {
+        delete headers[method];
+      }
+    );
+    config.headers = AxiosHeaders.concat(contextHeaders, headers);
+    const requestInterceptorChain = [];
+    let synchronousRequestInterceptors = true;
+    this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+      if (typeof interceptor.runWhen === "function" && interceptor.runWhen(config) === false) {
+        return;
+      }
+      synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+      requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+    });
+    const responseInterceptorChain = [];
+    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+      responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+    });
+    let promise;
+    let i = 0;
+    let len;
+    if (!synchronousRequestInterceptors) {
+      const chain = [dispatchRequest.bind(this), void 0];
+      chain.unshift.apply(chain, requestInterceptorChain);
+      chain.push.apply(chain, responseInterceptorChain);
+      len = chain.length;
+      promise = Promise.resolve(config);
+      while (i < len) {
+        promise = promise.then(chain[i++], chain[i++]);
+      }
+      return promise;
+    }
+    len = requestInterceptorChain.length;
+    let newConfig = config;
+    i = 0;
+    while (i < len) {
+      const onFulfilled = requestInterceptorChain[i++];
+      const onRejected = requestInterceptorChain[i++];
+      try {
+        newConfig = onFulfilled(newConfig);
+      } catch (error) {
+        onRejected.call(this, error);
+        break;
+      }
+    }
+    try {
+      promise = dispatchRequest.call(this, newConfig);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    i = 0;
+    len = responseInterceptorChain.length;
+    while (i < len) {
+      promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+    }
+    return promise;
+  }
+  getUri(config) {
+    config = mergeConfig(this.defaults, config);
+    const fullPath = buildFullPath(config.baseURL, config.url);
+    return buildURL(fullPath, config.params, config.paramsSerializer);
+  }
+}
+utils$1.forEach(["delete", "get", "head", "options"], function forEachMethodNoData(method) {
+  Axios.prototype[method] = function(url2, config) {
+    return this.request(mergeConfig(config || {}, {
+      method,
+      url: url2,
+      data: (config || {}).data
+    }));
+  };
+});
+utils$1.forEach(["post", "put", "patch"], function forEachMethodWithData(method) {
+  function generateHTTPMethod(isForm) {
+    return function httpMethod(url2, data, config) {
+      return this.request(mergeConfig(config || {}, {
+        method,
+        headers: isForm ? {
+          "Content-Type": "multipart/form-data"
+        } : {},
+        url: url2,
+        data
+      }));
+    };
+  }
+  Axios.prototype[method] = generateHTTPMethod();
+  Axios.prototype[method + "Form"] = generateHTTPMethod(true);
+});
+class CancelToken {
+  constructor(executor) {
+    if (typeof executor !== "function") {
+      throw new TypeError("executor must be a function.");
+    }
+    let resolvePromise;
+    this.promise = new Promise(function promiseExecutor(resolve) {
+      resolvePromise = resolve;
+    });
+    const token = this;
+    this.promise.then((cancel) => {
+      if (!token._listeners) return;
+      let i = token._listeners.length;
+      while (i-- > 0) {
+        token._listeners[i](cancel);
+      }
+      token._listeners = null;
+    });
+    this.promise.then = (onfulfilled) => {
+      let _resolve;
+      const promise = new Promise((resolve) => {
+        token.subscribe(resolve);
+        _resolve = resolve;
+      }).then(onfulfilled);
+      promise.cancel = function reject() {
+        token.unsubscribe(_resolve);
+      };
+      return promise;
+    };
+    executor(function cancel(message, config, request) {
+      if (token.reason) {
+        return;
+      }
+      token.reason = new CanceledError(message, config, request);
+      resolvePromise(token.reason);
+    });
+  }
+  /**
+   * Throws a `CanceledError` if cancellation has been requested.
+   */
+  throwIfRequested() {
+    if (this.reason) {
+      throw this.reason;
+    }
+  }
+  /**
+   * Subscribe to the cancel signal
+   */
+  subscribe(listener) {
+    if (this.reason) {
+      listener(this.reason);
+      return;
+    }
+    if (this._listeners) {
+      this._listeners.push(listener);
+    } else {
+      this._listeners = [listener];
+    }
+  }
+  /**
+   * Unsubscribe from the cancel signal
+   */
+  unsubscribe(listener) {
+    if (!this._listeners) {
+      return;
+    }
+    const index = this._listeners.indexOf(listener);
+    if (index !== -1) {
+      this._listeners.splice(index, 1);
+    }
+  }
+  toAbortSignal() {
+    const controller = new AbortController();
+    const abort2 = (err) => {
+      controller.abort(err);
+    };
+    this.subscribe(abort2);
+    controller.signal.unsubscribe = () => this.unsubscribe(abort2);
+    return controller.signal;
+  }
+  /**
+   * Returns an object that contains a new `CancelToken` and a function that, when called,
+   * cancels the `CancelToken`.
+   */
+  static source() {
+    let cancel;
+    const token = new CancelToken(function executor(c) {
+      cancel = c;
+    });
+    return {
+      token,
+      cancel
+    };
+  }
+}
+function spread(callback) {
+  return function wrap2(arr) {
+    return callback.apply(null, arr);
+  };
+}
+function isAxiosError(payload) {
+  return utils$1.isObject(payload) && payload.isAxiosError === true;
+}
+const HttpStatusCode = {
+  Continue: 100,
+  SwitchingProtocols: 101,
+  Processing: 102,
+  EarlyHints: 103,
+  Ok: 200,
+  Created: 201,
+  Accepted: 202,
+  NonAuthoritativeInformation: 203,
+  NoContent: 204,
+  ResetContent: 205,
+  PartialContent: 206,
+  MultiStatus: 207,
+  AlreadyReported: 208,
+  ImUsed: 226,
+  MultipleChoices: 300,
+  MovedPermanently: 301,
+  Found: 302,
+  SeeOther: 303,
+  NotModified: 304,
+  UseProxy: 305,
+  Unused: 306,
+  TemporaryRedirect: 307,
+  PermanentRedirect: 308,
+  BadRequest: 400,
+  Unauthorized: 401,
+  PaymentRequired: 402,
+  Forbidden: 403,
+  NotFound: 404,
+  MethodNotAllowed: 405,
+  NotAcceptable: 406,
+  ProxyAuthenticationRequired: 407,
+  RequestTimeout: 408,
+  Conflict: 409,
+  Gone: 410,
+  LengthRequired: 411,
+  PreconditionFailed: 412,
+  PayloadTooLarge: 413,
+  UriTooLong: 414,
+  UnsupportedMediaType: 415,
+  RangeNotSatisfiable: 416,
+  ExpectationFailed: 417,
+  ImATeapot: 418,
+  MisdirectedRequest: 421,
+  UnprocessableEntity: 422,
+  Locked: 423,
+  FailedDependency: 424,
+  TooEarly: 425,
+  UpgradeRequired: 426,
+  PreconditionRequired: 428,
+  TooManyRequests: 429,
+  RequestHeaderFieldsTooLarge: 431,
+  UnavailableForLegalReasons: 451,
+  InternalServerError: 500,
+  NotImplemented: 501,
+  BadGateway: 502,
+  ServiceUnavailable: 503,
+  GatewayTimeout: 504,
+  HttpVersionNotSupported: 505,
+  VariantAlsoNegotiates: 506,
+  InsufficientStorage: 507,
+  LoopDetected: 508,
+  NotExtended: 510,
+  NetworkAuthenticationRequired: 511
+};
+Object.entries(HttpStatusCode).forEach(([key, value]) => {
+  HttpStatusCode[value] = key;
+});
+function createInstance(defaultConfig) {
+  const context = new Axios(defaultConfig);
+  const instance = bind(Axios.prototype.request, context);
+  utils$1.extend(instance, Axios.prototype, context, { allOwnKeys: true });
+  utils$1.extend(instance, context, null, { allOwnKeys: true });
+  instance.create = function create(instanceConfig) {
+    return createInstance(mergeConfig(defaultConfig, instanceConfig));
+  };
+  return instance;
+}
+const axios = createInstance(defaults);
+axios.Axios = Axios;
+axios.CanceledError = CanceledError;
+axios.CancelToken = CancelToken;
+axios.isCancel = isCancel;
+axios.VERSION = VERSION;
+axios.toFormData = toFormData;
+axios.AxiosError = AxiosError;
+axios.Cancel = axios.CanceledError;
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = spread;
+axios.isAxiosError = isAxiosError;
+axios.mergeConfig = mergeConfig;
+axios.AxiosHeaders = AxiosHeaders;
+axios.formToJSON = (thing) => formDataToJSON(utils$1.isHTMLForm(thing) ? new FormData(thing) : thing);
+axios.getAdapter = adapters.getAdapter;
+axios.HttpStatusCode = HttpStatusCode;
+axios.default = axios;
+var niceErrors = {
+  0: "Invalid value for configuration 'enforceActions', expected 'never', 'always' or 'observed'",
+  1: function _(annotationType, key) {
+    return "Cannot apply '" + annotationType + "' to '" + key.toString() + "': Field not found.";
+  },
+  /*
+  2(prop) {
+      return `invalid decorator for '${prop.toString()}'`
+  },
+  3(prop) {
+      return `Cannot decorate '${prop.toString()}': action can only be used on properties with a function value.`
+  },
+  4(prop) {
+      return `Cannot decorate '${prop.toString()}': computed can only be used on getter properties.`
+  },
+  */
+  5: "'keys()' can only be used on observable objects, arrays, sets and maps",
+  6: "'values()' can only be used on observable objects, arrays, sets and maps",
+  7: "'entries()' can only be used on observable objects, arrays and maps",
+  8: "'set()' can only be used on observable objects, arrays and maps",
+  9: "'remove()' can only be used on observable objects, arrays and maps",
+  10: "'has()' can only be used on observable objects, arrays and maps",
+  11: "'get()' can only be used on observable objects, arrays and maps",
+  12: "Invalid annotation",
+  13: "Dynamic observable objects cannot be frozen. If you're passing observables to 3rd party component/function that calls Object.freeze, pass copy instead: toJS(observable)",
+  14: "Intercept handlers should return nothing or a change object",
+  15: "Observable arrays cannot be frozen. If you're passing observables to 3rd party component/function that calls Object.freeze, pass copy instead: toJS(observable)",
+  16: "Modification exception: the internal structure of an observable array was changed.",
+  17: function _2(index, length) {
+    return "[mobx.array] Index out of bounds, " + index + " is larger than " + length;
+  },
+  18: "mobx.map requires Map polyfill for the current browser. Check babel-polyfill or core-js/es6/map.js",
+  19: function _3(other) {
+    return "Cannot initialize from classes that inherit from Map: " + other.constructor.name;
+  },
+  20: function _4(other) {
+    return "Cannot initialize map from " + other;
+  },
+  21: function _5(dataStructure) {
+    return "Cannot convert to map from '" + dataStructure + "'";
+  },
+  22: "mobx.set requires Set polyfill for the current browser. Check babel-polyfill or core-js/es6/set.js",
+  23: "It is not possible to get index atoms from arrays",
+  24: function _6(thing) {
+    return "Cannot obtain administration from " + thing;
+  },
+  25: function _7(property, name) {
+    return "the entry '" + property + "' does not exist in the observable map '" + name + "'";
+  },
+  26: "please specify a property",
+  27: function _8(property, name) {
+    return "no observable property '" + property.toString() + "' found on the observable object '" + name + "'";
+  },
+  28: function _9(thing) {
+    return "Cannot obtain atom from " + thing;
+  },
+  29: "Expecting some object",
+  30: "invalid action stack. did you forget to finish an action?",
+  31: "missing option for computed: get",
+  32: function _10(name, derivation) {
+    return "Cycle detected in computation " + name + ": " + derivation;
+  },
+  33: function _11(name) {
+    return "The setter of computed value '" + name + "' is trying to update itself. Did you intend to update an _observable_ value, instead of the computed property?";
+  },
+  34: function _12(name) {
+    return "[ComputedValue '" + name + "'] It is not possible to assign a new value to a computed value.";
+  },
+  35: "There are multiple, different versions of MobX active. Make sure MobX is loaded only once or use `configure({ isolateGlobalState: true })`",
+  36: "isolateGlobalState should be called before MobX is running any reactions",
+  37: function _13(method) {
+    return "[mobx] `observableArray." + method + "()` mutates the array in-place, which is not allowed inside a derivation. Use `array.slice()." + method + "()` instead";
+  },
+  38: "'ownKeys()' can only be used on observable objects",
+  39: "'defineProperty()' can only be used on observable objects"
+};
+var errors = process.env.NODE_ENV !== "production" ? niceErrors : {};
+function die(error) {
+  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+  if (process.env.NODE_ENV !== "production") {
+    var e = typeof error === "string" ? error : errors[error];
+    if (typeof e === "function") e = e.apply(null, args);
+    throw new Error("[MobX] " + e);
+  }
+  throw new Error(typeof error === "number" ? "[MobX] minified error nr: " + error + (args.length ? " " + args.map(String).join(",") : "") + ". Find the full error at: https://github.com/mobxjs/mobx/blob/main/packages/mobx/src/errors.ts" : "[MobX] " + error);
+}
+var mockGlobal = {};
+function getGlobal() {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  return mockGlobal;
+}
+var assign = Object.assign;
+var getDescriptor = Object.getOwnPropertyDescriptor;
+var defineProperty = Object.defineProperty;
+var objectPrototype = Object.prototype;
+var EMPTY_ARRAY = [];
+Object.freeze(EMPTY_ARRAY);
+var EMPTY_OBJECT = {};
+Object.freeze(EMPTY_OBJECT);
+var hasProxy = typeof Proxy !== "undefined";
+var plainObjectString = /* @__PURE__ */ Object.toString();
+function assertProxies() {
+  if (!hasProxy) {
+    die(process.env.NODE_ENV !== "production" ? "`Proxy` objects are not available in the current environment. Please configure MobX to enable a fallback implementation.`" : "Proxy not available");
+  }
+}
+function warnAboutProxyRequirement(msg) {
+  if (process.env.NODE_ENV !== "production" && globalState.verifyProxies) {
+    die("MobX is currently configured to be able to run in ES5 mode, but in ES5 MobX won't be able to " + msg);
+  }
+}
+function getNextId() {
+  return ++globalState.mobxGuid;
+}
+function once(func) {
+  var invoked = false;
+  return function() {
+    if (invoked) {
+      return;
+    }
+    invoked = true;
+    return func.apply(this, arguments);
+  };
+}
+var noop = function noop2() {
+};
+function isFunction(fn) {
+  return typeof fn === "function";
+}
+function isStringish(value) {
+  var t = typeof value;
+  switch (t) {
+    case "string":
+    case "symbol":
+    case "number":
+      return true;
   }
   return false;
 }
-function runOnDate(date2, job) {
-  const now2 = Date.now();
-  const then = date2.getTime();
-  return lt.setTimeout(function() {
-    if (then > Date.now())
-      runOnDate(date2, job);
-    else
-      job();
-  }, then < now2 ? 0 : then - now2);
+function isObject(value) {
+  return value !== null && typeof value === "object";
 }
-function scheduleInvocation$1(invocation) {
-  sorted$1.add(invocations, invocation, sorter$1);
-  prepareNextInvocation();
-  const date2 = invocation.fireDate instanceof CronDate$1 ? invocation.fireDate.toDate() : invocation.fireDate;
-  invocation.job.emit("scheduled", date2);
+function isPlainObject(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+  var proto = Object.getPrototypeOf(value);
+  if (proto == null) {
+    return true;
+  }
+  var protoConstructor = Object.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof protoConstructor === "function" && protoConstructor.toString() === plainObjectString;
 }
-function prepareNextInvocation() {
-  if (invocations.length > 0 && currentInvocation !== invocations[0]) {
-    if (currentInvocation !== null) {
-      lt.clearTimeout(currentInvocation.timerID);
-      currentInvocation.timerID = null;
-      currentInvocation = null;
+function isGenerator(obj) {
+  var constructor = obj == null ? void 0 : obj.constructor;
+  if (!constructor) {
+    return false;
+  }
+  if ("GeneratorFunction" === constructor.name || "GeneratorFunction" === constructor.displayName) {
+    return true;
+  }
+  return false;
+}
+function addHiddenProp(object2, propName, value) {
+  defineProperty(object2, propName, {
+    enumerable: false,
+    writable: true,
+    configurable: true,
+    value
+  });
+}
+function addHiddenFinalProp(object2, propName, value) {
+  defineProperty(object2, propName, {
+    enumerable: false,
+    writable: false,
+    configurable: true,
+    value
+  });
+}
+function createInstanceofPredicate(name, theClass) {
+  var propName = "isMobX" + name;
+  theClass.prototype[propName] = true;
+  return function(x) {
+    return isObject(x) && x[propName] === true;
+  };
+}
+function isES6Map(thing) {
+  return thing != null && Object.prototype.toString.call(thing) === "[object Map]";
+}
+function isPlainES6Map(thing) {
+  var mapProto = Object.getPrototypeOf(thing);
+  var objectProto = Object.getPrototypeOf(mapProto);
+  var nullProto = Object.getPrototypeOf(objectProto);
+  return nullProto === null;
+}
+function isES6Set(thing) {
+  return thing != null && Object.prototype.toString.call(thing) === "[object Set]";
+}
+var hasGetOwnPropertySymbols = typeof Object.getOwnPropertySymbols !== "undefined";
+function getPlainObjectKeys(object2) {
+  var keys2 = Object.keys(object2);
+  if (!hasGetOwnPropertySymbols) {
+    return keys2;
+  }
+  var symbols = Object.getOwnPropertySymbols(object2);
+  if (!symbols.length) {
+    return keys2;
+  }
+  return [].concat(keys2, symbols.filter(function(s) {
+    return objectPrototype.propertyIsEnumerable.call(object2, s);
+  }));
+}
+var ownKeys = typeof Reflect !== "undefined" && Reflect.ownKeys ? Reflect.ownKeys : hasGetOwnPropertySymbols ? function(obj) {
+  return Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertySymbols(obj));
+} : (
+  /* istanbul ignore next */
+  Object.getOwnPropertyNames
+);
+function stringifyKey(key) {
+  if (typeof key === "string") {
+    return key;
+  }
+  if (typeof key === "symbol") {
+    return key.toString();
+  }
+  return new String(key).toString();
+}
+function toPrimitive(value) {
+  return value === null ? null : typeof value === "object" ? "" + value : value;
+}
+function hasProp(target, prop) {
+  return objectPrototype.hasOwnProperty.call(target, prop);
+}
+var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors || function getOwnPropertyDescriptors2(target) {
+  var res = {};
+  ownKeys(target).forEach(function(key) {
+    res[key] = getDescriptor(target, key);
+  });
+  return res;
+};
+function getFlag(flags, mask) {
+  return !!(flags & mask);
+}
+function setFlag(flags, mask, newValue) {
+  if (newValue) {
+    flags |= mask;
+  } else {
+    flags &= ~mask;
+  }
+  return flags;
+}
+function _arrayLikeToArray(r, a) {
+  (null == a || a > r.length) && (a = r.length);
+  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+  return n;
+}
+function _defineProperties(e, r) {
+  for (var t = 0; t < r.length; t++) {
+    var o = r[t];
+    o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey(o.key), o);
+  }
+}
+function _createClass(e, r, t) {
+  return r && _defineProperties(e.prototype, r), Object.defineProperty(e, "prototype", {
+    writable: false
+  }), e;
+}
+function _createForOfIteratorHelperLoose(r, e) {
+  var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+  if (t) return (t = t.call(r)).next.bind(t);
+  if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) {
+    t && (r = t);
+    var o = 0;
+    return function() {
+      return o >= r.length ? {
+        done: true
+      } : {
+        done: false,
+        value: r[o++]
+      };
+    };
+  }
+  throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function(n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
     }
-    currentInvocation = invocations[0];
-    const job = currentInvocation.job;
-    const cinv = currentInvocation;
-    currentInvocation.timerID = runOnDate(currentInvocation.fireDate, function() {
-      currentInvocationFinished();
-      if (job.callback) {
-        job.callback();
+    return n;
+  }, _extends.apply(null, arguments);
+}
+function _inheritsLoose(t, o) {
+  t.prototype = Object.create(o.prototype), t.prototype.constructor = t, _setPrototypeOf(t, o);
+}
+function _setPrototypeOf(t, e) {
+  return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function(t2, e2) {
+    return t2.__proto__ = e2, t2;
+  }, _setPrototypeOf(t, e);
+}
+function _toPrimitive(t, r) {
+  if ("object" != typeof t || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r);
+    if ("object" != typeof i) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return String(t);
+}
+function _toPropertyKey(t) {
+  var i = _toPrimitive(t, "string");
+  return "symbol" == typeof i ? i : i + "";
+}
+function _unsupportedIterableToArray(r, a) {
+  if (r) {
+    if ("string" == typeof r) return _arrayLikeToArray(r, a);
+    var t = {}.toString.call(r).slice(8, -1);
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
+  }
+}
+var storedAnnotationsSymbol = /* @__PURE__ */ Symbol("mobx-stored-annotations");
+function createDecoratorAnnotation(annotation) {
+  function decorator(target, property) {
+    if (is20223Decorator(property)) {
+      return annotation.decorate_20223_(target, property);
+    } else {
+      storeAnnotation(target, property, annotation);
+    }
+  }
+  return Object.assign(decorator, annotation);
+}
+function storeAnnotation(prototype2, key, annotation) {
+  if (!hasProp(prototype2, storedAnnotationsSymbol)) {
+    addHiddenProp(prototype2, storedAnnotationsSymbol, _extends({}, prototype2[storedAnnotationsSymbol]));
+  }
+  if (process.env.NODE_ENV !== "production" && isOverride(annotation) && !hasProp(prototype2[storedAnnotationsSymbol], key)) {
+    var fieldName = prototype2.constructor.name + ".prototype." + key.toString();
+    die("'" + fieldName + "' is decorated with 'override', but no such decorated member was found on prototype.");
+  }
+  assertNotDecorated(prototype2, annotation, key);
+  if (!isOverride(annotation)) {
+    prototype2[storedAnnotationsSymbol][key] = annotation;
+  }
+}
+function assertNotDecorated(prototype2, annotation, key) {
+  if (process.env.NODE_ENV !== "production" && !isOverride(annotation) && hasProp(prototype2[storedAnnotationsSymbol], key)) {
+    var fieldName = prototype2.constructor.name + ".prototype." + key.toString();
+    var currentAnnotationType = prototype2[storedAnnotationsSymbol][key].annotationType_;
+    var requestedAnnotationType = annotation.annotationType_;
+    die("Cannot apply '@" + requestedAnnotationType + "' to '" + fieldName + "':" + ("\nThe field is already decorated with '@" + currentAnnotationType + "'.") + "\nRe-decorating fields is not allowed.\nUse '@override' decorator for methods overridden by subclass.");
+  }
+}
+function is20223Decorator(context) {
+  return typeof context == "object" && typeof context["kind"] == "string";
+}
+function assert20223DecoratorType(context, types) {
+  if (process.env.NODE_ENV !== "production" && !types.includes(context.kind)) {
+    die("The decorator applied to '" + String(context.name) + "' cannot be used on a " + context.kind + " element");
+  }
+}
+var $mobx = /* @__PURE__ */ Symbol("mobx administration");
+var Atom = /* @__PURE__ */ function() {
+  function Atom2(name_) {
+    if (name_ === void 0) {
+      name_ = process.env.NODE_ENV !== "production" ? "Atom@" + getNextId() : "Atom";
+    }
+    this.name_ = void 0;
+    this.flags_ = 0;
+    this.observers_ = /* @__PURE__ */ new Set();
+    this.lastAccessedBy_ = 0;
+    this.lowestObserverState_ = IDerivationState_.NOT_TRACKING_;
+    this.onBOL = void 0;
+    this.onBUOL = void 0;
+    this.name_ = name_;
+  }
+  var _proto = Atom2.prototype;
+  _proto.onBO = function onBO() {
+    if (this.onBOL) {
+      this.onBOL.forEach(function(listener) {
+        return listener();
+      });
+    }
+  };
+  _proto.onBUO = function onBUO() {
+    if (this.onBUOL) {
+      this.onBUOL.forEach(function(listener) {
+        return listener();
+      });
+    }
+  };
+  _proto.reportObserved = function reportObserved$1() {
+    return reportObserved(this);
+  };
+  _proto.reportChanged = function reportChanged() {
+    startBatch();
+    propagateChanged(this);
+    endBatch();
+  };
+  _proto.toString = function toString22() {
+    return this.name_;
+  };
+  return _createClass(Atom2, [{
+    key: "isBeingObserved",
+    get: function get4() {
+      return getFlag(this.flags_, Atom2.isBeingObservedMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Atom2.isBeingObservedMask_, newValue);
+    }
+  }, {
+    key: "isPendingUnobservation",
+    get: function get4() {
+      return getFlag(this.flags_, Atom2.isPendingUnobservationMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Atom2.isPendingUnobservationMask_, newValue);
+    }
+  }, {
+    key: "diffValue",
+    get: function get4() {
+      return getFlag(this.flags_, Atom2.diffValueMask_) ? 1 : 0;
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Atom2.diffValueMask_, newValue === 1 ? true : false);
+    }
+  }]);
+}();
+Atom.isBeingObservedMask_ = 1;
+Atom.isPendingUnobservationMask_ = 2;
+Atom.diffValueMask_ = 4;
+var isAtom = /* @__PURE__ */ createInstanceofPredicate("Atom", Atom);
+function createAtom(name, onBecomeObservedHandler, onBecomeUnobservedHandler) {
+  if (onBecomeObservedHandler === void 0) {
+    onBecomeObservedHandler = noop;
+  }
+  if (onBecomeUnobservedHandler === void 0) {
+    onBecomeUnobservedHandler = noop;
+  }
+  var atom = new Atom(name);
+  if (onBecomeObservedHandler !== noop) {
+    onBecomeObserved(atom, onBecomeObservedHandler);
+  }
+  if (onBecomeUnobservedHandler !== noop) {
+    onBecomeUnobserved(atom, onBecomeUnobservedHandler);
+  }
+  return atom;
+}
+function identityComparer(a, b) {
+  return a === b;
+}
+function structuralComparer(a, b) {
+  return deepEqual(a, b);
+}
+function shallowComparer(a, b) {
+  return deepEqual(a, b, 1);
+}
+function defaultComparer(a, b) {
+  if (Object.is) {
+    return Object.is(a, b);
+  }
+  return a === b ? a !== 0 || 1 / a === 1 / b : a !== a && b !== b;
+}
+var comparer = {
+  identity: identityComparer,
+  structural: structuralComparer,
+  "default": defaultComparer,
+  shallow: shallowComparer
+};
+function deepEnhancer(v, _14, name) {
+  if (isObservable(v)) {
+    return v;
+  }
+  if (Array.isArray(v)) {
+    return observable.array(v, {
+      name
+    });
+  }
+  if (isPlainObject(v)) {
+    return observable.object(v, void 0, {
+      name
+    });
+  }
+  if (isES6Map(v)) {
+    return observable.map(v, {
+      name
+    });
+  }
+  if (isES6Set(v)) {
+    return observable.set(v, {
+      name
+    });
+  }
+  if (typeof v === "function" && !isAction(v) && !isFlow(v)) {
+    if (isGenerator(v)) {
+      return flow(v);
+    } else {
+      return autoAction(name, v);
+    }
+  }
+  return v;
+}
+function shallowEnhancer(v, _14, name) {
+  if (v === void 0 || v === null) {
+    return v;
+  }
+  if (isObservableObject(v) || isObservableArray(v) || isObservableMap(v) || isObservableSet(v)) {
+    return v;
+  }
+  if (Array.isArray(v)) {
+    return observable.array(v, {
+      name,
+      deep: false
+    });
+  }
+  if (isPlainObject(v)) {
+    return observable.object(v, void 0, {
+      name,
+      deep: false
+    });
+  }
+  if (isES6Map(v)) {
+    return observable.map(v, {
+      name,
+      deep: false
+    });
+  }
+  if (isES6Set(v)) {
+    return observable.set(v, {
+      name,
+      deep: false
+    });
+  }
+  if (process.env.NODE_ENV !== "production") {
+    die("The shallow modifier / decorator can only used in combination with arrays, objects, maps and sets");
+  }
+}
+function referenceEnhancer(newValue) {
+  return newValue;
+}
+function refStructEnhancer(v, oldValue) {
+  if (process.env.NODE_ENV !== "production" && isObservable(v)) {
+    die("observable.struct should not be used with observable values");
+  }
+  if (deepEqual(v, oldValue)) {
+    return oldValue;
+  }
+  return v;
+}
+var OVERRIDE = "override";
+function isOverride(annotation) {
+  return annotation.annotationType_ === OVERRIDE;
+}
+function createActionAnnotation(name, options) {
+  return {
+    annotationType_: name,
+    options_: options,
+    make_: make_$1,
+    extend_: extend_$1,
+    decorate_20223_: decorate_20223_$1
+  };
+}
+function make_$1(adm, key, descriptor, source) {
+  var _this$options_;
+  if ((_this$options_ = this.options_) != null && _this$options_.bound) {
+    return this.extend_(adm, key, descriptor, false) === null ? 0 : 1;
+  }
+  if (source === adm.target_) {
+    return this.extend_(adm, key, descriptor, false) === null ? 0 : 2;
+  }
+  if (isAction(descriptor.value)) {
+    return 1;
+  }
+  var actionDescriptor = createActionDescriptor(adm, this, key, descriptor, false);
+  defineProperty(source, key, actionDescriptor);
+  return 2;
+}
+function extend_$1(adm, key, descriptor, proxyTrap) {
+  var actionDescriptor = createActionDescriptor(adm, this, key, descriptor);
+  return adm.defineProperty_(key, actionDescriptor, proxyTrap);
+}
+function decorate_20223_$1(mthd, context) {
+  if (process.env.NODE_ENV !== "production") {
+    assert20223DecoratorType(context, ["method", "field"]);
+  }
+  var kind = context.kind, name = context.name, addInitializer = context.addInitializer;
+  var ann = this;
+  var _createAction = function _createAction2(m) {
+    var _ann$options_$name, _ann$options_, _ann$options_$autoAct, _ann$options_2;
+    return createAction((_ann$options_$name = (_ann$options_ = ann.options_) == null ? void 0 : _ann$options_.name) != null ? _ann$options_$name : name.toString(), m, (_ann$options_$autoAct = (_ann$options_2 = ann.options_) == null ? void 0 : _ann$options_2.autoAction) != null ? _ann$options_$autoAct : false);
+  };
+  if (kind == "field") {
+    return function(initMthd) {
+      var _ann$options_3;
+      var mthd2 = initMthd;
+      if (!isAction(mthd2)) {
+        mthd2 = _createAction(mthd2);
       }
-      if (cinv.recurrenceRule.recurs || cinv.recurrenceRule._endDate === null) {
-        const inv = scheduleNextRecurrence$1(cinv.recurrenceRule, cinv.job, cinv.fireDate, cinv.endDate);
-        if (inv !== null) {
-          inv.job.trackInvocation(inv);
+      if ((_ann$options_3 = ann.options_) != null && _ann$options_3.bound) {
+        mthd2 = mthd2.bind(this);
+        mthd2.isMobxAction = true;
+      }
+      return mthd2;
+    };
+  }
+  if (kind == "method") {
+    var _this$options_2;
+    if (!isAction(mthd)) {
+      mthd = _createAction(mthd);
+    }
+    if ((_this$options_2 = this.options_) != null && _this$options_2.bound) {
+      addInitializer(function() {
+        var self2 = this;
+        var bound = self2[name].bind(self2);
+        bound.isMobxAction = true;
+        self2[name] = bound;
+      });
+    }
+    return mthd;
+  }
+  die("Cannot apply '" + ann.annotationType_ + "' to '" + String(name) + "' (kind: " + kind + "):" + ("\n'" + ann.annotationType_ + "' can only be used on properties with a function value."));
+}
+function assertActionDescriptor(adm, _ref, key, _ref2) {
+  var annotationType_ = _ref.annotationType_;
+  var value = _ref2.value;
+  if (process.env.NODE_ENV !== "production" && !isFunction(value)) {
+    die("Cannot apply '" + annotationType_ + "' to '" + adm.name_ + "." + key.toString() + "':" + ("\n'" + annotationType_ + "' can only be used on properties with a function value."));
+  }
+}
+function createActionDescriptor(adm, annotation, key, descriptor, safeDescriptors) {
+  var _annotation$options_, _annotation$options_$, _annotation$options_2, _annotation$options_$2, _annotation$options_3, _annotation$options_4, _adm$proxy_2;
+  if (safeDescriptors === void 0) {
+    safeDescriptors = globalState.safeDescriptors;
+  }
+  assertActionDescriptor(adm, annotation, key, descriptor);
+  var value = descriptor.value;
+  if ((_annotation$options_ = annotation.options_) != null && _annotation$options_.bound) {
+    var _adm$proxy_;
+    value = value.bind((_adm$proxy_ = adm.proxy_) != null ? _adm$proxy_ : adm.target_);
+  }
+  return {
+    value: createAction(
+      (_annotation$options_$ = (_annotation$options_2 = annotation.options_) == null ? void 0 : _annotation$options_2.name) != null ? _annotation$options_$ : key.toString(),
+      value,
+      (_annotation$options_$2 = (_annotation$options_3 = annotation.options_) == null ? void 0 : _annotation$options_3.autoAction) != null ? _annotation$options_$2 : false,
+      // https://github.com/mobxjs/mobx/discussions/3140
+      (_annotation$options_4 = annotation.options_) != null && _annotation$options_4.bound ? (_adm$proxy_2 = adm.proxy_) != null ? _adm$proxy_2 : adm.target_ : void 0
+    ),
+    // Non-configurable for classes
+    // prevents accidental field redefinition in subclass
+    configurable: safeDescriptors ? adm.isPlainObject_ : true,
+    // https://github.com/mobxjs/mobx/pull/2641#issuecomment-737292058
+    enumerable: false,
+    // Non-obsevable, therefore non-writable
+    // Also prevents rewriting in subclass constructor
+    writable: safeDescriptors ? false : true
+  };
+}
+function createFlowAnnotation(name, options) {
+  return {
+    annotationType_: name,
+    options_: options,
+    make_: make_$2,
+    extend_: extend_$2,
+    decorate_20223_: decorate_20223_$2
+  };
+}
+function make_$2(adm, key, descriptor, source) {
+  var _this$options_;
+  if (source === adm.target_) {
+    return this.extend_(adm, key, descriptor, false) === null ? 0 : 2;
+  }
+  if ((_this$options_ = this.options_) != null && _this$options_.bound && (!hasProp(adm.target_, key) || !isFlow(adm.target_[key]))) {
+    if (this.extend_(adm, key, descriptor, false) === null) {
+      return 0;
+    }
+  }
+  if (isFlow(descriptor.value)) {
+    return 1;
+  }
+  var flowDescriptor = createFlowDescriptor(adm, this, key, descriptor, false, false);
+  defineProperty(source, key, flowDescriptor);
+  return 2;
+}
+function extend_$2(adm, key, descriptor, proxyTrap) {
+  var _this$options_2;
+  var flowDescriptor = createFlowDescriptor(adm, this, key, descriptor, (_this$options_2 = this.options_) == null ? void 0 : _this$options_2.bound);
+  return adm.defineProperty_(key, flowDescriptor, proxyTrap);
+}
+function decorate_20223_$2(mthd, context) {
+  var _this$options_3;
+  if (process.env.NODE_ENV !== "production") {
+    assert20223DecoratorType(context, ["method"]);
+  }
+  var name = context.name, addInitializer = context.addInitializer;
+  if (!isFlow(mthd)) {
+    mthd = flow(mthd);
+  }
+  if ((_this$options_3 = this.options_) != null && _this$options_3.bound) {
+    addInitializer(function() {
+      var self2 = this;
+      var bound = self2[name].bind(self2);
+      bound.isMobXFlow = true;
+      self2[name] = bound;
+    });
+  }
+  return mthd;
+}
+function assertFlowDescriptor(adm, _ref, key, _ref2) {
+  var annotationType_ = _ref.annotationType_;
+  var value = _ref2.value;
+  if (process.env.NODE_ENV !== "production" && !isFunction(value)) {
+    die("Cannot apply '" + annotationType_ + "' to '" + adm.name_ + "." + key.toString() + "':" + ("\n'" + annotationType_ + "' can only be used on properties with a generator function value."));
+  }
+}
+function createFlowDescriptor(adm, annotation, key, descriptor, bound, safeDescriptors) {
+  if (safeDescriptors === void 0) {
+    safeDescriptors = globalState.safeDescriptors;
+  }
+  assertFlowDescriptor(adm, annotation, key, descriptor);
+  var value = descriptor.value;
+  if (!isFlow(value)) {
+    value = flow(value);
+  }
+  if (bound) {
+    var _adm$proxy_;
+    value = value.bind((_adm$proxy_ = adm.proxy_) != null ? _adm$proxy_ : adm.target_);
+    value.isMobXFlow = true;
+  }
+  return {
+    value,
+    // Non-configurable for classes
+    // prevents accidental field redefinition in subclass
+    configurable: safeDescriptors ? adm.isPlainObject_ : true,
+    // https://github.com/mobxjs/mobx/pull/2641#issuecomment-737292058
+    enumerable: false,
+    // Non-obsevable, therefore non-writable
+    // Also prevents rewriting in subclass constructor
+    writable: safeDescriptors ? false : true
+  };
+}
+function createComputedAnnotation(name, options) {
+  return {
+    annotationType_: name,
+    options_: options,
+    make_: make_$3,
+    extend_: extend_$3,
+    decorate_20223_: decorate_20223_$3
+  };
+}
+function make_$3(adm, key, descriptor) {
+  return this.extend_(adm, key, descriptor, false) === null ? 0 : 1;
+}
+function extend_$3(adm, key, descriptor, proxyTrap) {
+  assertComputedDescriptor(adm, this, key, descriptor);
+  return adm.defineComputedProperty_(key, _extends({}, this.options_, {
+    get: descriptor.get,
+    set: descriptor.set
+  }), proxyTrap);
+}
+function decorate_20223_$3(get4, context) {
+  if (process.env.NODE_ENV !== "production") {
+    assert20223DecoratorType(context, ["getter"]);
+  }
+  var ann = this;
+  var key = context.name, addInitializer = context.addInitializer;
+  addInitializer(function() {
+    var adm = asObservableObject(this)[$mobx];
+    var options = _extends({}, ann.options_, {
+      get: get4,
+      context: this
+    });
+    options.name || (options.name = process.env.NODE_ENV !== "production" ? adm.name_ + "." + key.toString() : "ObservableObject." + key.toString());
+    adm.values_.set(key, new ComputedValue(options));
+  });
+  return function() {
+    return this[$mobx].getObservablePropValue_(key);
+  };
+}
+function assertComputedDescriptor(adm, _ref, key, _ref2) {
+  var annotationType_ = _ref.annotationType_;
+  var get4 = _ref2.get;
+  if (process.env.NODE_ENV !== "production" && !get4) {
+    die("Cannot apply '" + annotationType_ + "' to '" + adm.name_ + "." + key.toString() + "':" + ("\n'" + annotationType_ + "' can only be used on getter(+setter) properties."));
+  }
+}
+function createObservableAnnotation(name, options) {
+  return {
+    annotationType_: name,
+    options_: options,
+    make_: make_$4,
+    extend_: extend_$4,
+    decorate_20223_: decorate_20223_$4
+  };
+}
+function make_$4(adm, key, descriptor) {
+  return this.extend_(adm, key, descriptor, false) === null ? 0 : 1;
+}
+function extend_$4(adm, key, descriptor, proxyTrap) {
+  var _this$options_$enhanc, _this$options_;
+  assertObservableDescriptor(adm, this, key, descriptor);
+  return adm.defineObservableProperty_(key, descriptor.value, (_this$options_$enhanc = (_this$options_ = this.options_) == null ? void 0 : _this$options_.enhancer) != null ? _this$options_$enhanc : deepEnhancer, proxyTrap);
+}
+function decorate_20223_$4(desc, context) {
+  if (process.env.NODE_ENV !== "production") {
+    if (context.kind === "field") {
+      throw die("Please use `@observable accessor " + String(context.name) + "` instead of `@observable " + String(context.name) + "`");
+    }
+    assert20223DecoratorType(context, ["accessor"]);
+  }
+  var ann = this;
+  var kind = context.kind, name = context.name;
+  var initializedObjects = /* @__PURE__ */ new WeakSet();
+  function initializeObservable(target, value) {
+    var _ann$options_$enhance, _ann$options_;
+    var adm = asObservableObject(target)[$mobx];
+    var observable2 = new ObservableValue(value, (_ann$options_$enhance = (_ann$options_ = ann.options_) == null ? void 0 : _ann$options_.enhancer) != null ? _ann$options_$enhance : deepEnhancer, process.env.NODE_ENV !== "production" ? adm.name_ + "." + name.toString() : "ObservableObject." + name.toString(), false);
+    adm.values_.set(name, observable2);
+    initializedObjects.add(target);
+  }
+  if (kind == "accessor") {
+    return {
+      get: function get4() {
+        if (!initializedObjects.has(this)) {
+          initializeObservable(this, desc.get.call(this));
         }
+        return this[$mobx].getObservablePropValue_(name);
+      },
+      set: function set5(value) {
+        if (!initializedObjects.has(this)) {
+          initializeObservable(this, value);
+        }
+        return this[$mobx].setObservablePropValue_(name, value);
+      },
+      init: function init(value) {
+        if (!initializedObjects.has(this)) {
+          initializeObservable(this, value);
+        }
+        return value;
       }
-      job.stopTrackingInvocation(cinv);
+    };
+  }
+  return;
+}
+function assertObservableDescriptor(adm, _ref, key, descriptor) {
+  var annotationType_ = _ref.annotationType_;
+  if (process.env.NODE_ENV !== "production" && !("value" in descriptor)) {
+    die("Cannot apply '" + annotationType_ + "' to '" + adm.name_ + "." + key.toString() + "':" + ("\n'" + annotationType_ + "' cannot be used on getter/setter properties"));
+  }
+}
+var AUTO = "true";
+var autoAnnotation = /* @__PURE__ */ createAutoAnnotation();
+function createAutoAnnotation(options) {
+  return {
+    annotationType_: AUTO,
+    options_: options,
+    make_: make_$5,
+    extend_: extend_$5,
+    decorate_20223_: decorate_20223_$5
+  };
+}
+function make_$5(adm, key, descriptor, source) {
+  var _this$options_3, _this$options_4;
+  if (descriptor.get) {
+    return computed.make_(adm, key, descriptor, source);
+  }
+  if (descriptor.set) {
+    var set5 = createAction(key.toString(), descriptor.set);
+    if (source === adm.target_) {
+      return adm.defineProperty_(key, {
+        configurable: globalState.safeDescriptors ? adm.isPlainObject_ : true,
+        set: set5
+      }) === null ? 0 : 2;
+    }
+    defineProperty(source, key, {
+      configurable: true,
+      set: set5
+    });
+    return 2;
+  }
+  if (source !== adm.target_ && typeof descriptor.value === "function") {
+    var _this$options_2;
+    if (isGenerator(descriptor.value)) {
+      var _this$options_;
+      var flowAnnotation2 = (_this$options_ = this.options_) != null && _this$options_.autoBind ? flow.bound : flow;
+      return flowAnnotation2.make_(adm, key, descriptor, source);
+    }
+    var actionAnnotation2 = (_this$options_2 = this.options_) != null && _this$options_2.autoBind ? autoAction.bound : autoAction;
+    return actionAnnotation2.make_(adm, key, descriptor, source);
+  }
+  var observableAnnotation2 = ((_this$options_3 = this.options_) == null ? void 0 : _this$options_3.deep) === false ? observable.ref : observable;
+  if (typeof descriptor.value === "function" && (_this$options_4 = this.options_) != null && _this$options_4.autoBind) {
+    var _adm$proxy_;
+    descriptor.value = descriptor.value.bind((_adm$proxy_ = adm.proxy_) != null ? _adm$proxy_ : adm.target_);
+  }
+  return observableAnnotation2.make_(adm, key, descriptor, source);
+}
+function extend_$5(adm, key, descriptor, proxyTrap) {
+  var _this$options_5, _this$options_6;
+  if (descriptor.get) {
+    return computed.extend_(adm, key, descriptor, proxyTrap);
+  }
+  if (descriptor.set) {
+    return adm.defineProperty_(key, {
+      configurable: globalState.safeDescriptors ? adm.isPlainObject_ : true,
+      set: createAction(key.toString(), descriptor.set)
+    }, proxyTrap);
+  }
+  if (typeof descriptor.value === "function" && (_this$options_5 = this.options_) != null && _this$options_5.autoBind) {
+    var _adm$proxy_2;
+    descriptor.value = descriptor.value.bind((_adm$proxy_2 = adm.proxy_) != null ? _adm$proxy_2 : adm.target_);
+  }
+  var observableAnnotation2 = ((_this$options_6 = this.options_) == null ? void 0 : _this$options_6.deep) === false ? observable.ref : observable;
+  return observableAnnotation2.extend_(adm, key, descriptor, proxyTrap);
+}
+function decorate_20223_$5(desc, context) {
+  die("'" + this.annotationType_ + "' cannot be used as a decorator");
+}
+var OBSERVABLE = "observable";
+var OBSERVABLE_REF = "observable.ref";
+var OBSERVABLE_SHALLOW = "observable.shallow";
+var OBSERVABLE_STRUCT = "observable.struct";
+var defaultCreateObservableOptions = {
+  deep: true,
+  name: void 0,
+  defaultDecorator: void 0,
+  proxy: true
+};
+Object.freeze(defaultCreateObservableOptions);
+function asCreateObservableOptions(thing) {
+  return thing || defaultCreateObservableOptions;
+}
+var observableAnnotation = /* @__PURE__ */ createObservableAnnotation(OBSERVABLE);
+var observableRefAnnotation = /* @__PURE__ */ createObservableAnnotation(OBSERVABLE_REF, {
+  enhancer: referenceEnhancer
+});
+var observableShallowAnnotation = /* @__PURE__ */ createObservableAnnotation(OBSERVABLE_SHALLOW, {
+  enhancer: shallowEnhancer
+});
+var observableStructAnnotation = /* @__PURE__ */ createObservableAnnotation(OBSERVABLE_STRUCT, {
+  enhancer: refStructEnhancer
+});
+var observableDecoratorAnnotation = /* @__PURE__ */ createDecoratorAnnotation(observableAnnotation);
+function getEnhancerFromOptions(options) {
+  return options.deep === true ? deepEnhancer : options.deep === false ? referenceEnhancer : getEnhancerFromAnnotation(options.defaultDecorator);
+}
+function getAnnotationFromOptions(options) {
+  var _options$defaultDecor;
+  return options ? (_options$defaultDecor = options.defaultDecorator) != null ? _options$defaultDecor : createAutoAnnotation(options) : void 0;
+}
+function getEnhancerFromAnnotation(annotation) {
+  var _annotation$options_$, _annotation$options_;
+  return !annotation ? deepEnhancer : (_annotation$options_$ = (_annotation$options_ = annotation.options_) == null ? void 0 : _annotation$options_.enhancer) != null ? _annotation$options_$ : deepEnhancer;
+}
+function createObservable(v, arg2, arg3) {
+  if (is20223Decorator(arg2)) {
+    return observableAnnotation.decorate_20223_(v, arg2);
+  }
+  if (isStringish(arg2)) {
+    storeAnnotation(v, arg2, observableAnnotation);
+    return;
+  }
+  if (isObservable(v)) {
+    return v;
+  }
+  if (isPlainObject(v)) {
+    return observable.object(v, arg2, arg3);
+  }
+  if (Array.isArray(v)) {
+    return observable.array(v, arg2);
+  }
+  if (isES6Map(v)) {
+    return observable.map(v, arg2);
+  }
+  if (isES6Set(v)) {
+    return observable.set(v, arg2);
+  }
+  if (typeof v === "object" && v !== null) {
+    return v;
+  }
+  return observable.box(v, arg2);
+}
+assign(createObservable, observableDecoratorAnnotation);
+var observableFactories = {
+  box: function box(value, options) {
+    var o = asCreateObservableOptions(options);
+    return new ObservableValue(value, getEnhancerFromOptions(o), o.name, true, o.equals);
+  },
+  array: function array(initialValues, options) {
+    var o = asCreateObservableOptions(options);
+    return (globalState.useProxies === false || o.proxy === false ? createLegacyArray : createObservableArray)(initialValues, getEnhancerFromOptions(o), o.name);
+  },
+  map: function map(initialValues, options) {
+    var o = asCreateObservableOptions(options);
+    return new ObservableMap(initialValues, getEnhancerFromOptions(o), o.name);
+  },
+  set: function set(initialValues, options) {
+    var o = asCreateObservableOptions(options);
+    return new ObservableSet(initialValues, getEnhancerFromOptions(o), o.name);
+  },
+  object: function object(props, decorators, options) {
+    return initObservable(function() {
+      return extendObservable(globalState.useProxies === false || (options == null ? void 0 : options.proxy) === false ? asObservableObject({}, options) : asDynamicObservableObject({}, options), props, decorators);
+    });
+  },
+  ref: /* @__PURE__ */ createDecoratorAnnotation(observableRefAnnotation),
+  shallow: /* @__PURE__ */ createDecoratorAnnotation(observableShallowAnnotation),
+  deep: observableDecoratorAnnotation,
+  struct: /* @__PURE__ */ createDecoratorAnnotation(observableStructAnnotation)
+};
+var observable = /* @__PURE__ */ assign(createObservable, observableFactories);
+var COMPUTED = "computed";
+var COMPUTED_STRUCT = "computed.struct";
+var computedAnnotation = /* @__PURE__ */ createComputedAnnotation(COMPUTED);
+var computedStructAnnotation = /* @__PURE__ */ createComputedAnnotation(COMPUTED_STRUCT, {
+  equals: comparer.structural
+});
+var computed = function computed2(arg1, arg2) {
+  if (is20223Decorator(arg2)) {
+    return computedAnnotation.decorate_20223_(arg1, arg2);
+  }
+  if (isStringish(arg2)) {
+    return storeAnnotation(arg1, arg2, computedAnnotation);
+  }
+  if (isPlainObject(arg1)) {
+    return createDecoratorAnnotation(createComputedAnnotation(COMPUTED, arg1));
+  }
+  if (process.env.NODE_ENV !== "production") {
+    if (!isFunction(arg1)) {
+      die("First argument to `computed` should be an expression.");
+    }
+    if (isFunction(arg2)) {
+      die("A setter as second argument is no longer supported, use `{ set: fn }` option instead");
+    }
+  }
+  var opts = isPlainObject(arg2) ? arg2 : {};
+  opts.get = arg1;
+  opts.name || (opts.name = arg1.name || "");
+  return new ComputedValue(opts);
+};
+Object.assign(computed, computedAnnotation);
+computed.struct = /* @__PURE__ */ createDecoratorAnnotation(computedStructAnnotation);
+var _getDescriptor$config, _getDescriptor;
+var currentActionId = 0;
+var nextActionId = 1;
+var isFunctionNameConfigurable = (_getDescriptor$config = (_getDescriptor = /* @__PURE__ */ getDescriptor(function() {
+}, "name")) == null ? void 0 : _getDescriptor.configurable) != null ? _getDescriptor$config : false;
+var tmpNameDescriptor = {
+  value: "action",
+  configurable: true,
+  writable: false,
+  enumerable: false
+};
+function createAction(actionName, fn, autoAction2, ref) {
+  if (autoAction2 === void 0) {
+    autoAction2 = false;
+  }
+  if (process.env.NODE_ENV !== "production") {
+    if (!isFunction(fn)) {
+      die("`action` can only be invoked on functions");
+    }
+    if (typeof actionName !== "string" || !actionName) {
+      die("actions should have valid names, got: '" + actionName + "'");
+    }
+  }
+  function res() {
+    return executeAction(actionName, autoAction2, fn, ref || this, arguments);
+  }
+  res.isMobxAction = true;
+  res.toString = function() {
+    return fn.toString();
+  };
+  if (isFunctionNameConfigurable) {
+    tmpNameDescriptor.value = actionName;
+    defineProperty(res, "name", tmpNameDescriptor);
+  }
+  return res;
+}
+function executeAction(actionName, canRunAsDerivation, fn, scope, args) {
+  var runInfo = _startAction(actionName, canRunAsDerivation, scope, args);
+  try {
+    return fn.apply(scope, args);
+  } catch (err) {
+    runInfo.error_ = err;
+    throw err;
+  } finally {
+    _endAction(runInfo);
+  }
+}
+function _startAction(actionName, canRunAsDerivation, scope, args) {
+  var notifySpy_ = process.env.NODE_ENV !== "production" && isSpyEnabled() && !!actionName;
+  var startTime_ = 0;
+  if (process.env.NODE_ENV !== "production" && notifySpy_) {
+    startTime_ = Date.now();
+    var flattenedArgs = args ? Array.from(args) : EMPTY_ARRAY;
+    spyReportStart({
+      type: ACTION,
+      name: actionName,
+      object: scope,
+      arguments: flattenedArgs
+    });
+  }
+  var prevDerivation_ = globalState.trackingDerivation;
+  var runAsAction = !canRunAsDerivation || !prevDerivation_;
+  startBatch();
+  var prevAllowStateChanges_ = globalState.allowStateChanges;
+  if (runAsAction) {
+    untrackedStart();
+    prevAllowStateChanges_ = allowStateChangesStart(true);
+  }
+  var prevAllowStateReads_ = allowStateReadsStart(true);
+  var runInfo = {
+    runAsAction_: runAsAction,
+    prevDerivation_,
+    prevAllowStateChanges_,
+    prevAllowStateReads_,
+    notifySpy_,
+    startTime_,
+    actionId_: nextActionId++,
+    parentActionId_: currentActionId
+  };
+  currentActionId = runInfo.actionId_;
+  return runInfo;
+}
+function _endAction(runInfo) {
+  if (currentActionId !== runInfo.actionId_) {
+    die(30);
+  }
+  currentActionId = runInfo.parentActionId_;
+  if (runInfo.error_ !== void 0) {
+    globalState.suppressReactionErrors = true;
+  }
+  allowStateChangesEnd(runInfo.prevAllowStateChanges_);
+  allowStateReadsEnd(runInfo.prevAllowStateReads_);
+  endBatch();
+  if (runInfo.runAsAction_) {
+    untrackedEnd(runInfo.prevDerivation_);
+  }
+  if (process.env.NODE_ENV !== "production" && runInfo.notifySpy_) {
+    spyReportEnd({
+      time: Date.now() - runInfo.startTime_
+    });
+  }
+  globalState.suppressReactionErrors = false;
+}
+function allowStateChangesStart(allowStateChanges2) {
+  var prev = globalState.allowStateChanges;
+  globalState.allowStateChanges = allowStateChanges2;
+  return prev;
+}
+function allowStateChangesEnd(prev) {
+  globalState.allowStateChanges = prev;
+}
+var CREATE = "create";
+var ObservableValue = /* @__PURE__ */ function(_Atom) {
+  function ObservableValue2(value, enhancer, name_, notifySpy, equals) {
+    var _this;
+    if (name_ === void 0) {
+      name_ = process.env.NODE_ENV !== "production" ? "ObservableValue@" + getNextId() : "ObservableValue";
+    }
+    if (notifySpy === void 0) {
+      notifySpy = true;
+    }
+    if (equals === void 0) {
+      equals = comparer["default"];
+    }
+    _this = _Atom.call(this, name_) || this;
+    _this.enhancer = void 0;
+    _this.name_ = void 0;
+    _this.equals = void 0;
+    _this.hasUnreportedChange_ = false;
+    _this.interceptors_ = void 0;
+    _this.changeListeners_ = void 0;
+    _this.value_ = void 0;
+    _this.dehancer = void 0;
+    _this.enhancer = enhancer;
+    _this.name_ = name_;
+    _this.equals = equals;
+    _this.value_ = enhancer(value, void 0, name_);
+    if (process.env.NODE_ENV !== "production" && notifySpy && isSpyEnabled()) {
+      spyReport({
+        type: CREATE,
+        object: _this,
+        observableKind: "value",
+        debugObjectName: _this.name_,
+        newValue: "" + _this.value_
+      });
+    }
+    return _this;
+  }
+  _inheritsLoose(ObservableValue2, _Atom);
+  var _proto = ObservableValue2.prototype;
+  _proto.dehanceValue = function dehanceValue(value) {
+    if (this.dehancer !== void 0) {
+      return this.dehancer(value);
+    }
+    return value;
+  };
+  _proto.set = function set5(newValue) {
+    var oldValue = this.value_;
+    newValue = this.prepareNewValue_(newValue);
+    if (newValue !== globalState.UNCHANGED) {
+      var notifySpy = isSpyEnabled();
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportStart({
+          type: UPDATE,
+          object: this,
+          observableKind: "value",
+          debugObjectName: this.name_,
+          newValue,
+          oldValue
+        });
+      }
+      this.setNewValue_(newValue);
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportEnd();
+      }
+    }
+  };
+  _proto.prepareNewValue_ = function prepareNewValue_(newValue) {
+    checkIfStateModificationsAreAllowed(this);
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        object: this,
+        type: UPDATE,
+        newValue
+      });
+      if (!change) {
+        return globalState.UNCHANGED;
+      }
+      newValue = change.newValue;
+    }
+    newValue = this.enhancer(newValue, this.value_, this.name_);
+    return this.equals(this.value_, newValue) ? globalState.UNCHANGED : newValue;
+  };
+  _proto.setNewValue_ = function setNewValue_(newValue) {
+    var oldValue = this.value_;
+    this.value_ = newValue;
+    this.reportChanged();
+    if (hasListeners(this)) {
+      notifyListeners(this, {
+        type: UPDATE,
+        object: this,
+        newValue,
+        oldValue
+      });
+    }
+  };
+  _proto.get = function get4() {
+    this.reportObserved();
+    return this.dehanceValue(this.value_);
+  };
+  _proto.intercept_ = function intercept_(handler) {
+    return registerInterceptor(this, handler);
+  };
+  _proto.observe_ = function observe_(listener, fireImmediately) {
+    if (fireImmediately) {
+      listener({
+        observableKind: "value",
+        debugObjectName: this.name_,
+        object: this,
+        type: UPDATE,
+        newValue: this.value_,
+        oldValue: void 0
+      });
+    }
+    return registerListener(this, listener);
+  };
+  _proto.raw = function raw() {
+    return this.value_;
+  };
+  _proto.toJSON = function toJSON22() {
+    return this.get();
+  };
+  _proto.toString = function toString22() {
+    return this.name_ + "[" + this.value_ + "]";
+  };
+  _proto.valueOf = function valueOf() {
+    return toPrimitive(this.get());
+  };
+  _proto[Symbol.toPrimitive] = function() {
+    return this.valueOf();
+  };
+  return ObservableValue2;
+}(Atom);
+var ComputedValue = /* @__PURE__ */ function() {
+  function ComputedValue2(options) {
+    this.dependenciesState_ = IDerivationState_.NOT_TRACKING_;
+    this.observing_ = [];
+    this.newObserving_ = null;
+    this.observers_ = /* @__PURE__ */ new Set();
+    this.runId_ = 0;
+    this.lastAccessedBy_ = 0;
+    this.lowestObserverState_ = IDerivationState_.UP_TO_DATE_;
+    this.unboundDepsCount_ = 0;
+    this.value_ = new CaughtException(null);
+    this.name_ = void 0;
+    this.triggeredBy_ = void 0;
+    this.flags_ = 0;
+    this.derivation = void 0;
+    this.setter_ = void 0;
+    this.isTracing_ = TraceMode.NONE;
+    this.scope_ = void 0;
+    this.equals_ = void 0;
+    this.requiresReaction_ = void 0;
+    this.keepAlive_ = void 0;
+    this.onBOL = void 0;
+    this.onBUOL = void 0;
+    if (!options.get) {
+      die(31);
+    }
+    this.derivation = options.get;
+    this.name_ = options.name || (process.env.NODE_ENV !== "production" ? "ComputedValue@" + getNextId() : "ComputedValue");
+    if (options.set) {
+      this.setter_ = createAction(process.env.NODE_ENV !== "production" ? this.name_ + "-setter" : "ComputedValue-setter", options.set);
+    }
+    this.equals_ = options.equals || (options.compareStructural || options.struct ? comparer.structural : comparer["default"]);
+    this.scope_ = options.context;
+    this.requiresReaction_ = options.requiresReaction;
+    this.keepAlive_ = !!options.keepAlive;
+  }
+  var _proto = ComputedValue2.prototype;
+  _proto.onBecomeStale_ = function onBecomeStale_() {
+    propagateMaybeChanged(this);
+  };
+  _proto.onBO = function onBO() {
+    if (this.onBOL) {
+      this.onBOL.forEach(function(listener) {
+        return listener();
+      });
+    }
+  };
+  _proto.onBUO = function onBUO() {
+    if (this.onBUOL) {
+      this.onBUOL.forEach(function(listener) {
+        return listener();
+      });
+    }
+  };
+  _proto.get = function get4() {
+    if (this.isComputing) {
+      die(32, this.name_, this.derivation);
+    }
+    if (globalState.inBatch === 0 && // !globalState.trackingDerivatpion &&
+    this.observers_.size === 0 && !this.keepAlive_) {
+      if (shouldCompute(this)) {
+        this.warnAboutUntrackedRead_();
+        startBatch();
+        this.value_ = this.computeValue_(false);
+        endBatch();
+      }
+    } else {
+      reportObserved(this);
+      if (shouldCompute(this)) {
+        var prevTrackingContext = globalState.trackingContext;
+        if (this.keepAlive_ && !prevTrackingContext) {
+          globalState.trackingContext = this;
+        }
+        if (this.trackAndCompute()) {
+          propagateChangeConfirmed(this);
+        }
+        globalState.trackingContext = prevTrackingContext;
+      }
+    }
+    var result = this.value_;
+    if (isCaughtException(result)) {
+      throw result.cause;
+    }
+    return result;
+  };
+  _proto.set = function set5(value) {
+    if (this.setter_) {
+      if (this.isRunningSetter) {
+        die(33, this.name_);
+      }
+      this.isRunningSetter = true;
       try {
-        const result = job.invoke(cinv.fireDate instanceof CronDate$1 ? cinv.fireDate.toDate() : cinv.fireDate);
-        job.emit("run");
-        job.running += 1;
-        if (result instanceof Promise) {
-          result.then(function(value) {
-            job.emit("success", value);
-            job.running -= 1;
-          }).catch(function(err) {
-            job.emit("error", err);
-            job.running -= 1;
-          });
-        } else {
-          job.emit("success", result);
-          job.running -= 1;
+        this.setter_.call(this.scope_, value);
+      } finally {
+        this.isRunningSetter = false;
+      }
+    } else {
+      die(34, this.name_);
+    }
+  };
+  _proto.trackAndCompute = function trackAndCompute() {
+    var oldValue = this.value_;
+    var wasSuspended = (
+      /* see #1208 */
+      this.dependenciesState_ === IDerivationState_.NOT_TRACKING_
+    );
+    var newValue = this.computeValue_(true);
+    var changed = wasSuspended || isCaughtException(oldValue) || isCaughtException(newValue) || !this.equals_(oldValue, newValue);
+    if (changed) {
+      this.value_ = newValue;
+      if (process.env.NODE_ENV !== "production" && isSpyEnabled()) {
+        spyReport({
+          observableKind: "computed",
+          debugObjectName: this.name_,
+          object: this.scope_,
+          type: "update",
+          oldValue,
+          newValue
+        });
+      }
+    }
+    return changed;
+  };
+  _proto.computeValue_ = function computeValue_(track) {
+    this.isComputing = true;
+    var prev = allowStateChangesStart(false);
+    var res;
+    if (track) {
+      res = trackDerivedFunction(this, this.derivation, this.scope_);
+    } else {
+      if (globalState.disableErrorBoundaries === true) {
+        res = this.derivation.call(this.scope_);
+      } else {
+        try {
+          res = this.derivation.call(this.scope_);
+        } catch (e) {
+          res = new CaughtException(e);
         }
-      } catch (err) {
-        job.emit("error", err);
-        job.running -= 1;
       }
-      if (job.isOneTimeJob) {
-        job.deleteFromSchedule();
+    }
+    allowStateChangesEnd(prev);
+    this.isComputing = false;
+    return res;
+  };
+  _proto.suspend_ = function suspend_() {
+    if (!this.keepAlive_) {
+      clearObserving(this);
+      this.value_ = void 0;
+      if (process.env.NODE_ENV !== "production" && this.isTracing_ !== TraceMode.NONE) {
+        console.log("[mobx.trace] Computed value '" + this.name_ + "' was suspended and it will recompute on the next access.");
       }
+    }
+  };
+  _proto.observe_ = function observe_(listener, fireImmediately) {
+    var _this = this;
+    var firstTime = true;
+    var prevValue = void 0;
+    return autorun(function() {
+      var newValue = _this.get();
+      if (!firstTime || fireImmediately) {
+        var prevU = untrackedStart();
+        listener({
+          observableKind: "computed",
+          debugObjectName: _this.name_,
+          type: UPDATE,
+          object: _this,
+          newValue,
+          oldValue: prevValue
+        });
+        untrackedEnd(prevU);
+      }
+      firstTime = false;
+      prevValue = newValue;
+    });
+  };
+  _proto.warnAboutUntrackedRead_ = function warnAboutUntrackedRead_() {
+    if (!(process.env.NODE_ENV !== "production")) {
+      return;
+    }
+    if (this.isTracing_ !== TraceMode.NONE) {
+      console.log("[mobx.trace] Computed value '" + this.name_ + "' is being read outside a reactive context. Doing a full recompute.");
+    }
+    if (typeof this.requiresReaction_ === "boolean" ? this.requiresReaction_ : globalState.computedRequiresReaction) {
+      console.warn("[mobx] Computed value '" + this.name_ + "' is being read outside a reactive context. Doing a full recompute.");
+    }
+  };
+  _proto.toString = function toString22() {
+    return this.name_ + "[" + this.derivation.toString() + "]";
+  };
+  _proto.valueOf = function valueOf() {
+    return toPrimitive(this.get());
+  };
+  _proto[Symbol.toPrimitive] = function() {
+    return this.valueOf();
+  };
+  return _createClass(ComputedValue2, [{
+    key: "isComputing",
+    get: function get4() {
+      return getFlag(this.flags_, ComputedValue2.isComputingMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, ComputedValue2.isComputingMask_, newValue);
+    }
+  }, {
+    key: "isRunningSetter",
+    get: function get4() {
+      return getFlag(this.flags_, ComputedValue2.isRunningSetterMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, ComputedValue2.isRunningSetterMask_, newValue);
+    }
+  }, {
+    key: "isBeingObserved",
+    get: function get4() {
+      return getFlag(this.flags_, ComputedValue2.isBeingObservedMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, ComputedValue2.isBeingObservedMask_, newValue);
+    }
+  }, {
+    key: "isPendingUnobservation",
+    get: function get4() {
+      return getFlag(this.flags_, ComputedValue2.isPendingUnobservationMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, ComputedValue2.isPendingUnobservationMask_, newValue);
+    }
+  }, {
+    key: "diffValue",
+    get: function get4() {
+      return getFlag(this.flags_, ComputedValue2.diffValueMask_) ? 1 : 0;
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, ComputedValue2.diffValueMask_, newValue === 1 ? true : false);
+    }
+  }]);
+}();
+ComputedValue.isComputingMask_ = 1;
+ComputedValue.isRunningSetterMask_ = 2;
+ComputedValue.isBeingObservedMask_ = 4;
+ComputedValue.isPendingUnobservationMask_ = 8;
+ComputedValue.diffValueMask_ = 16;
+var isComputedValue = /* @__PURE__ */ createInstanceofPredicate("ComputedValue", ComputedValue);
+var IDerivationState_;
+(function(IDerivationState_2) {
+  IDerivationState_2[IDerivationState_2["NOT_TRACKING_"] = -1] = "NOT_TRACKING_";
+  IDerivationState_2[IDerivationState_2["UP_TO_DATE_"] = 0] = "UP_TO_DATE_";
+  IDerivationState_2[IDerivationState_2["POSSIBLY_STALE_"] = 1] = "POSSIBLY_STALE_";
+  IDerivationState_2[IDerivationState_2["STALE_"] = 2] = "STALE_";
+})(IDerivationState_ || (IDerivationState_ = {}));
+var TraceMode;
+(function(TraceMode2) {
+  TraceMode2[TraceMode2["NONE"] = 0] = "NONE";
+  TraceMode2[TraceMode2["LOG"] = 1] = "LOG";
+  TraceMode2[TraceMode2["BREAK"] = 2] = "BREAK";
+})(TraceMode || (TraceMode = {}));
+var CaughtException = function CaughtException2(cause) {
+  this.cause = void 0;
+  this.cause = cause;
+};
+function isCaughtException(e) {
+  return e instanceof CaughtException;
+}
+function shouldCompute(derivation) {
+  switch (derivation.dependenciesState_) {
+    case IDerivationState_.UP_TO_DATE_:
+      return false;
+    case IDerivationState_.NOT_TRACKING_:
+    case IDerivationState_.STALE_:
+      return true;
+    case IDerivationState_.POSSIBLY_STALE_: {
+      var prevAllowStateReads = allowStateReadsStart(true);
+      var prevUntracked = untrackedStart();
+      var obs = derivation.observing_, l = obs.length;
+      for (var i = 0; i < l; i++) {
+        var obj = obs[i];
+        if (isComputedValue(obj)) {
+          if (globalState.disableErrorBoundaries) {
+            obj.get();
+          } else {
+            try {
+              obj.get();
+            } catch (e) {
+              untrackedEnd(prevUntracked);
+              allowStateReadsEnd(prevAllowStateReads);
+              return true;
+            }
+          }
+          if (derivation.dependenciesState_ === IDerivationState_.STALE_) {
+            untrackedEnd(prevUntracked);
+            allowStateReadsEnd(prevAllowStateReads);
+            return true;
+          }
+        }
+      }
+      changeDependenciesStateTo0(derivation);
+      untrackedEnd(prevUntracked);
+      allowStateReadsEnd(prevAllowStateReads);
+      return false;
+    }
+  }
+}
+function checkIfStateModificationsAreAllowed(atom) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  var hasObservers2 = atom.observers_.size > 0;
+  if (!globalState.allowStateChanges && (hasObservers2 || globalState.enforceActions === "always")) {
+    console.warn("[MobX] " + (globalState.enforceActions ? "Since strict-mode is enabled, changing (observed) observable values without using an action is not allowed. Tried to modify: " : "Side effects like changing state are not allowed at this point. Are you trying to modify state from, for example, a computed value or the render function of a React component? You can wrap side effects in 'runInAction' (or decorate functions with 'action') if needed. Tried to modify: ") + atom.name_);
+  }
+}
+function checkIfStateReadsAreAllowed(observable2) {
+  if (process.env.NODE_ENV !== "production" && !globalState.allowStateReads && globalState.observableRequiresReaction) {
+    console.warn("[mobx] Observable '" + observable2.name_ + "' being read outside a reactive context.");
+  }
+}
+function trackDerivedFunction(derivation, f, context) {
+  var prevAllowStateReads = allowStateReadsStart(true);
+  changeDependenciesStateTo0(derivation);
+  derivation.newObserving_ = new Array(
+    // Reserve constant space for initial dependencies, dynamic space otherwise.
+    // See https://github.com/mobxjs/mobx/pull/3833
+    derivation.runId_ === 0 ? 100 : derivation.observing_.length
+  );
+  derivation.unboundDepsCount_ = 0;
+  derivation.runId_ = ++globalState.runId;
+  var prevTracking = globalState.trackingDerivation;
+  globalState.trackingDerivation = derivation;
+  globalState.inBatch++;
+  var result;
+  if (globalState.disableErrorBoundaries === true) {
+    result = f.call(context);
+  } else {
+    try {
+      result = f.call(context);
+    } catch (e) {
+      result = new CaughtException(e);
+    }
+  }
+  globalState.inBatch--;
+  globalState.trackingDerivation = prevTracking;
+  bindDependencies(derivation);
+  warnAboutDerivationWithoutDependencies(derivation);
+  allowStateReadsEnd(prevAllowStateReads);
+  return result;
+}
+function warnAboutDerivationWithoutDependencies(derivation) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  if (derivation.observing_.length !== 0) {
+    return;
+  }
+  if (typeof derivation.requiresObservable_ === "boolean" ? derivation.requiresObservable_ : globalState.reactionRequiresObservable) {
+    console.warn("[mobx] Derivation '" + derivation.name_ + "' is created/updated without reading any observable value.");
+  }
+}
+function bindDependencies(derivation) {
+  var prevObserving = derivation.observing_;
+  var observing = derivation.observing_ = derivation.newObserving_;
+  var lowestNewObservingDerivationState = IDerivationState_.UP_TO_DATE_;
+  var i0 = 0, l = derivation.unboundDepsCount_;
+  for (var i = 0; i < l; i++) {
+    var dep = observing[i];
+    if (dep.diffValue === 0) {
+      dep.diffValue = 1;
+      if (i0 !== i) {
+        observing[i0] = dep;
+      }
+      i0++;
+    }
+    if (dep.dependenciesState_ > lowestNewObservingDerivationState) {
+      lowestNewObservingDerivationState = dep.dependenciesState_;
+    }
+  }
+  observing.length = i0;
+  derivation.newObserving_ = null;
+  l = prevObserving.length;
+  while (l--) {
+    var _dep = prevObserving[l];
+    if (_dep.diffValue === 0) {
+      removeObserver(_dep, derivation);
+    }
+    _dep.diffValue = 0;
+  }
+  while (i0--) {
+    var _dep2 = observing[i0];
+    if (_dep2.diffValue === 1) {
+      _dep2.diffValue = 0;
+      addObserver(_dep2, derivation);
+    }
+  }
+  if (lowestNewObservingDerivationState !== IDerivationState_.UP_TO_DATE_) {
+    derivation.dependenciesState_ = lowestNewObservingDerivationState;
+    derivation.onBecomeStale_();
+  }
+}
+function clearObserving(derivation) {
+  var obs = derivation.observing_;
+  derivation.observing_ = [];
+  var i = obs.length;
+  while (i--) {
+    removeObserver(obs[i], derivation);
+  }
+  derivation.dependenciesState_ = IDerivationState_.NOT_TRACKING_;
+}
+function untracked(action2) {
+  var prev = untrackedStart();
+  try {
+    return action2();
+  } finally {
+    untrackedEnd(prev);
+  }
+}
+function untrackedStart() {
+  var prev = globalState.trackingDerivation;
+  globalState.trackingDerivation = null;
+  return prev;
+}
+function untrackedEnd(prev) {
+  globalState.trackingDerivation = prev;
+}
+function allowStateReadsStart(allowStateReads) {
+  var prev = globalState.allowStateReads;
+  globalState.allowStateReads = allowStateReads;
+  return prev;
+}
+function allowStateReadsEnd(prev) {
+  globalState.allowStateReads = prev;
+}
+function changeDependenciesStateTo0(derivation) {
+  if (derivation.dependenciesState_ === IDerivationState_.UP_TO_DATE_) {
+    return;
+  }
+  derivation.dependenciesState_ = IDerivationState_.UP_TO_DATE_;
+  var obs = derivation.observing_;
+  var i = obs.length;
+  while (i--) {
+    obs[i].lowestObserverState_ = IDerivationState_.UP_TO_DATE_;
+  }
+}
+var MobXGlobals = function MobXGlobals2() {
+  this.version = 6;
+  this.UNCHANGED = {};
+  this.trackingDerivation = null;
+  this.trackingContext = null;
+  this.runId = 0;
+  this.mobxGuid = 0;
+  this.inBatch = 0;
+  this.pendingUnobservations = [];
+  this.pendingReactions = [];
+  this.isRunningReactions = false;
+  this.allowStateChanges = false;
+  this.allowStateReads = true;
+  this.enforceActions = true;
+  this.spyListeners = [];
+  this.globalReactionErrorHandlers = [];
+  this.computedRequiresReaction = false;
+  this.reactionRequiresObservable = false;
+  this.observableRequiresReaction = false;
+  this.disableErrorBoundaries = false;
+  this.suppressReactionErrors = false;
+  this.useProxies = true;
+  this.verifyProxies = false;
+  this.safeDescriptors = true;
+};
+var canMergeGlobalState = true;
+var globalState = /* @__PURE__ */ function() {
+  var global2 = /* @__PURE__ */ getGlobal();
+  if (global2.__mobxInstanceCount > 0 && !global2.__mobxGlobals) {
+    canMergeGlobalState = false;
+  }
+  if (global2.__mobxGlobals && global2.__mobxGlobals.version !== new MobXGlobals().version) {
+    canMergeGlobalState = false;
+  }
+  if (!canMergeGlobalState) {
+    setTimeout(function() {
+      {
+        die(35);
+      }
+    }, 1);
+    return new MobXGlobals();
+  } else if (global2.__mobxGlobals) {
+    global2.__mobxInstanceCount += 1;
+    if (!global2.__mobxGlobals.UNCHANGED) {
+      global2.__mobxGlobals.UNCHANGED = {};
+    }
+    return global2.__mobxGlobals;
+  } else {
+    global2.__mobxInstanceCount = 1;
+    return global2.__mobxGlobals = /* @__PURE__ */ new MobXGlobals();
+  }
+}();
+function addObserver(observable2, node2) {
+  observable2.observers_.add(node2);
+  if (observable2.lowestObserverState_ > node2.dependenciesState_) {
+    observable2.lowestObserverState_ = node2.dependenciesState_;
+  }
+}
+function removeObserver(observable2, node2) {
+  observable2.observers_["delete"](node2);
+  if (observable2.observers_.size === 0) {
+    queueForUnobservation(observable2);
+  }
+}
+function queueForUnobservation(observable2) {
+  if (observable2.isPendingUnobservation === false) {
+    observable2.isPendingUnobservation = true;
+    globalState.pendingUnobservations.push(observable2);
+  }
+}
+function startBatch() {
+  globalState.inBatch++;
+}
+function endBatch() {
+  if (--globalState.inBatch === 0) {
+    runReactions();
+    var list = globalState.pendingUnobservations;
+    for (var i = 0; i < list.length; i++) {
+      var observable2 = list[i];
+      observable2.isPendingUnobservation = false;
+      if (observable2.observers_.size === 0) {
+        if (observable2.isBeingObserved) {
+          observable2.isBeingObserved = false;
+          observable2.onBUO();
+        }
+        if (observable2 instanceof ComputedValue) {
+          observable2.suspend_();
+        }
+      }
+    }
+    globalState.pendingUnobservations = [];
+  }
+}
+function reportObserved(observable2) {
+  checkIfStateReadsAreAllowed(observable2);
+  var derivation = globalState.trackingDerivation;
+  if (derivation !== null) {
+    if (derivation.runId_ !== observable2.lastAccessedBy_) {
+      observable2.lastAccessedBy_ = derivation.runId_;
+      derivation.newObserving_[derivation.unboundDepsCount_++] = observable2;
+      if (!observable2.isBeingObserved && globalState.trackingContext) {
+        observable2.isBeingObserved = true;
+        observable2.onBO();
+      }
+    }
+    return observable2.isBeingObserved;
+  } else if (observable2.observers_.size === 0 && globalState.inBatch > 0) {
+    queueForUnobservation(observable2);
+  }
+  return false;
+}
+function propagateChanged(observable2) {
+  if (observable2.lowestObserverState_ === IDerivationState_.STALE_) {
+    return;
+  }
+  observable2.lowestObserverState_ = IDerivationState_.STALE_;
+  observable2.observers_.forEach(function(d) {
+    if (d.dependenciesState_ === IDerivationState_.UP_TO_DATE_) {
+      if (process.env.NODE_ENV !== "production" && d.isTracing_ !== TraceMode.NONE) {
+        logTraceInfo(d, observable2);
+      }
+      d.onBecomeStale_();
+    }
+    d.dependenciesState_ = IDerivationState_.STALE_;
+  });
+}
+function propagateChangeConfirmed(observable2) {
+  if (observable2.lowestObserverState_ === IDerivationState_.STALE_) {
+    return;
+  }
+  observable2.lowestObserverState_ = IDerivationState_.STALE_;
+  observable2.observers_.forEach(function(d) {
+    if (d.dependenciesState_ === IDerivationState_.POSSIBLY_STALE_) {
+      d.dependenciesState_ = IDerivationState_.STALE_;
+      if (process.env.NODE_ENV !== "production" && d.isTracing_ !== TraceMode.NONE) {
+        logTraceInfo(d, observable2);
+      }
+    } else if (d.dependenciesState_ === IDerivationState_.UP_TO_DATE_) {
+      observable2.lowestObserverState_ = IDerivationState_.UP_TO_DATE_;
+    }
+  });
+}
+function propagateMaybeChanged(observable2) {
+  if (observable2.lowestObserverState_ !== IDerivationState_.UP_TO_DATE_) {
+    return;
+  }
+  observable2.lowestObserverState_ = IDerivationState_.POSSIBLY_STALE_;
+  observable2.observers_.forEach(function(d) {
+    if (d.dependenciesState_ === IDerivationState_.UP_TO_DATE_) {
+      d.dependenciesState_ = IDerivationState_.POSSIBLY_STALE_;
+      d.onBecomeStale_();
+    }
+  });
+}
+function logTraceInfo(derivation, observable2) {
+  console.log("[mobx.trace] '" + derivation.name_ + "' is invalidated due to a change in: '" + observable2.name_ + "'");
+  if (derivation.isTracing_ === TraceMode.BREAK) {
+    var lines = [];
+    printDepTree(getDependencyTree(derivation), lines, 1);
+    new Function("debugger;\n/*\nTracing '" + derivation.name_ + "'\n\nYou are entering this break point because derivation '" + derivation.name_ + "' is being traced and '" + observable2.name_ + "' is now forcing it to update.\nJust follow the stacktrace you should now see in the devtools to see precisely what piece of your code is causing this update\nThe stackframe you are looking for is at least ~6-8 stack-frames up.\n\n" + (derivation instanceof ComputedValue ? derivation.derivation.toString().replace(/[*]\//g, "/") : "") + "\n\nThe dependencies for this derivation are:\n\n" + lines.join("\n") + "\n*/\n    ")();
+  }
+}
+function printDepTree(tree, lines, depth) {
+  if (lines.length >= 1e3) {
+    lines.push("(and many more)");
+    return;
+  }
+  lines.push("" + "	".repeat(depth - 1) + tree.name);
+  if (tree.dependencies) {
+    tree.dependencies.forEach(function(child) {
+      return printDepTree(child, lines, depth + 1);
     });
   }
 }
-function currentInvocationFinished() {
-  invocations.shift();
-  currentInvocation = null;
-  prepareNextInvocation();
-}
-function cancelInvocation$1(invocation) {
-  const idx = invocations.indexOf(invocation);
-  if (idx > -1) {
-    invocations.splice(idx, 1);
-    if (invocation.timerID !== null) {
-      lt.clearTimeout(invocation.timerID);
+var Reaction = /* @__PURE__ */ function() {
+  function Reaction2(name_, onInvalidate_, errorHandler_, requiresObservable_) {
+    if (name_ === void 0) {
+      name_ = process.env.NODE_ENV !== "production" ? "Reaction@" + getNextId() : "Reaction";
     }
-    if (currentInvocation === invocation) {
-      currentInvocation = null;
-    }
-    invocation.job.emit("canceled", invocation.fireDate);
-    prepareNextInvocation();
+    this.name_ = void 0;
+    this.onInvalidate_ = void 0;
+    this.errorHandler_ = void 0;
+    this.requiresObservable_ = void 0;
+    this.observing_ = [];
+    this.newObserving_ = [];
+    this.dependenciesState_ = IDerivationState_.NOT_TRACKING_;
+    this.runId_ = 0;
+    this.unboundDepsCount_ = 0;
+    this.flags_ = 0;
+    this.isTracing_ = TraceMode.NONE;
+    this.name_ = name_;
+    this.onInvalidate_ = onInvalidate_;
+    this.errorHandler_ = errorHandler_;
+    this.requiresObservable_ = requiresObservable_;
   }
-}
-function scheduleNextRecurrence$1(rule, job, prevDate, endDate) {
-  prevDate = prevDate instanceof CronDate$1 ? prevDate : new CronDate$1();
-  const date2 = rule instanceof RecurrenceRule$2 ? rule._nextInvocationDate(prevDate) : rule.next();
-  if (date2 === null) {
-    return null;
-  }
-  if (endDate instanceof CronDate$1 && date2.getTime() > endDate.getTime()) {
-    return null;
-  }
-  const inv = new Invocation$2(job, date2, rule, endDate);
-  scheduleInvocation$1(inv);
-  return inv;
-}
-var Invocation_1 = {
-  Range: Range$1,
-  RecurrenceRule: RecurrenceRule$2,
-  Invocation: Invocation$2,
-  cancelInvocation: cancelInvocation$1,
-  scheduleInvocation: scheduleInvocation$1,
-  scheduleNextRecurrence: scheduleNextRecurrence$1,
-  sorter: sorter$1,
-  _invocations: invocations
-};
-function isValidDate$1(date2) {
-  return date2.getTime() === date2.getTime();
-}
-var dateUtils = {
-  isValidDate: isValidDate$1
-};
-const events = require$$0;
-const cronParser = parser;
-const CronDate = date;
-const sorted = sortedArrayFunctions;
-const { scheduleNextRecurrence, scheduleInvocation, cancelInvocation, RecurrenceRule: RecurrenceRule$1, sorter, Invocation: Invocation$1 } = Invocation_1;
-const { isValidDate } = dateUtils;
-const scheduledJobs$2 = {};
-let anonJobCounter = 0;
-function resolveAnonJobName() {
-  const now2 = /* @__PURE__ */ new Date();
-  if (anonJobCounter === Number.MAX_SAFE_INTEGER) {
-    anonJobCounter = 0;
-  }
-  anonJobCounter++;
-  return `<Anonymous Job ${anonJobCounter} ${now2.toISOString()}>`;
-}
-function Job$2(name, job, callback) {
-  this.pendingInvocations = [];
-  let triggeredJobs = 0;
-  const jobName = name && typeof name === "string" ? name : resolveAnonJobName();
-  this.job = name && typeof name === "function" ? name : job;
-  if (this.job === name) {
-    this.callback = typeof job === "function" ? job : false;
-  } else {
-    this.callback = typeof callback === "function" ? callback : false;
-  }
-  this.running = 0;
-  if (typeof this.job === "function" && this.job.prototype && this.job.prototype.next) {
-    this.job = (function() {
-      return this.next().value;
-    }).bind(this.job.call(this));
-  }
-  Object.defineProperty(this, "name", {
-    value: jobName,
-    writable: false,
-    enumerable: true
-  });
-  this.trackInvocation = function(invocation) {
-    sorted.add(this.pendingInvocations, invocation, sorter);
-    return true;
+  var _proto = Reaction2.prototype;
+  _proto.onBecomeStale_ = function onBecomeStale_() {
+    this.schedule_();
   };
-  this.stopTrackingInvocation = function(invocation) {
-    const invIdx = this.pendingInvocations.indexOf(invocation);
-    if (invIdx > -1) {
-      this.pendingInvocations.splice(invIdx, 1);
+  _proto.schedule_ = function schedule_() {
+    if (!this.isScheduled) {
+      this.isScheduled = true;
+      globalState.pendingReactions.push(this);
+      runReactions();
+    }
+  };
+  _proto.runReaction_ = function runReaction_() {
+    if (!this.isDisposed) {
+      startBatch();
+      this.isScheduled = false;
+      var prev = globalState.trackingContext;
+      globalState.trackingContext = this;
+      if (shouldCompute(this)) {
+        this.isTrackPending = true;
+        try {
+          this.onInvalidate_();
+          if (process.env.NODE_ENV !== "production" && this.isTrackPending && isSpyEnabled()) {
+            spyReport({
+              name: this.name_,
+              type: "scheduled-reaction"
+            });
+          }
+        } catch (e) {
+          this.reportExceptionInDerivation_(e);
+        }
+      }
+      globalState.trackingContext = prev;
+      endBatch();
+    }
+  };
+  _proto.track = function track(fn) {
+    if (this.isDisposed) {
+      return;
+    }
+    startBatch();
+    var notify = isSpyEnabled();
+    var startTime;
+    if (process.env.NODE_ENV !== "production" && notify) {
+      startTime = Date.now();
+      spyReportStart({
+        name: this.name_,
+        type: "reaction"
+      });
+    }
+    this.isRunning = true;
+    var prevReaction = globalState.trackingContext;
+    globalState.trackingContext = this;
+    var result = trackDerivedFunction(this, fn, void 0);
+    globalState.trackingContext = prevReaction;
+    this.isRunning = false;
+    this.isTrackPending = false;
+    if (this.isDisposed) {
+      clearObserving(this);
+    }
+    if (isCaughtException(result)) {
+      this.reportExceptionInDerivation_(result.cause);
+    }
+    if (process.env.NODE_ENV !== "production" && notify) {
+      spyReportEnd({
+        time: Date.now() - startTime
+      });
+    }
+    endBatch();
+  };
+  _proto.reportExceptionInDerivation_ = function reportExceptionInDerivation_(error) {
+    var _this = this;
+    if (this.errorHandler_) {
+      this.errorHandler_(error, this);
+      return;
+    }
+    if (globalState.disableErrorBoundaries) {
+      throw error;
+    }
+    var message = process.env.NODE_ENV !== "production" ? "[mobx] Encountered an uncaught exception that was thrown by a reaction or observer component, in: '" + this + "'" : "[mobx] uncaught error in '" + this + "'";
+    if (!globalState.suppressReactionErrors) {
+      console.error(message, error);
+    } else if (process.env.NODE_ENV !== "production") {
+      console.warn("[mobx] (error in reaction '" + this.name_ + "' suppressed, fix error of causing action below)");
+    }
+    if (process.env.NODE_ENV !== "production" && isSpyEnabled()) {
+      spyReport({
+        type: "error",
+        name: this.name_,
+        message,
+        error: "" + error
+      });
+    }
+    globalState.globalReactionErrorHandlers.forEach(function(f) {
+      return f(error, _this);
+    });
+  };
+  _proto.dispose = function dispose() {
+    if (!this.isDisposed) {
+      this.isDisposed = true;
+      if (!this.isRunning) {
+        startBatch();
+        clearObserving(this);
+        endBatch();
+      }
+    }
+  };
+  _proto.getDisposer_ = function getDisposer_(abortSignal) {
+    var _this2 = this;
+    var dispose = function dispose2() {
+      _this2.dispose();
+      abortSignal == null || abortSignal.removeEventListener == null || abortSignal.removeEventListener("abort", dispose2);
+    };
+    abortSignal == null || abortSignal.addEventListener == null || abortSignal.addEventListener("abort", dispose);
+    dispose[$mobx] = this;
+    return dispose;
+  };
+  _proto.toString = function toString22() {
+    return "Reaction[" + this.name_ + "]";
+  };
+  _proto.trace = function trace$1(enterBreakPoint) {
+    if (enterBreakPoint === void 0) {
+      enterBreakPoint = false;
+    }
+    trace(this, enterBreakPoint);
+  };
+  return _createClass(Reaction2, [{
+    key: "isDisposed",
+    get: function get4() {
+      return getFlag(this.flags_, Reaction2.isDisposedMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Reaction2.isDisposedMask_, newValue);
+    }
+  }, {
+    key: "isScheduled",
+    get: function get4() {
+      return getFlag(this.flags_, Reaction2.isScheduledMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Reaction2.isScheduledMask_, newValue);
+    }
+  }, {
+    key: "isTrackPending",
+    get: function get4() {
+      return getFlag(this.flags_, Reaction2.isTrackPendingMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Reaction2.isTrackPendingMask_, newValue);
+    }
+  }, {
+    key: "isRunning",
+    get: function get4() {
+      return getFlag(this.flags_, Reaction2.isRunningMask_);
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Reaction2.isRunningMask_, newValue);
+    }
+  }, {
+    key: "diffValue",
+    get: function get4() {
+      return getFlag(this.flags_, Reaction2.diffValueMask_) ? 1 : 0;
+    },
+    set: function set5(newValue) {
+      this.flags_ = setFlag(this.flags_, Reaction2.diffValueMask_, newValue === 1 ? true : false);
+    }
+  }]);
+}();
+Reaction.isDisposedMask_ = 1;
+Reaction.isScheduledMask_ = 2;
+Reaction.isTrackPendingMask_ = 4;
+Reaction.isRunningMask_ = 8;
+Reaction.diffValueMask_ = 16;
+var MAX_REACTION_ITERATIONS = 100;
+var reactionScheduler = function reactionScheduler2(f) {
+  return f();
+};
+function runReactions() {
+  if (globalState.inBatch > 0 || globalState.isRunningReactions) {
+    return;
+  }
+  reactionScheduler(runReactionsHelper);
+}
+function runReactionsHelper() {
+  globalState.isRunningReactions = true;
+  var allReactions = globalState.pendingReactions;
+  var iterations = 0;
+  while (allReactions.length > 0) {
+    if (++iterations === MAX_REACTION_ITERATIONS) {
+      console.error(process.env.NODE_ENV !== "production" ? "Reaction doesn't converge to a stable state after " + MAX_REACTION_ITERATIONS + " iterations." + (" Probably there is a cycle in the reactive function: " + allReactions[0]) : "[mobx] cycle in reaction: " + allReactions[0]);
+      allReactions.splice(0);
+    }
+    var remainingReactions = allReactions.splice(0);
+    for (var i = 0, l = remainingReactions.length; i < l; i++) {
+      remainingReactions[i].runReaction_();
+    }
+  }
+  globalState.isRunningReactions = false;
+}
+var isReaction = /* @__PURE__ */ createInstanceofPredicate("Reaction", Reaction);
+function isSpyEnabled() {
+  return process.env.NODE_ENV !== "production" && !!globalState.spyListeners.length;
+}
+function spyReport(event) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  if (!globalState.spyListeners.length) {
+    return;
+  }
+  var listeners = globalState.spyListeners;
+  for (var i = 0, l = listeners.length; i < l; i++) {
+    listeners[i](event);
+  }
+}
+function spyReportStart(event) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  var change = _extends({}, event, {
+    spyReportStart: true
+  });
+  spyReport(change);
+}
+var END_EVENT = {
+  type: "report-end",
+  spyReportEnd: true
+};
+function spyReportEnd(change) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  if (change) {
+    spyReport(_extends({}, change, {
+      type: "report-end",
+      spyReportEnd: true
+    }));
+  } else {
+    spyReport(END_EVENT);
+  }
+}
+function spy(listener) {
+  if (!(process.env.NODE_ENV !== "production")) {
+    console.warn("[mobx.spy] Is a no-op in production builds");
+    return function() {
+    };
+  } else {
+    globalState.spyListeners.push(listener);
+    return once(function() {
+      globalState.spyListeners = globalState.spyListeners.filter(function(l) {
+        return l !== listener;
+      });
+    });
+  }
+}
+var ACTION = "action";
+var ACTION_BOUND = "action.bound";
+var AUTOACTION = "autoAction";
+var AUTOACTION_BOUND = "autoAction.bound";
+var DEFAULT_ACTION_NAME = "<unnamed action>";
+var actionAnnotation = /* @__PURE__ */ createActionAnnotation(ACTION);
+var actionBoundAnnotation = /* @__PURE__ */ createActionAnnotation(ACTION_BOUND, {
+  bound: true
+});
+var autoActionAnnotation = /* @__PURE__ */ createActionAnnotation(AUTOACTION, {
+  autoAction: true
+});
+var autoActionBoundAnnotation = /* @__PURE__ */ createActionAnnotation(AUTOACTION_BOUND, {
+  autoAction: true,
+  bound: true
+});
+function createActionFactory(autoAction2) {
+  var res = function action2(arg1, arg2) {
+    if (isFunction(arg1)) {
+      return createAction(arg1.name || DEFAULT_ACTION_NAME, arg1, autoAction2);
+    }
+    if (isFunction(arg2)) {
+      return createAction(arg1, arg2, autoAction2);
+    }
+    if (is20223Decorator(arg2)) {
+      return (autoAction2 ? autoActionAnnotation : actionAnnotation).decorate_20223_(arg1, arg2);
+    }
+    if (isStringish(arg2)) {
+      return storeAnnotation(arg1, arg2, autoAction2 ? autoActionAnnotation : actionAnnotation);
+    }
+    if (isStringish(arg1)) {
+      return createDecoratorAnnotation(createActionAnnotation(autoAction2 ? AUTOACTION : ACTION, {
+        name: arg1,
+        autoAction: autoAction2
+      }));
+    }
+    if (process.env.NODE_ENV !== "production") {
+      die("Invalid arguments for `action`");
+    }
+  };
+  return res;
+}
+var action = /* @__PURE__ */ createActionFactory(false);
+Object.assign(action, actionAnnotation);
+var autoAction = /* @__PURE__ */ createActionFactory(true);
+Object.assign(autoAction, autoActionAnnotation);
+action.bound = /* @__PURE__ */ createDecoratorAnnotation(actionBoundAnnotation);
+autoAction.bound = /* @__PURE__ */ createDecoratorAnnotation(autoActionBoundAnnotation);
+function isAction(thing) {
+  return isFunction(thing) && thing.isMobxAction === true;
+}
+function autorun(view, opts) {
+  var _opts$name, _opts, _opts2, _opts3;
+  if (opts === void 0) {
+    opts = EMPTY_OBJECT;
+  }
+  if (process.env.NODE_ENV !== "production") {
+    if (!isFunction(view)) {
+      die("Autorun expects a function as first argument");
+    }
+    if (isAction(view)) {
+      die("Autorun does not accept actions since actions are untrackable");
+    }
+  }
+  var name = (_opts$name = (_opts = opts) == null ? void 0 : _opts.name) != null ? _opts$name : process.env.NODE_ENV !== "production" ? view.name || "Autorun@" + getNextId() : "Autorun";
+  var runSync = !opts.scheduler && !opts.delay;
+  var reaction2;
+  if (runSync) {
+    reaction2 = new Reaction(name, function() {
+      this.track(reactionRunner);
+    }, opts.onError, opts.requiresObservable);
+  } else {
+    var scheduler = createSchedulerFromOptions(opts);
+    var isScheduled = false;
+    reaction2 = new Reaction(name, function() {
+      if (!isScheduled) {
+        isScheduled = true;
+        scheduler(function() {
+          isScheduled = false;
+          if (!reaction2.isDisposed) {
+            reaction2.track(reactionRunner);
+          }
+        });
+      }
+    }, opts.onError, opts.requiresObservable);
+  }
+  function reactionRunner() {
+    view(reaction2);
+  }
+  if (!((_opts2 = opts) != null && (_opts2 = _opts2.signal) != null && _opts2.aborted)) {
+    reaction2.schedule_();
+  }
+  return reaction2.getDisposer_((_opts3 = opts) == null ? void 0 : _opts3.signal);
+}
+var run = function run2(f) {
+  return f();
+};
+function createSchedulerFromOptions(opts) {
+  return opts.scheduler ? opts.scheduler : opts.delay ? function(f) {
+    return setTimeout(f, opts.delay);
+  } : run;
+}
+var ON_BECOME_OBSERVED = "onBO";
+var ON_BECOME_UNOBSERVED = "onBUO";
+function onBecomeObserved(thing, arg2, arg3) {
+  return interceptHook(ON_BECOME_OBSERVED, thing, arg2, arg3);
+}
+function onBecomeUnobserved(thing, arg2, arg3) {
+  return interceptHook(ON_BECOME_UNOBSERVED, thing, arg2, arg3);
+}
+function interceptHook(hook, thing, arg2, arg3) {
+  var atom = getAtom(thing);
+  var cb = isFunction(arg3) ? arg3 : arg2;
+  var listenersKey = hook + "L";
+  if (atom[listenersKey]) {
+    atom[listenersKey].add(cb);
+  } else {
+    atom[listenersKey] = /* @__PURE__ */ new Set([cb]);
+  }
+  return function() {
+    var hookListeners = atom[listenersKey];
+    if (hookListeners) {
+      hookListeners["delete"](cb);
+      if (hookListeners.size === 0) {
+        delete atom[listenersKey];
+      }
+    }
+  };
+}
+function extendObservable(target, properties, annotations, options) {
+  if (process.env.NODE_ENV !== "production") {
+    if (arguments.length > 4) {
+      die("'extendObservable' expected 2-4 arguments");
+    }
+    if (typeof target !== "object") {
+      die("'extendObservable' expects an object as first argument");
+    }
+    if (isObservableMap(target)) {
+      die("'extendObservable' should not be used on maps, use map.merge instead");
+    }
+    if (!isPlainObject(properties)) {
+      die("'extendObservable' only accepts plain objects as second argument");
+    }
+    if (isObservable(properties) || isObservable(annotations)) {
+      die("Extending an object with another observable (object) is not supported");
+    }
+  }
+  var descriptors2 = getOwnPropertyDescriptors(properties);
+  initObservable(function() {
+    var adm = asObservableObject(target, options)[$mobx];
+    ownKeys(descriptors2).forEach(function(key) {
+      adm.extend_(
+        key,
+        descriptors2[key],
+        // must pass "undefined" for { key: undefined }
+        !annotations ? true : key in annotations ? annotations[key] : true
+      );
+    });
+  });
+  return target;
+}
+function getDependencyTree(thing, property) {
+  return nodeToDependencyTree(getAtom(thing, property));
+}
+function nodeToDependencyTree(node2) {
+  var result = {
+    name: node2.name_
+  };
+  if (node2.observing_ && node2.observing_.length > 0) {
+    result.dependencies = unique(node2.observing_).map(nodeToDependencyTree);
+  }
+  return result;
+}
+function unique(list) {
+  return Array.from(new Set(list));
+}
+var generatorId = 0;
+function FlowCancellationError() {
+  this.message = "FLOW_CANCELLED";
+}
+FlowCancellationError.prototype = /* @__PURE__ */ Object.create(Error.prototype);
+var flowAnnotation = /* @__PURE__ */ createFlowAnnotation("flow");
+var flowBoundAnnotation = /* @__PURE__ */ createFlowAnnotation("flow.bound", {
+  bound: true
+});
+var flow = /* @__PURE__ */ Object.assign(function flow2(arg1, arg2) {
+  if (is20223Decorator(arg2)) {
+    return flowAnnotation.decorate_20223_(arg1, arg2);
+  }
+  if (isStringish(arg2)) {
+    return storeAnnotation(arg1, arg2, flowAnnotation);
+  }
+  if (process.env.NODE_ENV !== "production" && arguments.length !== 1) {
+    die("Flow expects single argument with generator function");
+  }
+  var generator = arg1;
+  var name = generator.name || "<unnamed flow>";
+  var res = function res2() {
+    var ctx = this;
+    var args = arguments;
+    var runId = ++generatorId;
+    var gen = action(name + " - runid: " + runId + " - init", generator).apply(ctx, args);
+    var rejector;
+    var pendingPromise = void 0;
+    var promise = new Promise(function(resolve, reject) {
+      var stepId = 0;
+      rejector = reject;
+      function onFulfilled(res3) {
+        pendingPromise = void 0;
+        var ret;
+        try {
+          ret = action(name + " - runid: " + runId + " - yield " + stepId++, gen.next).call(gen, res3);
+        } catch (e) {
+          return reject(e);
+        }
+        next(ret);
+      }
+      function onRejected(err) {
+        pendingPromise = void 0;
+        var ret;
+        try {
+          ret = action(name + " - runid: " + runId + " - yield " + stepId++, gen["throw"]).call(gen, err);
+        } catch (e) {
+          return reject(e);
+        }
+        next(ret);
+      }
+      function next(ret) {
+        if (isFunction(ret == null ? void 0 : ret.then)) {
+          ret.then(next, reject);
+          return;
+        }
+        if (ret.done) {
+          return resolve(ret.value);
+        }
+        pendingPromise = Promise.resolve(ret.value);
+        return pendingPromise.then(onFulfilled, onRejected);
+      }
+      onFulfilled(void 0);
+    });
+    promise.cancel = action(name + " - runid: " + runId + " - cancel", function() {
+      try {
+        if (pendingPromise) {
+          cancelPromise(pendingPromise);
+        }
+        var _res = gen["return"](void 0);
+        var yieldedPromise = Promise.resolve(_res.value);
+        yieldedPromise.then(noop, noop);
+        cancelPromise(yieldedPromise);
+        rejector(new FlowCancellationError());
+      } catch (e) {
+        rejector(e);
+      }
+    });
+    return promise;
+  };
+  res.isMobXFlow = true;
+  return res;
+}, flowAnnotation);
+flow.bound = /* @__PURE__ */ createDecoratorAnnotation(flowBoundAnnotation);
+function cancelPromise(promise) {
+  if (isFunction(promise.cancel)) {
+    promise.cancel();
+  }
+}
+function isFlow(fn) {
+  return (fn == null ? void 0 : fn.isMobXFlow) === true;
+}
+function _isObservable(value, property) {
+  if (!value) {
+    return false;
+  }
+  return isObservableObject(value) || !!value[$mobx] || isAtom(value) || isReaction(value) || isComputedValue(value);
+}
+function isObservable(value) {
+  if (process.env.NODE_ENV !== "production" && arguments.length !== 1) {
+    die("isObservable expects only 1 argument. Use isObservableProp to inspect the observability of a property");
+  }
+  return _isObservable(value);
+}
+function trace() {
+  if (!(process.env.NODE_ENV !== "production")) {
+    return;
+  }
+  var enterBreakPoint = false;
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+  if (typeof args[args.length - 1] === "boolean") {
+    enterBreakPoint = args.pop();
+  }
+  var derivation = getAtomFromArgs(args);
+  if (!derivation) {
+    return die("'trace(break?)' can only be used inside a tracked computed value or a Reaction. Consider passing in the computed value or reaction explicitly");
+  }
+  if (derivation.isTracing_ === TraceMode.NONE) {
+    console.log("[mobx.trace] '" + derivation.name_ + "' tracing enabled");
+  }
+  derivation.isTracing_ = enterBreakPoint ? TraceMode.BREAK : TraceMode.LOG;
+}
+function getAtomFromArgs(args) {
+  switch (args.length) {
+    case 0:
+      return globalState.trackingDerivation;
+    case 1:
+      return getAtom(args[0]);
+    case 2:
+      return getAtom(args[0], args[1]);
+  }
+}
+function transaction(action2, thisArg) {
+  if (thisArg === void 0) {
+    thisArg = void 0;
+  }
+  startBatch();
+  try {
+    return action2.apply(thisArg);
+  } finally {
+    endBatch();
+  }
+}
+function getAdm(target) {
+  return target[$mobx];
+}
+var objectProxyTraps = {
+  has: function has2(target, name) {
+    if (process.env.NODE_ENV !== "production" && globalState.trackingDerivation) {
+      warnAboutProxyRequirement("detect new properties using the 'in' operator. Use 'has' from 'mobx' instead.");
+    }
+    return getAdm(target).has_(name);
+  },
+  get: function get2(target, name) {
+    return getAdm(target).get_(name);
+  },
+  set: function set3(target, name, value) {
+    var _getAdm$set_;
+    if (!isStringish(name)) {
+      return false;
+    }
+    if (process.env.NODE_ENV !== "production" && !getAdm(target).values_.has(name)) {
+      warnAboutProxyRequirement("add a new observable property through direct assignment. Use 'set' from 'mobx' instead.");
+    }
+    return (_getAdm$set_ = getAdm(target).set_(name, value, true)) != null ? _getAdm$set_ : true;
+  },
+  deleteProperty: function deleteProperty(target, name) {
+    var _getAdm$delete_;
+    if (process.env.NODE_ENV !== "production") {
+      warnAboutProxyRequirement("delete properties from an observable object. Use 'remove' from 'mobx' instead.");
+    }
+    if (!isStringish(name)) {
+      return false;
+    }
+    return (_getAdm$delete_ = getAdm(target).delete_(name, true)) != null ? _getAdm$delete_ : true;
+  },
+  defineProperty: function defineProperty2(target, name, descriptor) {
+    var _getAdm$definePropert;
+    if (process.env.NODE_ENV !== "production") {
+      warnAboutProxyRequirement("define property on an observable object. Use 'defineProperty' from 'mobx' instead.");
+    }
+    return (_getAdm$definePropert = getAdm(target).defineProperty_(name, descriptor)) != null ? _getAdm$definePropert : true;
+  },
+  ownKeys: function ownKeys2(target) {
+    if (process.env.NODE_ENV !== "production" && globalState.trackingDerivation) {
+      warnAboutProxyRequirement("iterate keys to detect added / removed properties. Use 'keys' from 'mobx' instead.");
+    }
+    return getAdm(target).ownKeys_();
+  },
+  preventExtensions: function preventExtensions(target) {
+    die(13);
+  }
+};
+function asDynamicObservableObject(target, options) {
+  var _target$$mobx, _target$$mobx$proxy_;
+  assertProxies();
+  target = asObservableObject(target, options);
+  return (_target$$mobx$proxy_ = (_target$$mobx = target[$mobx]).proxy_) != null ? _target$$mobx$proxy_ : _target$$mobx.proxy_ = new Proxy(target, objectProxyTraps);
+}
+function hasInterceptors(interceptable) {
+  return interceptable.interceptors_ !== void 0 && interceptable.interceptors_.length > 0;
+}
+function registerInterceptor(interceptable, handler) {
+  var interceptors = interceptable.interceptors_ || (interceptable.interceptors_ = []);
+  interceptors.push(handler);
+  return once(function() {
+    var idx = interceptors.indexOf(handler);
+    if (idx !== -1) {
+      interceptors.splice(idx, 1);
+    }
+  });
+}
+function interceptChange(interceptable, change) {
+  var prevU = untrackedStart();
+  try {
+    var interceptors = [].concat(interceptable.interceptors_ || []);
+    for (var i = 0, l = interceptors.length; i < l; i++) {
+      change = interceptors[i](change);
+      if (change && !change.type) {
+        die(14);
+      }
+      if (!change) {
+        break;
+      }
+    }
+    return change;
+  } finally {
+    untrackedEnd(prevU);
+  }
+}
+function hasListeners(listenable) {
+  return listenable.changeListeners_ !== void 0 && listenable.changeListeners_.length > 0;
+}
+function registerListener(listenable, handler) {
+  var listeners = listenable.changeListeners_ || (listenable.changeListeners_ = []);
+  listeners.push(handler);
+  return once(function() {
+    var idx = listeners.indexOf(handler);
+    if (idx !== -1) {
+      listeners.splice(idx, 1);
+    }
+  });
+}
+function notifyListeners(listenable, change) {
+  var prevU = untrackedStart();
+  var listeners = listenable.changeListeners_;
+  if (!listeners) {
+    return;
+  }
+  listeners = listeners.slice();
+  for (var i = 0, l = listeners.length; i < l; i++) {
+    listeners[i](change);
+  }
+  untrackedEnd(prevU);
+}
+var keysSymbol = /* @__PURE__ */ Symbol("mobx-keys");
+function makeAutoObservable(target, overrides, options) {
+  if (process.env.NODE_ENV !== "production") {
+    if (!isPlainObject(target) && !isPlainObject(Object.getPrototypeOf(target))) {
+      die("'makeAutoObservable' can only be used for classes that don't have a superclass");
+    }
+    if (isObservableObject(target)) {
+      die("makeAutoObservable can only be used on objects not already made observable");
+    }
+  }
+  if (isPlainObject(target)) {
+    return extendObservable(target, target, overrides, options);
+  }
+  initObservable(function() {
+    var adm = asObservableObject(target, options)[$mobx];
+    if (!target[keysSymbol]) {
+      var proto = Object.getPrototypeOf(target);
+      var keys2 = new Set([].concat(ownKeys(target), ownKeys(proto)));
+      keys2["delete"]("constructor");
+      keys2["delete"]($mobx);
+      addHiddenProp(proto, keysSymbol, keys2);
+    }
+    target[keysSymbol].forEach(function(key) {
+      return adm.make_(
+        key,
+        // must pass "undefined" for { key: undefined }
+        !overrides ? true : key in overrides ? overrides[key] : true
+      );
+    });
+  });
+  return target;
+}
+var SPLICE = "splice";
+var UPDATE = "update";
+var MAX_SPLICE_SIZE = 1e4;
+var arrayTraps = {
+  get: function get3(target, name) {
+    var adm = target[$mobx];
+    if (name === $mobx) {
+      return adm;
+    }
+    if (name === "length") {
+      return adm.getArrayLength_();
+    }
+    if (typeof name === "string" && !isNaN(name)) {
+      return adm.get_(parseInt(name));
+    }
+    if (hasProp(arrayExtensions, name)) {
+      return arrayExtensions[name];
+    }
+    return target[name];
+  },
+  set: function set4(target, name, value) {
+    var adm = target[$mobx];
+    if (name === "length") {
+      adm.setArrayLength_(value);
+    }
+    if (typeof name === "symbol" || isNaN(name)) {
+      target[name] = value;
+    } else {
+      adm.set_(parseInt(name), value);
+    }
+    return true;
+  },
+  preventExtensions: function preventExtensions2() {
+    die(15);
+  }
+};
+var ObservableArrayAdministration = /* @__PURE__ */ function() {
+  function ObservableArrayAdministration2(name, enhancer, owned_, legacyMode_) {
+    if (name === void 0) {
+      name = process.env.NODE_ENV !== "production" ? "ObservableArray@" + getNextId() : "ObservableArray";
+    }
+    this.owned_ = void 0;
+    this.legacyMode_ = void 0;
+    this.atom_ = void 0;
+    this.values_ = [];
+    this.interceptors_ = void 0;
+    this.changeListeners_ = void 0;
+    this.enhancer_ = void 0;
+    this.dehancer = void 0;
+    this.proxy_ = void 0;
+    this.lastKnownLength_ = 0;
+    this.owned_ = owned_;
+    this.legacyMode_ = legacyMode_;
+    this.atom_ = new Atom(name);
+    this.enhancer_ = function(newV, oldV) {
+      return enhancer(newV, oldV, process.env.NODE_ENV !== "production" ? name + "[..]" : "ObservableArray[..]");
+    };
+  }
+  var _proto = ObservableArrayAdministration2.prototype;
+  _proto.dehanceValue_ = function dehanceValue_(value) {
+    if (this.dehancer !== void 0) {
+      return this.dehancer(value);
+    }
+    return value;
+  };
+  _proto.dehanceValues_ = function dehanceValues_(values2) {
+    if (this.dehancer !== void 0 && values2.length > 0) {
+      return values2.map(this.dehancer);
+    }
+    return values2;
+  };
+  _proto.intercept_ = function intercept_(handler) {
+    return registerInterceptor(this, handler);
+  };
+  _proto.observe_ = function observe_(listener, fireImmediately) {
+    if (fireImmediately === void 0) {
+      fireImmediately = false;
+    }
+    if (fireImmediately) {
+      listener({
+        observableKind: "array",
+        object: this.proxy_,
+        debugObjectName: this.atom_.name_,
+        type: "splice",
+        index: 0,
+        added: this.values_.slice(),
+        addedCount: this.values_.length,
+        removed: [],
+        removedCount: 0
+      });
+    }
+    return registerListener(this, listener);
+  };
+  _proto.getArrayLength_ = function getArrayLength_() {
+    this.atom_.reportObserved();
+    return this.values_.length;
+  };
+  _proto.setArrayLength_ = function setArrayLength_(newLength) {
+    if (typeof newLength !== "number" || isNaN(newLength) || newLength < 0) {
+      die("Out of range: " + newLength);
+    }
+    var currentLength = this.values_.length;
+    if (newLength === currentLength) {
+      return;
+    } else if (newLength > currentLength) {
+      var newItems = new Array(newLength - currentLength);
+      for (var i = 0; i < newLength - currentLength; i++) {
+        newItems[i] = void 0;
+      }
+      this.spliceWithArray_(currentLength, 0, newItems);
+    } else {
+      this.spliceWithArray_(newLength, currentLength - newLength);
+    }
+  };
+  _proto.updateArrayLength_ = function updateArrayLength_(oldLength, delta) {
+    if (oldLength !== this.lastKnownLength_) {
+      die(16);
+    }
+    this.lastKnownLength_ += delta;
+    if (this.legacyMode_ && delta > 0) {
+      reserveArrayBuffer(oldLength + delta + 1);
+    }
+  };
+  _proto.spliceWithArray_ = function spliceWithArray_(index, deleteCount, newItems) {
+    var _this = this;
+    checkIfStateModificationsAreAllowed(this.atom_);
+    var length = this.values_.length;
+    if (index === void 0) {
+      index = 0;
+    } else if (index > length) {
+      index = length;
+    } else if (index < 0) {
+      index = Math.max(0, length + index);
+    }
+    if (arguments.length === 1) {
+      deleteCount = length - index;
+    } else if (deleteCount === void 0 || deleteCount === null) {
+      deleteCount = 0;
+    } else {
+      deleteCount = Math.max(0, Math.min(deleteCount, length - index));
+    }
+    if (newItems === void 0) {
+      newItems = EMPTY_ARRAY;
+    }
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        object: this.proxy_,
+        type: SPLICE,
+        index,
+        removedCount: deleteCount,
+        added: newItems
+      });
+      if (!change) {
+        return EMPTY_ARRAY;
+      }
+      deleteCount = change.removedCount;
+      newItems = change.added;
+    }
+    newItems = newItems.length === 0 ? newItems : newItems.map(function(v) {
+      return _this.enhancer_(v, void 0);
+    });
+    if (this.legacyMode_ || process.env.NODE_ENV !== "production") {
+      var lengthDelta = newItems.length - deleteCount;
+      this.updateArrayLength_(length, lengthDelta);
+    }
+    var res = this.spliceItemsIntoValues_(index, deleteCount, newItems);
+    if (deleteCount !== 0 || newItems.length !== 0) {
+      this.notifyArraySplice_(index, newItems, res);
+    }
+    return this.dehanceValues_(res);
+  };
+  _proto.spliceItemsIntoValues_ = function spliceItemsIntoValues_(index, deleteCount, newItems) {
+    if (newItems.length < MAX_SPLICE_SIZE) {
+      var _this$values_;
+      return (_this$values_ = this.values_).splice.apply(_this$values_, [index, deleteCount].concat(newItems));
+    } else {
+      var res = this.values_.slice(index, index + deleteCount);
+      var oldItems = this.values_.slice(index + deleteCount);
+      this.values_.length += newItems.length - deleteCount;
+      for (var i = 0; i < newItems.length; i++) {
+        this.values_[index + i] = newItems[i];
+      }
+      for (var _i = 0; _i < oldItems.length; _i++) {
+        this.values_[index + newItems.length + _i] = oldItems[_i];
+      }
+      return res;
+    }
+  };
+  _proto.notifyArrayChildUpdate_ = function notifyArrayChildUpdate_(index, newValue, oldValue) {
+    var notifySpy = !this.owned_ && isSpyEnabled();
+    var notify = hasListeners(this);
+    var change = notify || notifySpy ? {
+      observableKind: "array",
+      object: this.proxy_,
+      type: UPDATE,
+      debugObjectName: this.atom_.name_,
+      index,
+      newValue,
+      oldValue
+    } : null;
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportStart(change);
+    }
+    this.atom_.reportChanged();
+    if (notify) {
+      notifyListeners(this, change);
+    }
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportEnd();
+    }
+  };
+  _proto.notifyArraySplice_ = function notifyArraySplice_(index, added, removed) {
+    var notifySpy = !this.owned_ && isSpyEnabled();
+    var notify = hasListeners(this);
+    var change = notify || notifySpy ? {
+      observableKind: "array",
+      object: this.proxy_,
+      debugObjectName: this.atom_.name_,
+      type: SPLICE,
+      index,
+      removed,
+      added,
+      removedCount: removed.length,
+      addedCount: added.length
+    } : null;
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportStart(change);
+    }
+    this.atom_.reportChanged();
+    if (notify) {
+      notifyListeners(this, change);
+    }
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportEnd();
+    }
+  };
+  _proto.get_ = function get_(index) {
+    if (this.legacyMode_ && index >= this.values_.length) {
+      console.warn(process.env.NODE_ENV !== "production" ? "[mobx.array] Attempt to read an array index (" + index + ") that is out of bounds (" + this.values_.length + "). Please check length first. Out of bound indices will not be tracked by MobX" : "[mobx] Out of bounds read: " + index);
+      return void 0;
+    }
+    this.atom_.reportObserved();
+    return this.dehanceValue_(this.values_[index]);
+  };
+  _proto.set_ = function set_(index, newValue) {
+    var values2 = this.values_;
+    if (this.legacyMode_ && index > values2.length) {
+      die(17, index, values2.length);
+    }
+    if (index < values2.length) {
+      checkIfStateModificationsAreAllowed(this.atom_);
+      var oldValue = values2[index];
+      if (hasInterceptors(this)) {
+        var change = interceptChange(this, {
+          type: UPDATE,
+          object: this.proxy_,
+          // since "this" is the real array we need to pass its proxy
+          index,
+          newValue
+        });
+        if (!change) {
+          return;
+        }
+        newValue = change.newValue;
+      }
+      newValue = this.enhancer_(newValue, oldValue);
+      var changed = newValue !== oldValue;
+      if (changed) {
+        values2[index] = newValue;
+        this.notifyArrayChildUpdate_(index, newValue, oldValue);
+      }
+    } else {
+      var newItems = new Array(index + 1 - values2.length);
+      for (var i = 0; i < newItems.length - 1; i++) {
+        newItems[i] = void 0;
+      }
+      newItems[newItems.length - 1] = newValue;
+      this.spliceWithArray_(values2.length, 0, newItems);
+    }
+  };
+  return ObservableArrayAdministration2;
+}();
+function createObservableArray(initialValues, enhancer, name, owned) {
+  if (name === void 0) {
+    name = process.env.NODE_ENV !== "production" ? "ObservableArray@" + getNextId() : "ObservableArray";
+  }
+  if (owned === void 0) {
+    owned = false;
+  }
+  assertProxies();
+  return initObservable(function() {
+    var adm = new ObservableArrayAdministration(name, enhancer, owned, false);
+    addHiddenFinalProp(adm.values_, $mobx, adm);
+    var proxy = new Proxy(adm.values_, arrayTraps);
+    adm.proxy_ = proxy;
+    if (initialValues && initialValues.length) {
+      adm.spliceWithArray_(0, 0, initialValues);
+    }
+    return proxy;
+  });
+}
+var arrayExtensions = {
+  clear: function clear() {
+    return this.splice(0);
+  },
+  replace: function replace(newItems) {
+    var adm = this[$mobx];
+    return adm.spliceWithArray_(0, adm.values_.length, newItems);
+  },
+  // Used by JSON.stringify
+  toJSON: function toJSON2() {
+    return this.slice();
+  },
+  /*
+   * functions that do alter the internal structure of the array, (based on lib.es6.d.ts)
+   * since these functions alter the inner structure of the array, the have side effects.
+   * Because the have side effects, they should not be used in computed function,
+   * and for that reason the do not call dependencyState.notifyObserved
+   */
+  splice: function splice(index, deleteCount) {
+    for (var _len = arguments.length, newItems = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+      newItems[_key - 2] = arguments[_key];
+    }
+    var adm = this[$mobx];
+    switch (arguments.length) {
+      case 0:
+        return [];
+      case 1:
+        return adm.spliceWithArray_(index);
+      case 2:
+        return adm.spliceWithArray_(index, deleteCount);
+    }
+    return adm.spliceWithArray_(index, deleteCount, newItems);
+  },
+  spliceWithArray: function spliceWithArray(index, deleteCount, newItems) {
+    return this[$mobx].spliceWithArray_(index, deleteCount, newItems);
+  },
+  push: function push() {
+    var adm = this[$mobx];
+    for (var _len2 = arguments.length, items = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      items[_key2] = arguments[_key2];
+    }
+    adm.spliceWithArray_(adm.values_.length, 0, items);
+    return adm.values_.length;
+  },
+  pop: function pop() {
+    return this.splice(Math.max(this[$mobx].values_.length - 1, 0), 1)[0];
+  },
+  shift: function shift() {
+    return this.splice(0, 1)[0];
+  },
+  unshift: function unshift() {
+    var adm = this[$mobx];
+    for (var _len3 = arguments.length, items = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      items[_key3] = arguments[_key3];
+    }
+    adm.spliceWithArray_(0, 0, items);
+    return adm.values_.length;
+  },
+  reverse: function reverse() {
+    if (globalState.trackingDerivation) {
+      die(37, "reverse");
+    }
+    this.replace(this.slice().reverse());
+    return this;
+  },
+  sort: function sort() {
+    if (globalState.trackingDerivation) {
+      die(37, "sort");
+    }
+    var copy = this.slice();
+    copy.sort.apply(copy, arguments);
+    this.replace(copy);
+    return this;
+  },
+  remove: function remove2(value) {
+    var adm = this[$mobx];
+    var idx = adm.dehanceValues_(adm.values_).indexOf(value);
+    if (idx > -1) {
+      this.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+};
+addArrayExtension("at", simpleFunc);
+addArrayExtension("concat", simpleFunc);
+addArrayExtension("flat", simpleFunc);
+addArrayExtension("includes", simpleFunc);
+addArrayExtension("indexOf", simpleFunc);
+addArrayExtension("join", simpleFunc);
+addArrayExtension("lastIndexOf", simpleFunc);
+addArrayExtension("slice", simpleFunc);
+addArrayExtension("toString", simpleFunc);
+addArrayExtension("toLocaleString", simpleFunc);
+addArrayExtension("toSorted", simpleFunc);
+addArrayExtension("toSpliced", simpleFunc);
+addArrayExtension("with", simpleFunc);
+addArrayExtension("every", mapLikeFunc);
+addArrayExtension("filter", mapLikeFunc);
+addArrayExtension("find", mapLikeFunc);
+addArrayExtension("findIndex", mapLikeFunc);
+addArrayExtension("findLast", mapLikeFunc);
+addArrayExtension("findLastIndex", mapLikeFunc);
+addArrayExtension("flatMap", mapLikeFunc);
+addArrayExtension("forEach", mapLikeFunc);
+addArrayExtension("map", mapLikeFunc);
+addArrayExtension("some", mapLikeFunc);
+addArrayExtension("toReversed", mapLikeFunc);
+addArrayExtension("reduce", reduceLikeFunc);
+addArrayExtension("reduceRight", reduceLikeFunc);
+function addArrayExtension(funcName, funcFactory) {
+  if (typeof Array.prototype[funcName] === "function") {
+    arrayExtensions[funcName] = funcFactory(funcName);
+  }
+}
+function simpleFunc(funcName) {
+  return function() {
+    var adm = this[$mobx];
+    adm.atom_.reportObserved();
+    var dehancedValues = adm.dehanceValues_(adm.values_);
+    return dehancedValues[funcName].apply(dehancedValues, arguments);
+  };
+}
+function mapLikeFunc(funcName) {
+  return function(callback, thisArg) {
+    var _this2 = this;
+    var adm = this[$mobx];
+    adm.atom_.reportObserved();
+    var dehancedValues = adm.dehanceValues_(adm.values_);
+    return dehancedValues[funcName](function(element, index) {
+      return callback.call(thisArg, element, index, _this2);
+    });
+  };
+}
+function reduceLikeFunc(funcName) {
+  return function() {
+    var _this3 = this;
+    var adm = this[$mobx];
+    adm.atom_.reportObserved();
+    var dehancedValues = adm.dehanceValues_(adm.values_);
+    var callback = arguments[0];
+    arguments[0] = function(accumulator, currentValue, index) {
+      return callback(accumulator, currentValue, index, _this3);
+    };
+    return dehancedValues[funcName].apply(dehancedValues, arguments);
+  };
+}
+var isObservableArrayAdministration = /* @__PURE__ */ createInstanceofPredicate("ObservableArrayAdministration", ObservableArrayAdministration);
+function isObservableArray(thing) {
+  return isObject(thing) && isObservableArrayAdministration(thing[$mobx]);
+}
+var ObservableMapMarker = {};
+var ADD = "add";
+var DELETE = "delete";
+var ObservableMap = /* @__PURE__ */ function() {
+  function ObservableMap2(initialData, enhancer_, name_) {
+    var _this = this;
+    if (enhancer_ === void 0) {
+      enhancer_ = deepEnhancer;
+    }
+    if (name_ === void 0) {
+      name_ = process.env.NODE_ENV !== "production" ? "ObservableMap@" + getNextId() : "ObservableMap";
+    }
+    this.enhancer_ = void 0;
+    this.name_ = void 0;
+    this[$mobx] = ObservableMapMarker;
+    this.data_ = void 0;
+    this.hasMap_ = void 0;
+    this.keysAtom_ = void 0;
+    this.interceptors_ = void 0;
+    this.changeListeners_ = void 0;
+    this.dehancer = void 0;
+    this.enhancer_ = enhancer_;
+    this.name_ = name_;
+    if (!isFunction(Map)) {
+      die(18);
+    }
+    initObservable(function() {
+      _this.keysAtom_ = createAtom(process.env.NODE_ENV !== "production" ? _this.name_ + ".keys()" : "ObservableMap.keys()");
+      _this.data_ = /* @__PURE__ */ new Map();
+      _this.hasMap_ = /* @__PURE__ */ new Map();
+      if (initialData) {
+        _this.merge(initialData);
+      }
+    });
+  }
+  var _proto = ObservableMap2.prototype;
+  _proto.has_ = function has_(key) {
+    return this.data_.has(key);
+  };
+  _proto.has = function has3(key) {
+    var _this2 = this;
+    if (!globalState.trackingDerivation) {
+      return this.has_(key);
+    }
+    var entry = this.hasMap_.get(key);
+    if (!entry) {
+      var newEntry = entry = new ObservableValue(this.has_(key), referenceEnhancer, process.env.NODE_ENV !== "production" ? this.name_ + "." + stringifyKey(key) + "?" : "ObservableMap.key?", false);
+      this.hasMap_.set(key, newEntry);
+      onBecomeUnobserved(newEntry, function() {
+        return _this2.hasMap_["delete"](key);
+      });
+    }
+    return entry.get();
+  };
+  _proto.set = function set5(key, value) {
+    var hasKey = this.has_(key);
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        type: hasKey ? UPDATE : ADD,
+        object: this,
+        newValue: value,
+        name: key
+      });
+      if (!change) {
+        return this;
+      }
+      value = change.newValue;
+    }
+    if (hasKey) {
+      this.updateValue_(key, value);
+    } else {
+      this.addValue_(key, value);
+    }
+    return this;
+  };
+  _proto["delete"] = function _delete(key) {
+    var _this3 = this;
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        type: DELETE,
+        object: this,
+        name: key
+      });
+      if (!change) {
+        return false;
+      }
+    }
+    if (this.has_(key)) {
+      var notifySpy = isSpyEnabled();
+      var notify = hasListeners(this);
+      var _change = notify || notifySpy ? {
+        observableKind: "map",
+        debugObjectName: this.name_,
+        type: DELETE,
+        object: this,
+        oldValue: this.data_.get(key).value_,
+        name: key
+      } : null;
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportStart(_change);
+      }
+      transaction(function() {
+        var _this3$hasMap_$get;
+        _this3.keysAtom_.reportChanged();
+        (_this3$hasMap_$get = _this3.hasMap_.get(key)) == null || _this3$hasMap_$get.setNewValue_(false);
+        var observable2 = _this3.data_.get(key);
+        observable2.setNewValue_(void 0);
+        _this3.data_["delete"](key);
+      });
+      if (notify) {
+        notifyListeners(this, _change);
+      }
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportEnd();
+      }
       return true;
     }
     return false;
   };
-  this.triggeredJobs = function() {
-    return triggeredJobs;
-  };
-  this.setTriggeredJobs = function(triggeredJob) {
-    triggeredJobs = triggeredJob;
-  };
-  this.deleteFromSchedule = function() {
-    deleteScheduledJob(this.name);
-  };
-  this.cancel = function(reschedule) {
-    reschedule = typeof reschedule == "boolean" ? reschedule : false;
-    let inv, newInv;
-    const newInvs = [];
-    for (let j = 0; j < this.pendingInvocations.length; j++) {
-      inv = this.pendingInvocations[j];
-      cancelInvocation(inv);
-      if (reschedule && (inv.recurrenceRule.recurs || inv.recurrenceRule.next)) {
-        newInv = scheduleNextRecurrence(inv.recurrenceRule, this, inv.fireDate, inv.endDate);
-        if (newInv !== null) {
-          newInvs.push(newInv);
-        }
+  _proto.updateValue_ = function updateValue_(key, newValue) {
+    var observable2 = this.data_.get(key);
+    newValue = observable2.prepareNewValue_(newValue);
+    if (newValue !== globalState.UNCHANGED) {
+      var notifySpy = isSpyEnabled();
+      var notify = hasListeners(this);
+      var change = notify || notifySpy ? {
+        observableKind: "map",
+        debugObjectName: this.name_,
+        type: UPDATE,
+        object: this,
+        oldValue: observable2.value_,
+        name: key,
+        newValue
+      } : null;
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportStart(change);
       }
-    }
-    this.pendingInvocations = [];
-    for (let k = 0; k < newInvs.length; k++) {
-      this.trackInvocation(newInvs[k]);
-    }
-    if (!reschedule) {
-      this.deleteFromSchedule();
-    }
-    return true;
-  };
-  this.cancelNext = function(reschedule) {
-    reschedule = typeof reschedule == "boolean" ? reschedule : true;
-    if (!this.pendingInvocations.length) {
-      return false;
-    }
-    let newInv;
-    const nextInv = this.pendingInvocations.shift();
-    cancelInvocation(nextInv);
-    if (reschedule && (nextInv.recurrenceRule.recurs || nextInv.recurrenceRule.next)) {
-      newInv = scheduleNextRecurrence(nextInv.recurrenceRule, this, nextInv.fireDate, nextInv.endDate);
-      if (newInv !== null) {
-        this.trackInvocation(newInv);
+      observable2.setNewValue_(newValue);
+      if (notify) {
+        notifyListeners(this, change);
       }
-    }
-    return true;
-  };
-  this.reschedule = function(spec) {
-    let inv;
-    const invocationsToCancel = this.pendingInvocations.slice();
-    for (let j = 0; j < invocationsToCancel.length; j++) {
-      inv = invocationsToCancel[j];
-      cancelInvocation(inv);
-    }
-    this.pendingInvocations = [];
-    if (this.schedule(spec)) {
-      this.setTriggeredJobs(0);
-      return true;
-    } else {
-      this.pendingInvocations = invocationsToCancel;
-      return false;
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportEnd();
+      }
     }
   };
-  this.nextInvocation = function() {
-    if (!this.pendingInvocations.length) {
-      return null;
+  _proto.addValue_ = function addValue_(key, newValue) {
+    var _this4 = this;
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    transaction(function() {
+      var _this4$hasMap_$get;
+      var observable2 = new ObservableValue(newValue, _this4.enhancer_, process.env.NODE_ENV !== "production" ? _this4.name_ + "." + stringifyKey(key) : "ObservableMap.key", false);
+      _this4.data_.set(key, observable2);
+      newValue = observable2.value_;
+      (_this4$hasMap_$get = _this4.hasMap_.get(key)) == null || _this4$hasMap_$get.setNewValue_(true);
+      _this4.keysAtom_.reportChanged();
+    });
+    var notifySpy = isSpyEnabled();
+    var notify = hasListeners(this);
+    var change = notify || notifySpy ? {
+      observableKind: "map",
+      debugObjectName: this.name_,
+      type: ADD,
+      object: this,
+      name: key,
+      newValue
+    } : null;
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportStart(change);
     }
-    return this.pendingInvocations[0].fireDate;
+    if (notify) {
+      notifyListeners(this, change);
+    }
+    if (process.env.NODE_ENV !== "production" && notifySpy) {
+      spyReportEnd();
+    }
   };
-}
-Object.setPrototypeOf(Job$2.prototype, events.EventEmitter.prototype);
-Job$2.prototype.invoke = function(fireDate) {
-  this.setTriggeredJobs(this.triggeredJobs() + 1);
-  return this.job(fireDate);
-};
-Job$2.prototype.runOnDate = function(date2) {
-  return this.schedule(date2);
-};
-Job$2.prototype.schedule = function(spec) {
-  const self = this;
-  let success = false;
-  let inv;
-  let start;
-  let end;
-  let tz;
-  if (typeof spec === "object" && "tz" in spec) {
-    tz = spec.tz;
-  }
-  if (typeof spec === "object" && spec.rule) {
-    start = spec.start || void 0;
-    end = spec.end || void 0;
-    spec = spec.rule;
-    if (start) {
-      if (!(start instanceof Date)) {
-        start = new Date(start);
+  _proto.get = function get4(key) {
+    if (this.has(key)) {
+      return this.dehanceValue_(this.data_.get(key).get());
+    }
+    return this.dehanceValue_(void 0);
+  };
+  _proto.dehanceValue_ = function dehanceValue_(value) {
+    if (this.dehancer !== void 0) {
+      return this.dehancer(value);
+    }
+    return value;
+  };
+  _proto.keys = function keys2() {
+    this.keysAtom_.reportObserved();
+    return this.data_.keys();
+  };
+  _proto.values = function values2() {
+    var self2 = this;
+    var keys2 = this.keys();
+    return makeIterableForMap({
+      next: function next() {
+        var _keys$next = keys2.next(), done = _keys$next.done, value = _keys$next.value;
+        return {
+          done,
+          value: done ? void 0 : self2.get(value)
+        };
       }
-      start = new CronDate(start, tz);
-      if (!isValidDate(start) || start.getTime() < Date.now()) {
-        start = void 0;
+    });
+  };
+  _proto.entries = function entries2() {
+    var self2 = this;
+    var keys2 = this.keys();
+    return makeIterableForMap({
+      next: function next() {
+        var _keys$next2 = keys2.next(), done = _keys$next2.done, value = _keys$next2.value;
+        return {
+          done,
+          value: done ? void 0 : [value, self2.get(value)]
+        };
       }
+    });
+  };
+  _proto[Symbol.iterator] = function() {
+    return this.entries();
+  };
+  _proto.forEach = function forEach2(callback, thisArg) {
+    for (var _iterator = _createForOfIteratorHelperLoose(this), _step; !(_step = _iterator()).done; ) {
+      var _step$value = _step.value, key = _step$value[0], value = _step$value[1];
+      callback.call(thisArg, value, key, this);
     }
-    if (end && !(end instanceof Date) && !isValidDate(end = new Date(end))) {
-      end = void 0;
+  };
+  _proto.merge = function merge2(other) {
+    var _this5 = this;
+    if (isObservableMap(other)) {
+      other = new Map(other);
     }
-    if (end) {
-      end = new CronDate(end, tz);
-    }
-  }
-  try {
-    const res = cronParser.parseExpression(spec, { currentDate: start, tz });
-    inv = scheduleNextRecurrence(res, self, start, end);
-    if (inv !== null) {
-      success = self.trackInvocation(inv);
-    }
-  } catch (err) {
-    const type = typeof spec;
-    if (type === "string" || type === "number") {
-      spec = new Date(spec);
-    }
-    if (spec instanceof Date && isValidDate(spec)) {
-      spec = new CronDate(spec);
-      self.isOneTimeJob = true;
-      if (spec.getTime() >= Date.now()) {
-        inv = new Invocation$1(self, spec);
-        scheduleInvocation(inv);
-        success = self.trackInvocation(inv);
+    transaction(function() {
+      if (isPlainObject(other)) {
+        getPlainObjectKeys(other).forEach(function(key) {
+          return _this5.set(key, other[key]);
+        });
+      } else if (Array.isArray(other)) {
+        other.forEach(function(_ref) {
+          var key = _ref[0], value = _ref[1];
+          return _this5.set(key, value);
+        });
+      } else if (isES6Map(other)) {
+        if (!isPlainES6Map(other)) {
+          die(19, other);
+        }
+        other.forEach(function(value, key) {
+          return _this5.set(key, value);
+        });
+      } else if (other !== null && other !== void 0) {
+        die(20, other);
       }
-    } else if (type === "object") {
-      self.isOneTimeJob = false;
-      if (!(spec instanceof RecurrenceRule$1)) {
-        const r = new RecurrenceRule$1();
-        if ("year" in spec) {
-          r.year = spec.year;
+    });
+    return this;
+  };
+  _proto.clear = function clear2() {
+    var _this6 = this;
+    transaction(function() {
+      untracked(function() {
+        for (var _iterator2 = _createForOfIteratorHelperLoose(_this6.keys()), _step2; !(_step2 = _iterator2()).done; ) {
+          var key = _step2.value;
+          _this6["delete"](key);
         }
-        if ("month" in spec) {
-          r.month = spec.month;
-        }
-        if ("date" in spec) {
-          r.date = spec.date;
-        }
-        if ("dayOfWeek" in spec) {
-          r.dayOfWeek = spec.dayOfWeek;
-        }
-        if ("hour" in spec) {
-          r.hour = spec.hour;
-        }
-        if ("minute" in spec) {
-          r.minute = spec.minute;
-        }
-        if ("second" in spec) {
-          r.second = spec.second;
-        }
-        spec = r;
-      }
-      spec.tz = tz;
-      inv = scheduleNextRecurrence(spec, self, start, end);
-      if (inv !== null) {
-        success = self.trackInvocation(inv);
-      }
-    }
-  }
-  scheduledJobs$2[this.name] = this;
-  return success;
-};
-function deleteScheduledJob(name) {
-  if (name) {
-    delete scheduledJobs$2[name];
-  }
-}
-var Job_1 = {
-  Job: Job$2,
-  deleteScheduledJob,
-  scheduledJobs: scheduledJobs$2
-};
-const { Job: Job$1, scheduledJobs: scheduledJobs$1 } = Job_1;
-function scheduleJob$1() {
-  if (arguments.length < 2) {
-    throw new RangeError("Invalid number of arguments");
-  }
-  const name = arguments.length >= 3 && typeof arguments[0] === "string" ? arguments[0] : null;
-  const spec = name ? arguments[1] : arguments[0];
-  const method = name ? arguments[2] : arguments[1];
-  const callback = name ? arguments[3] : arguments[2];
-  if (typeof method !== "function") {
-    throw new RangeError("The job method must be a function.");
-  }
-  const job = new Job$1(name, method, callback);
-  if (job.schedule(spec)) {
-    return job;
-  }
-  return null;
-}
-function rescheduleJob$1(job, spec) {
-  if (job instanceof Job$1) {
-    if (job.reschedule(spec)) {
-      return job;
-    }
-  } else if (typeof job === "string") {
-    if (Object.prototype.hasOwnProperty.call(scheduledJobs$1, job)) {
-      if (scheduledJobs$1[job].reschedule(spec)) {
-        return scheduledJobs$1[job];
-      }
-    } else {
-      throw new Error("Cannot reschedule one-off job by name, pass job reference instead");
-    }
-  }
-  return null;
-}
-function cancelJob$1(job) {
-  let success = false;
-  if (job instanceof Job$1) {
-    success = job.cancel();
-  } else if (typeof job == "string" || job instanceof String) {
-    if (job in scheduledJobs$1 && Object.prototype.hasOwnProperty.call(scheduledJobs$1, job)) {
-      success = scheduledJobs$1[job].cancel();
-    }
-  }
-  return success;
-}
-function gracefulShutdown$1() {
-  const jobs = Object.keys(scheduledJobs$1).map((key) => scheduledJobs$1[key]);
-  jobs.forEach(function(job) {
-    job.cancel();
-  });
-  let running = false;
-  for (let i = 0; i < jobs.length; i++) {
-    if (jobs[i].running > 0) {
-      running = true;
-      break;
-    }
-  }
-  return new Promise(function(resolve) {
-    if (running) {
-      setInterval(function() {
-        for (let i = 0; i < jobs.length; i++) {
-          if (jobs[i].running > 0) {
-            return;
+      });
+    });
+  };
+  _proto.replace = function replace2(values2) {
+    var _this7 = this;
+    transaction(function() {
+      var replacementMap = convertToMap(values2);
+      var orderedData = /* @__PURE__ */ new Map();
+      var keysReportChangedCalled = false;
+      for (var _iterator3 = _createForOfIteratorHelperLoose(_this7.data_.keys()), _step3; !(_step3 = _iterator3()).done; ) {
+        var key = _step3.value;
+        if (!replacementMap.has(key)) {
+          var deleted = _this7["delete"](key);
+          if (deleted) {
+            keysReportChangedCalled = true;
+          } else {
+            var value = _this7.data_.get(key);
+            orderedData.set(key, value);
           }
         }
-        resolve();
-      }, 500);
+      }
+      for (var _iterator4 = _createForOfIteratorHelperLoose(replacementMap.entries()), _step4; !(_step4 = _iterator4()).done; ) {
+        var _step4$value = _step4.value, _key = _step4$value[0], _value = _step4$value[1];
+        var keyExisted = _this7.data_.has(_key);
+        _this7.set(_key, _value);
+        if (_this7.data_.has(_key)) {
+          var _value2 = _this7.data_.get(_key);
+          orderedData.set(_key, _value2);
+          if (!keyExisted) {
+            keysReportChangedCalled = true;
+          }
+        }
+      }
+      if (!keysReportChangedCalled) {
+        if (_this7.data_.size !== orderedData.size) {
+          _this7.keysAtom_.reportChanged();
+        } else {
+          var iter1 = _this7.data_.keys();
+          var iter2 = orderedData.keys();
+          var next1 = iter1.next();
+          var next2 = iter2.next();
+          while (!next1.done) {
+            if (next1.value !== next2.value) {
+              _this7.keysAtom_.reportChanged();
+              break;
+            }
+            next1 = iter1.next();
+            next2 = iter2.next();
+          }
+        }
+      }
+      _this7.data_ = orderedData;
+    });
+    return this;
+  };
+  _proto.toString = function toString22() {
+    return "[object ObservableMap]";
+  };
+  _proto.toJSON = function toJSON22() {
+    return Array.from(this);
+  };
+  _proto.observe_ = function observe_(listener, fireImmediately) {
+    if (process.env.NODE_ENV !== "production" && fireImmediately === true) {
+      die("`observe` doesn't support fireImmediately=true in combination with maps.");
+    }
+    return registerListener(this, listener);
+  };
+  _proto.intercept_ = function intercept_(handler) {
+    return registerInterceptor(this, handler);
+  };
+  return _createClass(ObservableMap2, [{
+    key: "size",
+    get: function get4() {
+      this.keysAtom_.reportObserved();
+      return this.data_.size;
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get4() {
+      return "Map";
+    }
+  }]);
+}();
+var isObservableMap = /* @__PURE__ */ createInstanceofPredicate("ObservableMap", ObservableMap);
+function makeIterableForMap(iterator) {
+  iterator[Symbol.toStringTag] = "MapIterator";
+  return makeIterable(iterator);
+}
+function convertToMap(dataStructure) {
+  if (isES6Map(dataStructure) || isObservableMap(dataStructure)) {
+    return dataStructure;
+  } else if (Array.isArray(dataStructure)) {
+    return new Map(dataStructure);
+  } else if (isPlainObject(dataStructure)) {
+    var map2 = /* @__PURE__ */ new Map();
+    for (var key in dataStructure) {
+      map2.set(key, dataStructure[key]);
+    }
+    return map2;
+  } else {
+    return die(21, dataStructure);
+  }
+}
+var ObservableSetMarker = {};
+var ObservableSet = /* @__PURE__ */ function() {
+  function ObservableSet2(initialData, enhancer, name_) {
+    var _this = this;
+    if (enhancer === void 0) {
+      enhancer = deepEnhancer;
+    }
+    if (name_ === void 0) {
+      name_ = process.env.NODE_ENV !== "production" ? "ObservableSet@" + getNextId() : "ObservableSet";
+    }
+    this.name_ = void 0;
+    this[$mobx] = ObservableSetMarker;
+    this.data_ = /* @__PURE__ */ new Set();
+    this.atom_ = void 0;
+    this.changeListeners_ = void 0;
+    this.interceptors_ = void 0;
+    this.dehancer = void 0;
+    this.enhancer_ = void 0;
+    this.name_ = name_;
+    if (!isFunction(Set)) {
+      die(22);
+    }
+    this.enhancer_ = function(newV, oldV) {
+      return enhancer(newV, oldV, name_);
+    };
+    initObservable(function() {
+      _this.atom_ = createAtom(_this.name_);
+      if (initialData) {
+        _this.replace(initialData);
+      }
+    });
+  }
+  var _proto = ObservableSet2.prototype;
+  _proto.dehanceValue_ = function dehanceValue_(value) {
+    if (this.dehancer !== void 0) {
+      return this.dehancer(value);
+    }
+    return value;
+  };
+  _proto.clear = function clear2() {
+    var _this2 = this;
+    transaction(function() {
+      untracked(function() {
+        for (var _iterator = _createForOfIteratorHelperLoose(_this2.data_.values()), _step; !(_step = _iterator()).done; ) {
+          var value = _step.value;
+          _this2["delete"](value);
+        }
+      });
+    });
+  };
+  _proto.forEach = function forEach2(callbackFn, thisArg) {
+    for (var _iterator2 = _createForOfIteratorHelperLoose(this), _step2; !(_step2 = _iterator2()).done; ) {
+      var value = _step2.value;
+      callbackFn.call(thisArg, value, value, this);
+    }
+  };
+  _proto.add = function add(value) {
+    var _this3 = this;
+    checkIfStateModificationsAreAllowed(this.atom_);
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        type: ADD,
+        object: this,
+        newValue: value
+      });
+      if (!change) {
+        return this;
+      }
+    }
+    if (!this.has(value)) {
+      transaction(function() {
+        _this3.data_.add(_this3.enhancer_(value, void 0));
+        _this3.atom_.reportChanged();
+      });
+      var notifySpy = process.env.NODE_ENV !== "production" && isSpyEnabled();
+      var notify = hasListeners(this);
+      var _change = notify || notifySpy ? {
+        observableKind: "set",
+        debugObjectName: this.name_,
+        type: ADD,
+        object: this,
+        newValue: value
+      } : null;
+      if (notifySpy && process.env.NODE_ENV !== "production") {
+        spyReportStart(_change);
+      }
+      if (notify) {
+        notifyListeners(this, _change);
+      }
+      if (notifySpy && process.env.NODE_ENV !== "production") {
+        spyReportEnd();
+      }
+    }
+    return this;
+  };
+  _proto["delete"] = function _delete(value) {
+    var _this4 = this;
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        type: DELETE,
+        object: this,
+        oldValue: value
+      });
+      if (!change) {
+        return false;
+      }
+    }
+    if (this.has(value)) {
+      var notifySpy = process.env.NODE_ENV !== "production" && isSpyEnabled();
+      var notify = hasListeners(this);
+      var _change2 = notify || notifySpy ? {
+        observableKind: "set",
+        debugObjectName: this.name_,
+        type: DELETE,
+        object: this,
+        oldValue: value
+      } : null;
+      if (notifySpy && process.env.NODE_ENV !== "production") {
+        spyReportStart(_change2);
+      }
+      transaction(function() {
+        _this4.atom_.reportChanged();
+        _this4.data_["delete"](value);
+      });
+      if (notify) {
+        notifyListeners(this, _change2);
+      }
+      if (notifySpy && process.env.NODE_ENV !== "production") {
+        spyReportEnd();
+      }
+      return true;
+    }
+    return false;
+  };
+  _proto.has = function has3(value) {
+    this.atom_.reportObserved();
+    return this.data_.has(this.dehanceValue_(value));
+  };
+  _proto.entries = function entries2() {
+    var nextIndex = 0;
+    var keys2 = Array.from(this.keys());
+    var values2 = Array.from(this.values());
+    return makeIterableForSet({
+      next: function next() {
+        var index = nextIndex;
+        nextIndex += 1;
+        return index < values2.length ? {
+          value: [keys2[index], values2[index]],
+          done: false
+        } : {
+          value: void 0,
+          done: true
+        };
+      }
+    });
+  };
+  _proto.keys = function keys2() {
+    return this.values();
+  };
+  _proto.values = function values2() {
+    this.atom_.reportObserved();
+    var self2 = this;
+    var nextIndex = 0;
+    var observableValues = Array.from(this.data_.values());
+    return makeIterableForSet({
+      next: function next() {
+        return nextIndex < observableValues.length ? {
+          value: self2.dehanceValue_(observableValues[nextIndex++]),
+          done: false
+        } : {
+          value: void 0,
+          done: true
+        };
+      }
+    });
+  };
+  _proto.intersection = function intersection(otherSet) {
+    if (isES6Set(otherSet) && !isObservableSet(otherSet)) {
+      return otherSet.intersection(this);
     } else {
-      resolve();
+      var dehancedSet = new Set(this);
+      return dehancedSet.intersection(otherSet);
+    }
+  };
+  _proto.union = function union(otherSet) {
+    if (isES6Set(otherSet) && !isObservableSet(otherSet)) {
+      return otherSet.union(this);
+    } else {
+      var dehancedSet = new Set(this);
+      return dehancedSet.union(otherSet);
+    }
+  };
+  _proto.difference = function difference(otherSet) {
+    return new Set(this).difference(otherSet);
+  };
+  _proto.symmetricDifference = function symmetricDifference(otherSet) {
+    if (isES6Set(otherSet) && !isObservableSet(otherSet)) {
+      return otherSet.symmetricDifference(this);
+    } else {
+      var dehancedSet = new Set(this);
+      return dehancedSet.symmetricDifference(otherSet);
+    }
+  };
+  _proto.isSubsetOf = function isSubsetOf(otherSet) {
+    return new Set(this).isSubsetOf(otherSet);
+  };
+  _proto.isSupersetOf = function isSupersetOf(otherSet) {
+    return new Set(this).isSupersetOf(otherSet);
+  };
+  _proto.isDisjointFrom = function isDisjointFrom(otherSet) {
+    if (isES6Set(otherSet) && !isObservableSet(otherSet)) {
+      return otherSet.isDisjointFrom(this);
+    } else {
+      var dehancedSet = new Set(this);
+      return dehancedSet.isDisjointFrom(otherSet);
+    }
+  };
+  _proto.replace = function replace2(other) {
+    var _this5 = this;
+    if (isObservableSet(other)) {
+      other = new Set(other);
+    }
+    transaction(function() {
+      if (Array.isArray(other)) {
+        _this5.clear();
+        other.forEach(function(value) {
+          return _this5.add(value);
+        });
+      } else if (isES6Set(other)) {
+        _this5.clear();
+        other.forEach(function(value) {
+          return _this5.add(value);
+        });
+      } else if (other !== null && other !== void 0) {
+        die("Cannot initialize set from " + other);
+      }
+    });
+    return this;
+  };
+  _proto.observe_ = function observe_(listener, fireImmediately) {
+    if (process.env.NODE_ENV !== "production" && fireImmediately === true) {
+      die("`observe` doesn't support fireImmediately=true in combination with sets.");
+    }
+    return registerListener(this, listener);
+  };
+  _proto.intercept_ = function intercept_(handler) {
+    return registerInterceptor(this, handler);
+  };
+  _proto.toJSON = function toJSON22() {
+    return Array.from(this);
+  };
+  _proto.toString = function toString22() {
+    return "[object ObservableSet]";
+  };
+  _proto[Symbol.iterator] = function() {
+    return this.values();
+  };
+  return _createClass(ObservableSet2, [{
+    key: "size",
+    get: function get4() {
+      this.atom_.reportObserved();
+      return this.data_.size;
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get4() {
+      return "Set";
+    }
+  }]);
+}();
+var isObservableSet = /* @__PURE__ */ createInstanceofPredicate("ObservableSet", ObservableSet);
+function makeIterableForSet(iterator) {
+  iterator[Symbol.toStringTag] = "SetIterator";
+  return makeIterable(iterator);
+}
+var descriptorCache = /* @__PURE__ */ Object.create(null);
+var REMOVE = "remove";
+var ObservableObjectAdministration = /* @__PURE__ */ function() {
+  function ObservableObjectAdministration2(target_, values_, name_, defaultAnnotation_) {
+    if (values_ === void 0) {
+      values_ = /* @__PURE__ */ new Map();
+    }
+    if (defaultAnnotation_ === void 0) {
+      defaultAnnotation_ = autoAnnotation;
+    }
+    this.target_ = void 0;
+    this.values_ = void 0;
+    this.name_ = void 0;
+    this.defaultAnnotation_ = void 0;
+    this.keysAtom_ = void 0;
+    this.changeListeners_ = void 0;
+    this.interceptors_ = void 0;
+    this.proxy_ = void 0;
+    this.isPlainObject_ = void 0;
+    this.appliedAnnotations_ = void 0;
+    this.pendingKeys_ = void 0;
+    this.target_ = target_;
+    this.values_ = values_;
+    this.name_ = name_;
+    this.defaultAnnotation_ = defaultAnnotation_;
+    this.keysAtom_ = new Atom(process.env.NODE_ENV !== "production" ? this.name_ + ".keys" : "ObservableObject.keys");
+    this.isPlainObject_ = isPlainObject(this.target_);
+    if (process.env.NODE_ENV !== "production" && !isAnnotation(this.defaultAnnotation_)) {
+      die("defaultAnnotation must be valid annotation");
+    }
+    if (process.env.NODE_ENV !== "production") {
+      this.appliedAnnotations_ = {};
+    }
+  }
+  var _proto = ObservableObjectAdministration2.prototype;
+  _proto.getObservablePropValue_ = function getObservablePropValue_(key) {
+    return this.values_.get(key).get();
+  };
+  _proto.setObservablePropValue_ = function setObservablePropValue_(key, newValue) {
+    var observable2 = this.values_.get(key);
+    if (observable2 instanceof ComputedValue) {
+      observable2.set(newValue);
+      return true;
+    }
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        type: UPDATE,
+        object: this.proxy_ || this.target_,
+        name: key,
+        newValue
+      });
+      if (!change) {
+        return null;
+      }
+      newValue = change.newValue;
+    }
+    newValue = observable2.prepareNewValue_(newValue);
+    if (newValue !== globalState.UNCHANGED) {
+      var notify = hasListeners(this);
+      var notifySpy = process.env.NODE_ENV !== "production" && isSpyEnabled();
+      var _change = notify || notifySpy ? {
+        type: UPDATE,
+        observableKind: "object",
+        debugObjectName: this.name_,
+        object: this.proxy_ || this.target_,
+        oldValue: observable2.value_,
+        name: key,
+        newValue
+      } : null;
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportStart(_change);
+      }
+      observable2.setNewValue_(newValue);
+      if (notify) {
+        notifyListeners(this, _change);
+      }
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportEnd();
+      }
+    }
+    return true;
+  };
+  _proto.get_ = function get_(key) {
+    if (globalState.trackingDerivation && !hasProp(this.target_, key)) {
+      this.has_(key);
+    }
+    return this.target_[key];
+  };
+  _proto.set_ = function set_(key, value, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    if (hasProp(this.target_, key)) {
+      if (this.values_.has(key)) {
+        return this.setObservablePropValue_(key, value);
+      } else if (proxyTrap) {
+        return Reflect.set(this.target_, key, value);
+      } else {
+        this.target_[key] = value;
+        return true;
+      }
+    } else {
+      return this.extend_(key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true
+      }, this.defaultAnnotation_, proxyTrap);
+    }
+  };
+  _proto.has_ = function has_(key) {
+    if (!globalState.trackingDerivation) {
+      return key in this.target_;
+    }
+    this.pendingKeys_ || (this.pendingKeys_ = /* @__PURE__ */ new Map());
+    var entry = this.pendingKeys_.get(key);
+    if (!entry) {
+      entry = new ObservableValue(key in this.target_, referenceEnhancer, process.env.NODE_ENV !== "production" ? this.name_ + "." + stringifyKey(key) + "?" : "ObservableObject.key?", false);
+      this.pendingKeys_.set(key, entry);
+    }
+    return entry.get();
+  };
+  _proto.make_ = function make_2(key, annotation) {
+    if (annotation === true) {
+      annotation = this.defaultAnnotation_;
+    }
+    if (annotation === false) {
+      return;
+    }
+    assertAnnotable(this, annotation, key);
+    if (!(key in this.target_)) {
+      var _this$target_$storedA;
+      if ((_this$target_$storedA = this.target_[storedAnnotationsSymbol]) != null && _this$target_$storedA[key]) {
+        return;
+      } else {
+        die(1, annotation.annotationType_, this.name_ + "." + key.toString());
+      }
+    }
+    var source = this.target_;
+    while (source && source !== objectPrototype) {
+      var descriptor = getDescriptor(source, key);
+      if (descriptor) {
+        var outcome = annotation.make_(this, key, descriptor, source);
+        if (outcome === 0) {
+          return;
+        }
+        if (outcome === 1) {
+          break;
+        }
+      }
+      source = Object.getPrototypeOf(source);
+    }
+    recordAnnotationApplied(this, annotation, key);
+  };
+  _proto.extend_ = function extend_2(key, descriptor, annotation, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    if (annotation === true) {
+      annotation = this.defaultAnnotation_;
+    }
+    if (annotation === false) {
+      return this.defineProperty_(key, descriptor, proxyTrap);
+    }
+    assertAnnotable(this, annotation, key);
+    var outcome = annotation.extend_(this, key, descriptor, proxyTrap);
+    if (outcome) {
+      recordAnnotationApplied(this, annotation, key);
+    }
+    return outcome;
+  };
+  _proto.defineProperty_ = function defineProperty_(key, descriptor, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    try {
+      startBatch();
+      var deleteOutcome = this.delete_(key);
+      if (!deleteOutcome) {
+        return deleteOutcome;
+      }
+      if (hasInterceptors(this)) {
+        var change = interceptChange(this, {
+          object: this.proxy_ || this.target_,
+          name: key,
+          type: ADD,
+          newValue: descriptor.value
+        });
+        if (!change) {
+          return null;
+        }
+        var newValue = change.newValue;
+        if (descriptor.value !== newValue) {
+          descriptor = _extends({}, descriptor, {
+            value: newValue
+          });
+        }
+      }
+      if (proxyTrap) {
+        if (!Reflect.defineProperty(this.target_, key, descriptor)) {
+          return false;
+        }
+      } else {
+        defineProperty(this.target_, key, descriptor);
+      }
+      this.notifyPropertyAddition_(key, descriptor.value);
+    } finally {
+      endBatch();
+    }
+    return true;
+  };
+  _proto.defineObservableProperty_ = function defineObservableProperty_(key, value, enhancer, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    try {
+      startBatch();
+      var deleteOutcome = this.delete_(key);
+      if (!deleteOutcome) {
+        return deleteOutcome;
+      }
+      if (hasInterceptors(this)) {
+        var change = interceptChange(this, {
+          object: this.proxy_ || this.target_,
+          name: key,
+          type: ADD,
+          newValue: value
+        });
+        if (!change) {
+          return null;
+        }
+        value = change.newValue;
+      }
+      var cachedDescriptor = getCachedObservablePropDescriptor(key);
+      var descriptor = {
+        configurable: globalState.safeDescriptors ? this.isPlainObject_ : true,
+        enumerable: true,
+        get: cachedDescriptor.get,
+        set: cachedDescriptor.set
+      };
+      if (proxyTrap) {
+        if (!Reflect.defineProperty(this.target_, key, descriptor)) {
+          return false;
+        }
+      } else {
+        defineProperty(this.target_, key, descriptor);
+      }
+      var observable2 = new ObservableValue(value, enhancer, process.env.NODE_ENV !== "production" ? this.name_ + "." + key.toString() : "ObservableObject.key", false);
+      this.values_.set(key, observable2);
+      this.notifyPropertyAddition_(key, observable2.value_);
+    } finally {
+      endBatch();
+    }
+    return true;
+  };
+  _proto.defineComputedProperty_ = function defineComputedProperty_(key, options, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    try {
+      startBatch();
+      var deleteOutcome = this.delete_(key);
+      if (!deleteOutcome) {
+        return deleteOutcome;
+      }
+      if (hasInterceptors(this)) {
+        var change = interceptChange(this, {
+          object: this.proxy_ || this.target_,
+          name: key,
+          type: ADD,
+          newValue: void 0
+        });
+        if (!change) {
+          return null;
+        }
+      }
+      options.name || (options.name = process.env.NODE_ENV !== "production" ? this.name_ + "." + key.toString() : "ObservableObject.key");
+      options.context = this.proxy_ || this.target_;
+      var cachedDescriptor = getCachedObservablePropDescriptor(key);
+      var descriptor = {
+        configurable: globalState.safeDescriptors ? this.isPlainObject_ : true,
+        enumerable: false,
+        get: cachedDescriptor.get,
+        set: cachedDescriptor.set
+      };
+      if (proxyTrap) {
+        if (!Reflect.defineProperty(this.target_, key, descriptor)) {
+          return false;
+        }
+      } else {
+        defineProperty(this.target_, key, descriptor);
+      }
+      this.values_.set(key, new ComputedValue(options));
+      this.notifyPropertyAddition_(key, void 0);
+    } finally {
+      endBatch();
+    }
+    return true;
+  };
+  _proto.delete_ = function delete_(key, proxyTrap) {
+    if (proxyTrap === void 0) {
+      proxyTrap = false;
+    }
+    checkIfStateModificationsAreAllowed(this.keysAtom_);
+    if (!hasProp(this.target_, key)) {
+      return true;
+    }
+    if (hasInterceptors(this)) {
+      var change = interceptChange(this, {
+        object: this.proxy_ || this.target_,
+        name: key,
+        type: REMOVE
+      });
+      if (!change) {
+        return null;
+      }
+    }
+    try {
+      var _this$pendingKeys_;
+      startBatch();
+      var notify = hasListeners(this);
+      var notifySpy = process.env.NODE_ENV !== "production" && isSpyEnabled();
+      var observable2 = this.values_.get(key);
+      var value = void 0;
+      if (!observable2 && (notify || notifySpy)) {
+        var _getDescriptor2;
+        value = (_getDescriptor2 = getDescriptor(this.target_, key)) == null ? void 0 : _getDescriptor2.value;
+      }
+      if (proxyTrap) {
+        if (!Reflect.deleteProperty(this.target_, key)) {
+          return false;
+        }
+      } else {
+        delete this.target_[key];
+      }
+      if (process.env.NODE_ENV !== "production") {
+        delete this.appliedAnnotations_[key];
+      }
+      if (observable2) {
+        this.values_["delete"](key);
+        if (observable2 instanceof ObservableValue) {
+          value = observable2.value_;
+        }
+        propagateChanged(observable2);
+      }
+      this.keysAtom_.reportChanged();
+      (_this$pendingKeys_ = this.pendingKeys_) == null || (_this$pendingKeys_ = _this$pendingKeys_.get(key)) == null || _this$pendingKeys_.set(key in this.target_);
+      if (notify || notifySpy) {
+        var _change2 = {
+          type: REMOVE,
+          observableKind: "object",
+          object: this.proxy_ || this.target_,
+          debugObjectName: this.name_,
+          oldValue: value,
+          name: key
+        };
+        if (process.env.NODE_ENV !== "production" && notifySpy) {
+          spyReportStart(_change2);
+        }
+        if (notify) {
+          notifyListeners(this, _change2);
+        }
+        if (process.env.NODE_ENV !== "production" && notifySpy) {
+          spyReportEnd();
+        }
+      }
+    } finally {
+      endBatch();
+    }
+    return true;
+  };
+  _proto.observe_ = function observe_(callback, fireImmediately) {
+    if (process.env.NODE_ENV !== "production" && fireImmediately === true) {
+      die("`observe` doesn't support the fire immediately property for observable objects.");
+    }
+    return registerListener(this, callback);
+  };
+  _proto.intercept_ = function intercept_(handler) {
+    return registerInterceptor(this, handler);
+  };
+  _proto.notifyPropertyAddition_ = function notifyPropertyAddition_(key, value) {
+    var _this$pendingKeys_2;
+    var notify = hasListeners(this);
+    var notifySpy = process.env.NODE_ENV !== "production" && isSpyEnabled();
+    if (notify || notifySpy) {
+      var change = notify || notifySpy ? {
+        type: ADD,
+        observableKind: "object",
+        debugObjectName: this.name_,
+        object: this.proxy_ || this.target_,
+        name: key,
+        newValue: value
+      } : null;
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportStart(change);
+      }
+      if (notify) {
+        notifyListeners(this, change);
+      }
+      if (process.env.NODE_ENV !== "production" && notifySpy) {
+        spyReportEnd();
+      }
+    }
+    (_this$pendingKeys_2 = this.pendingKeys_) == null || (_this$pendingKeys_2 = _this$pendingKeys_2.get(key)) == null || _this$pendingKeys_2.set(true);
+    this.keysAtom_.reportChanged();
+  };
+  _proto.ownKeys_ = function ownKeys_() {
+    this.keysAtom_.reportObserved();
+    return ownKeys(this.target_);
+  };
+  _proto.keys_ = function keys_() {
+    this.keysAtom_.reportObserved();
+    return Object.keys(this.target_);
+  };
+  return ObservableObjectAdministration2;
+}();
+function asObservableObject(target, options) {
+  var _options$name;
+  if (process.env.NODE_ENV !== "production" && options && isObservableObject(target)) {
+    die("Options can't be provided for already observable objects.");
+  }
+  if (hasProp(target, $mobx)) {
+    if (process.env.NODE_ENV !== "production" && !(getAdministration(target) instanceof ObservableObjectAdministration)) {
+      die("Cannot convert '" + getDebugName(target) + "' into observable object:\nThe target is already observable of different type.\nExtending builtins is not supported.");
+    }
+    return target;
+  }
+  if (process.env.NODE_ENV !== "production" && !Object.isExtensible(target)) {
+    die("Cannot make the designated object observable; it is not extensible");
+  }
+  var name = (_options$name = options == null ? void 0 : options.name) != null ? _options$name : process.env.NODE_ENV !== "production" ? (isPlainObject(target) ? "ObservableObject" : target.constructor.name) + "@" + getNextId() : "ObservableObject";
+  var adm = new ObservableObjectAdministration(target, /* @__PURE__ */ new Map(), String(name), getAnnotationFromOptions(options));
+  addHiddenProp(target, $mobx, adm);
+  return target;
+}
+var isObservableObjectAdministration = /* @__PURE__ */ createInstanceofPredicate("ObservableObjectAdministration", ObservableObjectAdministration);
+function getCachedObservablePropDescriptor(key) {
+  return descriptorCache[key] || (descriptorCache[key] = {
+    get: function get4() {
+      return this[$mobx].getObservablePropValue_(key);
+    },
+    set: function set5(value) {
+      return this[$mobx].setObservablePropValue_(key, value);
     }
   });
 }
-var schedule = {
-  scheduleJob: scheduleJob$1,
-  rescheduleJob: rescheduleJob$1,
-  scheduledJobs: scheduledJobs$1,
-  cancelJob: cancelJob$1,
-  gracefulShutdown: gracefulShutdown$1
+function isObservableObject(thing) {
+  if (isObject(thing)) {
+    return isObservableObjectAdministration(thing[$mobx]);
+  }
+  return false;
+}
+function recordAnnotationApplied(adm, annotation, key) {
+  var _adm$target_$storedAn;
+  if (process.env.NODE_ENV !== "production") {
+    adm.appliedAnnotations_[key] = annotation;
+  }
+  (_adm$target_$storedAn = adm.target_[storedAnnotationsSymbol]) == null || delete _adm$target_$storedAn[key];
+}
+function assertAnnotable(adm, annotation, key) {
+  if (process.env.NODE_ENV !== "production" && !isAnnotation(annotation)) {
+    die("Cannot annotate '" + adm.name_ + "." + key.toString() + "': Invalid annotation.");
+  }
+  if (process.env.NODE_ENV !== "production" && !isOverride(annotation) && hasProp(adm.appliedAnnotations_, key)) {
+    var fieldName = adm.name_ + "." + key.toString();
+    var currentAnnotationType = adm.appliedAnnotations_[key].annotationType_;
+    var requestedAnnotationType = annotation.annotationType_;
+    die("Cannot apply '" + requestedAnnotationType + "' to '" + fieldName + "':" + ("\nThe field is already annotated with '" + currentAnnotationType + "'.") + "\nRe-annotating fields is not allowed.\nUse 'override' annotation for methods overridden by subclass.");
+  }
+}
+var ENTRY_0 = /* @__PURE__ */ createArrayEntryDescriptor(0);
+var safariPrototypeSetterInheritanceBug = /* @__PURE__ */ function() {
+  var v = false;
+  var p = {};
+  Object.defineProperty(p, "0", {
+    set: function set5() {
+      v = true;
+    }
+  });
+  Object.create(p)["0"] = 1;
+  return v === false;
+}();
+var OBSERVABLE_ARRAY_BUFFER_SIZE = 0;
+var StubArray = function StubArray2() {
 };
-const { cancelJob, rescheduleJob, scheduledJobs, scheduleJob, gracefulShutdown } = schedule;
-const { Invocation, RecurrenceRule, Range } = Invocation_1;
-const { Job } = Job_1;
-var nodeSchedule = {
-  Job,
-  Invocation,
-  Range,
-  RecurrenceRule,
-  cancelJob,
-  rescheduleJob,
-  scheduledJobs,
-  scheduleJob,
-  gracefulShutdown
-};
+function inherit(ctor, proto) {
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ctor.prototype, proto);
+  } else if (ctor.prototype.__proto__ !== void 0) {
+    ctor.prototype.__proto__ = proto;
+  } else {
+    ctor.prototype = proto;
+  }
+}
+inherit(StubArray, Array.prototype);
+var LegacyObservableArray = /* @__PURE__ */ function(_StubArray) {
+  function LegacyObservableArray2(initialValues, enhancer, name, owned) {
+    var _this;
+    if (name === void 0) {
+      name = process.env.NODE_ENV !== "production" ? "ObservableArray@" + getNextId() : "ObservableArray";
+    }
+    if (owned === void 0) {
+      owned = false;
+    }
+    _this = _StubArray.call(this) || this;
+    initObservable(function() {
+      var adm = new ObservableArrayAdministration(name, enhancer, owned, true);
+      adm.proxy_ = _this;
+      addHiddenFinalProp(_this, $mobx, adm);
+      if (initialValues && initialValues.length) {
+        _this.spliceWithArray(0, 0, initialValues);
+      }
+      if (safariPrototypeSetterInheritanceBug) {
+        Object.defineProperty(_this, "0", ENTRY_0);
+      }
+    });
+    return _this;
+  }
+  _inheritsLoose(LegacyObservableArray2, _StubArray);
+  var _proto = LegacyObservableArray2.prototype;
+  _proto.concat = function concat() {
+    this[$mobx].atom_.reportObserved();
+    for (var _len = arguments.length, arrays = new Array(_len), _key = 0; _key < _len; _key++) {
+      arrays[_key] = arguments[_key];
+    }
+    return Array.prototype.concat.apply(
+      this.slice(),
+      //@ts-ignore
+      arrays.map(function(a) {
+        return isObservableArray(a) ? a.slice() : a;
+      })
+    );
+  };
+  _proto[Symbol.iterator] = function() {
+    var self2 = this;
+    var nextIndex = 0;
+    return makeIterable({
+      next: function next() {
+        return nextIndex < self2.length ? {
+          value: self2[nextIndex++],
+          done: false
+        } : {
+          done: true,
+          value: void 0
+        };
+      }
+    });
+  };
+  return _createClass(LegacyObservableArray2, [{
+    key: "length",
+    get: function get4() {
+      return this[$mobx].getArrayLength_();
+    },
+    set: function set5(newLength) {
+      this[$mobx].setArrayLength_(newLength);
+    }
+  }, {
+    key: Symbol.toStringTag,
+    get: function get4() {
+      return "Array";
+    }
+  }]);
+}(StubArray);
+Object.entries(arrayExtensions).forEach(function(_ref) {
+  var prop = _ref[0], fn = _ref[1];
+  if (prop !== "concat") {
+    addHiddenProp(LegacyObservableArray.prototype, prop, fn);
+  }
+});
+function createArrayEntryDescriptor(index) {
+  return {
+    enumerable: false,
+    configurable: true,
+    get: function get4() {
+      return this[$mobx].get_(index);
+    },
+    set: function set5(value) {
+      this[$mobx].set_(index, value);
+    }
+  };
+}
+function createArrayBufferItem(index) {
+  defineProperty(LegacyObservableArray.prototype, "" + index, createArrayEntryDescriptor(index));
+}
+function reserveArrayBuffer(max) {
+  if (max > OBSERVABLE_ARRAY_BUFFER_SIZE) {
+    for (var index = OBSERVABLE_ARRAY_BUFFER_SIZE; index < max + 100; index++) {
+      createArrayBufferItem(index);
+    }
+    OBSERVABLE_ARRAY_BUFFER_SIZE = max;
+  }
+}
+reserveArrayBuffer(1e3);
+function createLegacyArray(initialValues, enhancer, name) {
+  return new LegacyObservableArray(initialValues, enhancer, name);
+}
+function getAtom(thing, property) {
+  if (typeof thing === "object" && thing !== null) {
+    if (isObservableArray(thing)) {
+      if (property !== void 0) {
+        die(23);
+      }
+      return thing[$mobx].atom_;
+    }
+    if (isObservableSet(thing)) {
+      return thing.atom_;
+    }
+    if (isObservableMap(thing)) {
+      if (property === void 0) {
+        return thing.keysAtom_;
+      }
+      var observable2 = thing.data_.get(property) || thing.hasMap_.get(property);
+      if (!observable2) {
+        die(25, property, getDebugName(thing));
+      }
+      return observable2;
+    }
+    if (isObservableObject(thing)) {
+      if (!property) {
+        return die(26);
+      }
+      var _observable = thing[$mobx].values_.get(property);
+      if (!_observable) {
+        die(27, property, getDebugName(thing));
+      }
+      return _observable;
+    }
+    if (isAtom(thing) || isComputedValue(thing) || isReaction(thing)) {
+      return thing;
+    }
+  } else if (isFunction(thing)) {
+    if (isReaction(thing[$mobx])) {
+      return thing[$mobx];
+    }
+  }
+  die(28);
+}
+function getAdministration(thing, property) {
+  if (!thing) {
+    die(29);
+  }
+  if (isAtom(thing) || isComputedValue(thing) || isReaction(thing)) {
+    return thing;
+  }
+  if (isObservableMap(thing) || isObservableSet(thing)) {
+    return thing;
+  }
+  if (thing[$mobx]) {
+    return thing[$mobx];
+  }
+  die(24, thing);
+}
+function getDebugName(thing, property) {
+  var named;
+  if (property !== void 0) {
+    named = getAtom(thing, property);
+  } else if (isAction(thing)) {
+    return thing.name;
+  } else if (isObservableObject(thing) || isObservableMap(thing) || isObservableSet(thing)) {
+    named = getAdministration(thing);
+  } else {
+    named = getAtom(thing);
+  }
+  return named.name_;
+}
+function initObservable(cb) {
+  var derivation = untrackedStart();
+  var allowStateChanges2 = allowStateChangesStart(true);
+  startBatch();
+  try {
+    return cb();
+  } finally {
+    endBatch();
+    allowStateChangesEnd(allowStateChanges2);
+    untrackedEnd(derivation);
+  }
+}
+var toString2 = objectPrototype.toString;
+function deepEqual(a, b, depth) {
+  if (depth === void 0) {
+    depth = -1;
+  }
+  return eq(a, b, depth);
+}
+function eq(a, b, depth, aStack, bStack) {
+  if (a === b) {
+    return a !== 0 || 1 / a === 1 / b;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  if (a !== a) {
+    return b !== b;
+  }
+  var type = typeof a;
+  if (type !== "function" && type !== "object" && typeof b != "object") {
+    return false;
+  }
+  var className = toString2.call(a);
+  if (className !== toString2.call(b)) {
+    return false;
+  }
+  switch (className) {
+    case "[object RegExp]":
+    case "[object String]":
+      return "" + a === "" + b;
+    case "[object Number]":
+      if (+a !== +a) {
+        return +b !== +b;
+      }
+      return +a === 0 ? 1 / +a === 1 / b : +a === +b;
+    case "[object Date]":
+    case "[object Boolean]":
+      return +a === +b;
+    case "[object Symbol]":
+      return typeof Symbol !== "undefined" && Symbol.valueOf.call(a) === Symbol.valueOf.call(b);
+    case "[object Map]":
+    case "[object Set]":
+      if (depth >= 0) {
+        depth++;
+      }
+      break;
+  }
+  a = unwrap(a);
+  b = unwrap(b);
+  var areArrays = className === "[object Array]";
+  if (!areArrays) {
+    if (typeof a != "object" || typeof b != "object") {
+      return false;
+    }
+    var aCtor = a.constructor, bCtor = b.constructor;
+    if (aCtor !== bCtor && !(isFunction(aCtor) && aCtor instanceof aCtor && isFunction(bCtor) && bCtor instanceof bCtor) && "constructor" in a && "constructor" in b) {
+      return false;
+    }
+  }
+  if (depth === 0) {
+    return false;
+  } else if (depth < 0) {
+    depth = -1;
+  }
+  aStack = aStack || [];
+  bStack = bStack || [];
+  var length = aStack.length;
+  while (length--) {
+    if (aStack[length] === a) {
+      return bStack[length] === b;
+    }
+  }
+  aStack.push(a);
+  bStack.push(b);
+  if (areArrays) {
+    length = a.length;
+    if (length !== b.length) {
+      return false;
+    }
+    while (length--) {
+      if (!eq(a[length], b[length], depth - 1, aStack, bStack)) {
+        return false;
+      }
+    }
+  } else {
+    var keys2 = Object.keys(a);
+    var key;
+    length = keys2.length;
+    if (Object.keys(b).length !== length) {
+      return false;
+    }
+    while (length--) {
+      key = keys2[length];
+      if (!(hasProp(b, key) && eq(a[key], b[key], depth - 1, aStack, bStack))) {
+        return false;
+      }
+    }
+  }
+  aStack.pop();
+  bStack.pop();
+  return true;
+}
+function unwrap(a) {
+  if (isObservableArray(a)) {
+    return a.slice();
+  }
+  if (isES6Map(a) || isObservableMap(a)) {
+    return Array.from(a.entries());
+  }
+  if (isES6Set(a) || isObservableSet(a)) {
+    return Array.from(a.entries());
+  }
+  return a;
+}
+var _getGlobal$Iterator;
+var maybeIteratorPrototype = ((_getGlobal$Iterator = getGlobal().Iterator) == null ? void 0 : _getGlobal$Iterator.prototype) || {};
+function makeIterable(iterator) {
+  iterator[Symbol.iterator] = getSelf;
+  return Object.assign(Object.create(maybeIteratorPrototype), iterator);
+}
+function getSelf() {
+  return this;
+}
+function isAnnotation(thing) {
+  return (
+    // Can be function
+    thing instanceof Object && typeof thing.annotationType_ === "string" && isFunction(thing.make_) && isFunction(thing.extend_)
+  );
+}
+["Symbol", "Map", "Set"].forEach(function(m) {
+  var g = getGlobal();
+  if (typeof g[m] === "undefined") {
+    die("MobX requires global '" + m + "' to be available or polyfilled");
+  }
+});
+if (typeof __MOBX_DEVTOOLS_GLOBAL_HOOK__ === "object") {
+  __MOBX_DEVTOOLS_GLOBAL_HOOK__.injectMobx({
+    spy,
+    extras: {
+      getDebugName
+    },
+    $mobx
+  });
+}
+const API_URL = `http://localhost:3300/api`;
+const $api = axios.create({
+  // withCredentials: true,
+  baseURL: API_URL
+});
+$api.interceptors.request.use((config) => {
+  config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+  return config;
+});
+$api.interceptors.response.use((config) => {
+  return config;
+}, async (error) => {
+  const originalRequest = error.config;
+  if (error.response.status == 401 && error.config && !error.config._isRetry) {
+    originalRequest._isRetry = true;
+    try {
+      const response = await axios.get(`${API_URL}`, { withCredentials: true });
+      localStorage.setItem("token", response.data.token);
+      return $api.request(originalRequest);
+    } catch (e) {
+      console.log("НЕ АВТОРИЗОВАН");
+    }
+  }
+  throw error;
+});
+class AuthService {
+  static async login(login, password) {
+    return $api.post("/user/login", { login, password, role: "ADMIN" });
+  }
+  static async create(firstName, lastName, fatherName, password) {
+    return $api.post("/create", { firstName, lastName, fatherName, password });
+  }
+  static async logout() {
+    return $api.post("/logout");
+  }
+}
+class InvalidTokenError extends Error {
+}
+InvalidTokenError.prototype.name = "InvalidTokenError";
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).replace(/(.)/g, (m, p) => {
+    let code = p.charCodeAt(0).toString(16).toUpperCase();
+    if (code.length < 2) {
+      code = "0" + code;
+    }
+    return "%" + code;
+  }));
+}
+function base64UrlDecode(str) {
+  let output = str.replace(/-/g, "+").replace(/_/g, "/");
+  switch (output.length % 4) {
+    case 0:
+      break;
+    case 2:
+      output += "==";
+      break;
+    case 3:
+      output += "=";
+      break;
+    default:
+      throw new Error("base64 string is not of the correct length");
+  }
+  try {
+    return b64DecodeUnicode(output);
+  } catch (err) {
+    return atob(output);
+  }
+}
+function jwtDecode(token, options) {
+  if (typeof token !== "string") {
+    throw new InvalidTokenError("Invalid token specified: must be a string");
+  }
+  options || (options = {});
+  const pos = options.header === true ? 0 : 1;
+  const part = token.split(".")[pos];
+  if (typeof part !== "string") {
+    throw new InvalidTokenError(`Invalid token specified: missing part #${pos + 1}`);
+  }
+  let decoded;
+  try {
+    decoded = base64UrlDecode(part);
+  } catch (e) {
+    throw new InvalidTokenError(`Invalid token specified: invalid base64 for part #${pos + 1} (${e.message})`);
+  }
+  try {
+    return JSON.parse(decoded);
+  } catch (e) {
+    throw new InvalidTokenError(`Invalid token specified: invalid json for part #${pos + 1} (${e.message})`);
+  }
+}
+class Store {
+  constructor() {
+    __publicField(this, "user", {});
+    __publicField(this, "isAuth", false);
+    __publicField(this, "isLoading", false);
+    __publicField(this, "users", []);
+    __publicField(this, "selectedUser", {});
+    makeAutoObservable(this);
+  }
+  setAuth(bool) {
+    this.isAuth = bool;
+  }
+  setUser(user) {
+    this.user = user;
+  }
+  setUsers(users) {
+    this.users = users;
+  }
+  setLoading(bool) {
+    this.isLoading = bool;
+  }
+  setSelectedUser(users) {
+    this.selectedUser = users;
+  }
+  async login(login, password) {
+    try {
+      const { data } = await AuthService.login(login, password);
+      localStorage.setItem("token", data.token);
+      this.setAuth(true);
+      this.setUser(jwtDecode(data.token));
+    } catch (error) {
+      if (error instanceof Error) {
+        error.message;
+      }
+    }
+  }
+  async create(firstName, lastName, fatherName, password) {
+    try {
+      const response = await AuthService.create(firstName, lastName, fatherName, password);
+      console.log(response);
+      localStorage.setItem("token", response.data.token);
+      this.setAuth(true);
+      this.setUser(response.data.user);
+    } catch (error) {
+      let errorMessage = "Failed to do something exceptional";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      console.log(errorMessage);
+    }
+  }
+  async logout() {
+    try {
+      const response = await AuthService.logout();
+      localStorage.removeItem("token");
+      this.setAuth(false);
+      this.setUser({});
+    } catch (error) {
+      let errorMessage = "Failed to do something exceptional";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      console.log(errorMessage);
+    }
+  }
+  async checkAuth() {
+    this.setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}`);
+      console.log(response);
+      localStorage.setItem("token", response.data.token);
+      this.setAuth(true);
+      this.setUser(response.data.user);
+    } catch (error) {
+      let errorMessage = "Failed to do something exceptional";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      console.log(errorMessage);
+    } finally {
+      this.setLoading(false);
+    }
+  }
+}
 createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-process.env.APP_ROOT = path.join(__dirname, "..");
+const __dirname = path$1.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path$1.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
-const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+const MAIN_DIST = path$1.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$1.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path$1.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     autoHideMenuBar: true,
     width: 1200,
     height: 1024,
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs")
+      preload: path$1.join(__dirname, "preload.mjs")
     }
   });
-  ipcMain.handle("fetch-data", async (_, url, options) => {
+  ipcMain.handle("fetch-data", async (_14, url2, options) => {
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(url2, options);
       const data = await response.json();
       return { ok: response.ok, status: response.status, data };
     } catch (error) {
@@ -8423,7 +20752,7 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
 }
 app.on("window-all-closed", () => {
@@ -8437,16 +20766,34 @@ app.on("activate", () => {
     createWindow();
   }
 });
-function sendNotification(title, body) {
-  const notification = new Notification({ title, body });
-  notification.show();
-}
-function scheduleNotification(date2) {
-  const notificationTime = new Date(date2.getTime() - 2 * 60 * 60 * 1e3);
-  nodeSchedule.scheduleJob(notificationTime, () => {
-    sendNotification("Напоминание!", "Срок исполнения задачи подходит к концу через 2 часа!");
-  });
-}
+const notifiedTasks = /* @__PURE__ */ new Set();
+const checkTasks = async () => {
+  const currentUser = Store.setUser();
+  if (!currentUser) return;
+  const currentTime = /* @__PURE__ */ new Date();
+  const twoHoursLater = new Date(currentTime.getTime() + 60 * 1e3);
+  try {
+    const response = await axios.get("http://localhost:3300/api/task");
+    const tasks = response.data;
+    tasks.forEach((task) => {
+      const taskDate = new Date(task.datetimeon);
+      if (taskDate <= twoHoursLater && taskDate > currentTime) {
+        if (!notifiedTasks.has(task.id)) {
+          if (task.user_author_id === currentUser.id || task.user_executor_id === currentUser.id) {
+            new Notification({
+              title: "Напоминание о сроке исполнения задачи!",
+              body: `Задача с № ${task.number_tesiz} в Тезисе должна быть выполнена через 1 час.`
+            }).show();
+          }
+          notifiedTasks.add(task.id);
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Ошибка при получении задач:", error);
+  }
+};
+setInterval(checkTasks, 10 * 1e3);
 app.on("second-instance", (event, commandLine, workingDirectory) => {
   if (win) {
     if (win.isMinimized()) win.restore();
@@ -8455,8 +20802,6 @@ app.on("second-instance", (event, commandLine, workingDirectory) => {
 });
 app.whenReady().then(() => {
   createWindow();
-  const targetDate = /* @__PURE__ */ new Date("2025-03-04T02:17:00+03:00");
-  scheduleNotification(targetDate);
 });
 export {
   MAIN_DIST,

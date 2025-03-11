@@ -20,7 +20,13 @@ const LoginForm: React.FC = () => {
   // const from = location.state?.from?.pathname || '/calendar'; 
 
   const auth = () => {
-    userStore.login(login, password)
+    try{
+      userStore.login(login, password)
+    }
+    catch(e){
+      setPassword("")
+    }
+    
     // navigate(from, { replace: true })
   }
 

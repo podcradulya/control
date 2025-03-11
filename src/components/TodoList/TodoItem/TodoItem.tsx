@@ -8,6 +8,9 @@ import { PriorityResponse } from "../../../models/response/PriorityResponse.ts"
 import { StatusResponse } from "../../../models/response/StatusResponse.ts"
 import { IUser } from "../../../models/IUser.ts"
 import Button from "../../Button/Button.tsx"
+import TaskForm from "../../TaskForm/TaskForm.tsx"
+import close_icon from "../../../assets/images/icons/close.svg"
+
 
 interface EventsProps{
     todo: TaskResponse
@@ -18,6 +21,9 @@ interface EventsProps{
 const TodoItem: React.FC<EventsProps> = ({todo}) => {
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const closePopup = () => setIsPopupOpen(false);   
+  const BtnClick = () => setIsPopupOpen(true);
 
   const handleEdit = async (task: TaskResponse) => {
     const number_tesiz = prompt('Введите новое название задачи:', task.number_tesiz);
@@ -129,6 +135,19 @@ const handleDelete = async (taskId: number) => {
                     <Button text="Закрыть" onClick={closeMenu}/>
                 </div>
             )}
+
+            {isPopupOpen && (
+      <div className="popup" style={{ fontFamily: "Nunito" }}>
+      <div className="popup_body" onClick={(e) => e.stopPropagation()}>
+        <h1 className="popup_header">Создание новой задачи</h1>
+        <img
+          src={close_icon}
+          alt="x"
+          onClick={closePopup}
+          className="popup_close"
+        /><TaskForm />
+        </div>
+        </div>)}
         </div>
 )}
 

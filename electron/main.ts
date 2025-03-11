@@ -3,7 +3,12 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import axios from "axios"
-import * as schedule from 'node-schedule'
+import  userStore  from "../src/store/UserStore"
+import { IUser } from "../src/models/IUser";
+import { TaskResponse } from "../src/models/response/TaskResponse";
+
+
+
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -82,18 +87,41 @@ app.on('activate', () => {
   }
 })
 
-function sendNotification(title: string, body: string) {
-  const notification = new Notification({ title, body });
-  notification.show();
-}
 
-function scheduleNotification(date: Date) {
-  const notificationTime = new Date(date.getTime() - 2 * 60 * 60 * 1000); 
+const notifiedTasks = new Set<number>(); // Сет для хранения идентификаторов уведомленных задач
 
-  schedule.scheduleJob(notificationTime, () => {
-      sendNotification('Напоминание!', 'Срок исполнения задачи подходит к концу через 2 часа!');
-  });
+const checkTasks = async () => {
+  const currentUser: IUser | null = userStore.setUser();
+  if (!currentUser) return;1
+  const currentTime = new Date();
+  const twoHoursLater = new Date(currentTime.getTime() + 60 * 1000); // Текущее время + 1 часа
+
+  try {
+    const response = await axios.get<TaskResponse[]>('http://localhost:3300/api/task'); // Замените на ваш URL
+    const tasks: TaskResponse[] = response.data;
+
+    tasks.forEach(task => {
+        const taskDate = new Date(task.datetimeon); // Преобразуем строку в дату
+        if (taskDate <= twoHoursLater && taskDate > currentTime) {
+            // Проверяем, было ли уже отправлено уведомление для этой задачи
+            if (!notifiedTasks.has(task.id)) {
+              if (task.user_author_id === currentUser.id || task.user_executor_id === currentUser.id) {
+                new Notification({
+                    title: 'Напоминание о сроке исполнения задачи!',
+                    body: `Задача с № ${task.number_tesiz} в Тезисе должна быть выполнена через 1 час.`,
+                }).show();
+              }
+                // Добавляем ID задачи в сет, чтобы не отправлять уведомление повторно
+                notifiedTasks.add(task.id);
+            }
+        }
+    });
+} catch (error) {
+    console.error('Ошибка при получении задач:', error);
 }
+};
+
+setInterval(checkTasks, 10 * 1000);
 
 app.on('second-instance', (event, commandLine, workingDirectory) => {
   if (win) {
@@ -105,5 +133,5 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 app.whenReady().then(() => {
   createWindow()
   const targetDate = new Date('2025-03-04T02:17:00+03:00'); // Московское время (UTC+3)
-    scheduleNotification(targetDate);
+    // scheduleNotification(targetDate);
 })
