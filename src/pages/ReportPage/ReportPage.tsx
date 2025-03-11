@@ -37,7 +37,12 @@ const ReportPage: React.FC = () => {
 };
 
 return (
+    <div className='container' 
+    style={{fontFamily: 'Nunito'}}>
+       <h2>Формирование отчета по работе сотрудников</h2>
+       <p>Сформировать отчет по текущим задачам для всех сотрудников в Excel</p>
     <Button text ={"Скачать отчет"} onClick={handleDownload}/>
+    </div>
 );
 }
 

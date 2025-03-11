@@ -6,6 +6,7 @@ import axios from "axios"
 import  userStore  from "../src/store/UserStore"
 import { IUser } from "../src/models/IUser";
 import { TaskResponse } from "../src/models/response/TaskResponse";
+import { log } from 'node:console'
 
 
 
@@ -91,26 +92,28 @@ app.on('activate', () => {
 const notifiedTasks = new Set<number>(); // Сет для хранения идентификаторов уведомленных задач
 
 const checkTasks = async () => {
-  const currentUser: IUser | null = userStore.setUser();
-  if (!currentUser) return;1
   const currentTime = new Date();
-  const twoHoursLater = new Date(currentTime.getTime() + 60 * 1000); // Текущее время + 1 часа
-
+  const HoursLater = new Date(currentTime.getTime() + 60 * 1000); // Текущее время + 1 часа
   try {
     const response = await axios.get<TaskResponse[]>('http://localhost:3300/api/task'); // Замените на ваш URL
     const tasks: TaskResponse[] = response.data;
+    console.log("dd", currentTime);
 
+    
     tasks.forEach(task => {
         const taskDate = new Date(task.datetimeon); // Преобразуем строку в дату
-        if (taskDate <= twoHoursLater && taskDate > currentTime) {
+        if (taskDate <= HoursLater && taskDate > currentTime) {
+          console.log(HoursLater);
+          console.log(taskDate);
+          console.log(currentTime);
             // Проверяем, было ли уже отправлено уведомление для этой задачи
             if (!notifiedTasks.has(task.id)) {
-              if (task.user_author_id === currentUser.id || task.user_executor_id === currentUser.id) {
+             
                 new Notification({
                     title: 'Напоминание о сроке исполнения задачи!',
                     body: `Задача с № ${task.number_tesiz} в Тезисе должна быть выполнена через 1 час.`,
                 }).show();
-              }
+              
                 // Добавляем ID задачи в сет, чтобы не отправлять уведомление повторно
                 notifiedTasks.add(task.id);
             }
@@ -121,7 +124,7 @@ const checkTasks = async () => {
 }
 };
 
-setInterval(checkTasks, 10 * 1000);
+setInterval(checkTasks, 15 * 1000);
 
 app.on('second-instance', (event, commandLine, workingDirectory) => {
   if (win) {
@@ -132,6 +135,4 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 
 app.whenReady().then(() => {
   createWindow()
-  const targetDate = new Date('2025-03-04T02:17:00+03:00'); // Московское время (UTC+3)
-    // scheduleNotification(targetDate);
 })
