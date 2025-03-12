@@ -13,6 +13,7 @@ const AuthPage: React.FC = () => {
           <p>Контролька</p>
         </div>
         <LoginForm />
+        <p>v1.0.0</p>
       </div>
     </>
   );
